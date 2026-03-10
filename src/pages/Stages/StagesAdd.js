@@ -8,9 +8,9 @@ import { useRef } from "react";
 import CustomInput from "./Input";
 import { toast } from "react-toastify";
 
-const UnitAdd = (props) => {
+const StagesAdd = (props) => {
   const [modal, setModal] = useState(false);
-  const [unitName, setUnitName] = useState("");
+  const [unitName, setStagesName] = useState("");
   const { http } = AuthUser();
   const Close = () => {
     setModal(false);
@@ -39,10 +39,10 @@ const UnitAdd = (props) => {
   }, [modal, props]);
   const [checkNameStatus, setCheckStatus] = useState({});
   const [msg, setMsg] = useState("");
-  const handleUnit = (e) => {
+  const handleStages = (e) => {
     setCheckStatus({});
     setMsg("");
-    setUnitName(e.target.value);
+    setStagesName(e.target.value);
   };
   const SubmitData = () => {
     if (unitName == "") {
@@ -50,10 +50,10 @@ const UnitAdd = (props) => {
         borderColor: "red",
         borderStyle: "groove",
       });
-      setMsg("Unit connot be empty!");
+      setMsg("Stages connot be empty!");
     } else {
       http
-        .post("/unit/store", { unit_name: unitName })
+        .post("/stages/store", { name: unitName })
         .then(function (response) {
           props.checkchang(response.data.message, response.data.status);
         })
@@ -90,7 +90,7 @@ const UnitAdd = (props) => {
     <div>
       <Modal id="showModal" isOpen={modal} toggle={toggle} centered>
         <ModalHeader className="bg-light p-3" toggle={toggle}>
-          Add Unit
+          Add Stages
         </ModalHeader>
         <span className="tablelist-form">
           <ModalBody>
@@ -101,19 +101,19 @@ const UnitAdd = (props) => {
                   className="form-label fw-bold d-flex justify-content-between"
                 >
                   <div>
-                    Unit Name<span style={{ color: "red" }}> *</span>
+                    Stages Name<span style={{ color: "red" }}> *</span>
                   </div>
                   <div style={{ color: "red" }}>{msg}</div>
                 </Label>
                 <CustomInput
                   name="category"
                   id="category-field"
-                  placeholder="Unit Name"
+                  placeholder="Stages Name"
                   className="form-control fw-bold"
-                  onChange={handleUnit}
+                  onChange={handleStages}
                   type="text"
                   checkNameStatus={checkNameStatus}
-                  handleUnit={handleUnit}
+                  handleStages={handleStages}
                   unitName={unitName}
                 />
               </div>
@@ -148,4 +148,4 @@ const UnitAdd = (props) => {
   );
 };
 
-export default UnitAdd;
+export default StagesAdd;

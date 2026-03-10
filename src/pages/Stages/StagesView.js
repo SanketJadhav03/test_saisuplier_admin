@@ -10,18 +10,18 @@ import {
 } from "reactstrap";
 import { toast, ToastContainer } from "react-toastify";
 import DeleteModal from "../../Components/Common/DeleteModal";
-import UnitAdd from "./UnitAdd";
-import UnitUpdate from "./UnitUpdate";
+import StagesAdd from "./StagesAdd";
+import StagesUpdate from "./StagesUpdate";
 import axios from "axios";
 import { API_URL } from "../../helpers/url_helper";
 import AuthUser from "../../helpers/Authuser";
 import InfiniteScroll from "react-infinite-scroll-component";
 
-const UnitView = () => {
+const StagesView = () => {
   const [modalStates, setModalStates] = useState(false);
   const [UpdatemodalStates, setUpdateModalStates] = useState(false);
-  const [unitList, setUnitList] = useState([]);
-  const [unitDataModal, setUnitDataModal] = useState({});
+  const [stagesList, setStagesList] = useState([]);
+  const [stagesDataModal, setStagesDataModal] = useState({});
   const { http } = AuthUser();
   //   Delete Aleart
   const [ID, SetID] = useState();
@@ -33,7 +33,7 @@ const UnitView = () => {
   const handleDeleteOrder = (data) => {
     if (data._reactName == "onClick") {
       http
-        .delete(`/unit/delete/${ID}`)
+        .delete(`/stages/delete/${ID}`)
         .then(function (response) {
           if (response.data.status == 0) {
             toast.success(response.data.message);
@@ -46,7 +46,7 @@ const UnitView = () => {
           console.log(error);
         });
     }
-    setUnitList([]);
+    setStagesList([]);
     SetPages(1);
     setDeleteModal(false);
   };
@@ -55,15 +55,15 @@ const UnitView = () => {
   // infinity
   const [Pages, SetPages] = useState(1);
   const [NoMore, SetNoMore] = useState(true);
-  const getUnitsList = () => {
-    document.title = "Units | Saisupplier Admin";
+  const getStagessList = () => {
+    document.title = "Stagess | Saisupplier Admin";
 
     http
-      .get(`/unit/list?page=${Pages}&limit=30`)
+      .get(`/stages/list?page=${Pages}&limit=30`)
       .then(function (response) {
-        setUnitList([...unitList, ...response.data]);
+        setStagesList([...stagesList, ...response.data.data]);
         SetPages(Pages + 1);
-        if (response.data.length === 0) {
+        if (response.data.data.length === 0) {
           SetNoMore(false);
         }
       })
@@ -94,7 +94,7 @@ const UnitView = () => {
   //   end Alert
   const [counts, Setcounts] = useState(1);
   const handleCallback = (data, status) => {
-    setUnitList([]);
+    setStagesList([]);
     SetPages(1);
     if (status == 0) {
       toast.success(data);
@@ -106,15 +106,15 @@ const UnitView = () => {
     Setcounts(counts + 1);
   };
 
-  // Edit unit data
+  // Edit stages data
   const [FindData, SetFind] = useState([]);
   const EditUpdate = (index) => {
-    let FindArray = unitList.filter((_, i) => i == index);
+    let FindArray = stagesList.filter((_, i) => i == index);
     SetFind(FindArray[0]);
     setUpdateModalStates(!UpdatemodalStates);
   };
   useEffect(() => {
-    getUnitsList();
+    getStagessList();
   }, [counts]);
 
   return (
@@ -131,7 +131,7 @@ const UnitView = () => {
               <CardHeader className="card-header border-0">
                 <Row className="align-items-center gy-3">
                   <div className="col-sm">
-                    <h5 className="card-title mb-0">Unit </h5>
+                    <h5 className="card-title mb-0">Stages </h5>
                   </div>
                   <div className="col-sm-auto">
                     <div className="d-flex gap-1 flex-wrap">
@@ -142,7 +142,7 @@ const UnitView = () => {
                         onClick={() => setModalStates(!modalStates)}
                       >
                         <i className="ri-add-line align-bottom me-1"></i> Create
-                        Unit
+                        Stages
                       </button>
                     </div>
                   </div>
@@ -156,7 +156,7 @@ const UnitView = () => {
                     role="tablist"
                   ></Nav>
                   <InfiniteScroll
-                    dataLength={unitList.length}
+                    dataLength={stagesList.length}
                     next={fetchData}
                     hasMore={NoMore}
                   >
@@ -176,13 +176,13 @@ const UnitView = () => {
                             title="Toggle SortBy"
                             style={{ cursor: "pointer" }}
                           >
-                            Unit Name
+                            Stages Name
                           </th>
                           <th>Action</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {unitList.map((data, index) => (
+                        {stagesList.map((data, index) => (
                           <tr key={index}>
                             <td>
                               <a
@@ -192,7 +192,7 @@ const UnitView = () => {
                                 {index + 1}
                               </a>
                             </td>
-                            <td>{data.unit_name}</td>
+                            <td>{data.name}</td>
                             <td>
                               <ul className="list-inline hstack gap-2 mb-0">
                                 <li className="list-inline-item edit">
@@ -204,10 +204,10 @@ const UnitView = () => {
                                   </button>
                                 </li>
                                 <li className="list-inline-item">
-                                  {data.unit_id != 1 ? (
+                                  {data.id != 1 ? (
                                     <button
                                       onClick={() =>
-                                        onClickDelete(data.unit_id)
+                                        onClickDelete(data.id)
                                       }
                                       className="text-danger d-inline-block remove-item-btn  border-0 bg-transparent"
                                     >
@@ -227,7 +227,7 @@ const UnitView = () => {
                 </div>
 
                 {modalStates === true ? (
-                  <UnitAdd
+                  <StagesAdd
                     modalStates={modalStates}
                     setModalStates={() => {
                       setModalStates(false);
@@ -238,9 +238,9 @@ const UnitView = () => {
                   ""
                 )}
                 {UpdatemodalStates === true ? (
-                  <UnitUpdate
+                  <StagesUpdate
                     modalStates={UpdatemodalStates}
-                    data={unitDataModal}
+                    data={stagesDataModal}
                     setModalStates={() => {
                       setUpdateModalStates(false);
                     }}
@@ -260,4 +260,4 @@ const UnitView = () => {
   );
 };
 
-export default UnitView;
+export default StagesView;

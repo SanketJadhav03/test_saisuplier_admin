@@ -112,6 +112,10 @@ import TransportTypeList from "../pages/TransportType/TransportTypeList";
 import OtherChrageList from "../pages/OtherCharge/OtherChrageList";
 import WhatsappTemplateList from "../pages/Template/WhatsappTemplate/WhatsappTemplateList";
 import CallLogsList from "../pages/Calllogs/CallLogsList";
+import StagesView from "../pages/Stages/StagesView";
+import SourceView from "../pages/Source/SourceView";
+import ReferenceView from "../pages/Reference/ReferenceView";
+import PriorityView from "../pages/Priority/PriorityView";
 
 const authProtectedRoutes = [
   // Unauthorized
@@ -145,7 +149,13 @@ const authProtectedRoutes = [
   // Tax Routes Starts
   { path: "/tax-list", component: <TaxView /> },
   { path: "/tax-add", component: <TaxAdd /> },
-
+  
+  // 
+  { path: "/source-list", component: <SourceView /> },
+  { path: "/reference-list", component: <ReferenceView /> },
+  { path: "/priority-list", component: <PriorityView /> },
+  { path: "/stages-list", component: <StagesView /> },
+  
   //Category Routes
   { path: "/category-list", component: <CategoryList /> },
 

@@ -229,11 +229,11 @@ export const GET_APPLICATION_LIST = "/application-list";
 //JOB APPLICATION
 export const GET_API_KEY = "/api-key";
 
-export const API_URL = "http://localhost:8001/api";
-export const IMG_API_URL = "http://localhost:8001";
+export const API_URL = "http://localhost:8002/api";
+export const IMG_API_URL = "http://localhost:8002";
 
-// export const API_URL = "https://api.saisuppliers.com/api";
-// export const IMG_API_URL = "https://api.saisuppliers.com";
+// export const API_URL = "https://testapi.saisuppliers.com/api";
+// export const IMG_API_URL = "https://testapi.saisuppliers.com";
 
 export const sendMail = async (templateName, item, emailTo) => {
   axios

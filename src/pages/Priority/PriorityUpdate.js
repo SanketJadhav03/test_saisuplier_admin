@@ -4,7 +4,7 @@ import "react-toastify/dist/ReactToastify.css";
 import AuthUser from "../../helpers/Authuser";
 import CustomInput from "./Input";
 
-const UnitUpdate = (props) => {
+const PriorityUpdate = (props) => {
   const [modal, setModal] = useState(false);
   const { http } = AuthUser();
   const [ModalData, setModalData] = useState(props.edit_data)
@@ -35,10 +35,10 @@ const UnitUpdate = (props) => {
         borderColor:"red",
         borderStyle:"groove"
       });
-      setMsg("Unit connot be empty!");
+      setMsg("Priority connot be empty!");
     }else{
     http
-      .put("/unit/update", ModalData)
+      .put("/stages/update", ModalData)
       .then(function (response) {
         props.checkchang(response.data.message,response.data.status);
       })
@@ -47,7 +47,7 @@ const UnitUpdate = (props) => {
       });
     }
     }
-    const handleUnit = (e)=>{
+    const handlePriority = (e)=>{
       setCheckStatus({});
       setMsg("");
       setModalData({ ...ModalData,unit_name: e.target.value })
@@ -57,7 +57,7 @@ const UnitUpdate = (props) => {
     <div>
       <Modal id="showModal" isOpen={modal} toggle={toggle} centered>
         <ModalHeader className="bg-light p-3" toggle={toggle}>
-          Edit Unit
+          Edit Priority
         </ModalHeader>
         <span className="tablelist-form">
           <ModalBody>
@@ -65,7 +65,7 @@ const UnitUpdate = (props) => {
               <div className="mb-3">
               <Label htmlFor="categoryname-field" className="form-label fw-bold d-flex justify-content-between">
                   <div>
-                    Unit Name<span style={{color:"red"}}> *</span>
+                    Priority Name<span style={{color:"red"}}> *</span>
                   </div>
                   <div style={{color:"red"}}>
                     {msg}
@@ -76,9 +76,9 @@ const UnitUpdate = (props) => {
                   name="category"
                   id="category-field"
                   className="form-control fw-bold"
-                  placeholder="Unit Name"
+                  placeholder="Priority Name"
                   type="text"
-                  onChange={handleUnit}
+                  onChange={handlePriority}
                   value={ModalData.unit_name}
                 />
               </div>
@@ -112,4 +112,4 @@ const UnitUpdate = (props) => {
   );
 };
 
-export default UnitUpdate;
+export default PriorityUpdate;
