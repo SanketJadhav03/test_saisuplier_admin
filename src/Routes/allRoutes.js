@@ -111,12 +111,14 @@ import Sale_List_delivered from "../pages/Sale/Sale_List_delivered";
 import TransportTypeList from "../pages/TransportType/TransportTypeList";
 import OtherChrageList from "../pages/OtherCharge/OtherChrageList";
 import WhatsappTemplateList from "../pages/Template/WhatsappTemplate/WhatsappTemplateList";
+import CallLogsList from "../pages/Calllogs/CallLogsList";
 
 const authProtectedRoutes = [
   // Unauthorized
   { path: "/unauthorized", component: <Unauthorized /> },
 
   { path: "/dashboard", component: <DashboardEcommerce /> },
+  { path: "/call-logs", component: <CallLogsList /> },
   // { path: "/pos/list", component: <POSList /> },
   { path: "/pos-bill-details/:billId", component: <POSBillDetailsList /> },
 

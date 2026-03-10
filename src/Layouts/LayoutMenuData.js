@@ -104,6 +104,19 @@ const Navdata = () => {
         updateIconSidebar(e);
       },
     },
+    {
+      id: "DASHBOARD",
+      label: "Call Logs",
+      icon: "mdi mdi-cart",
+      link: "/call-logs",
+      stateVariables: isDashboard,
+      click: function (e) {
+        e.preventDefault();
+        setIsDashboard(!isDashboard);
+        setIscurrentState("Dashboard");
+        updateIconSidebar(e);
+      },
+    },
 
     // {
     //   id: "PURCHASE",
@@ -483,7 +496,7 @@ const Navdata = () => {
           ? [
               {
                 id: "category_list",
-                label: " Category",
+                label: "Category",
                 link: "/category-list",
                 parentId: "apps",
               },
