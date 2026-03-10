@@ -38,7 +38,7 @@ const SourceUpdate = (props) => {
       setMsg("Stages connot be empty!");
     }else{
     http
-      .put(`/stages/update/${ModalData.id}`, ModalData)
+      .put(`/sources/update/${ModalData.id}`, ModalData)
       .then(function (response) {
         props.checkchang(response.data.message,response.data.status);
       })

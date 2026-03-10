@@ -20,8 +20,8 @@ import InfiniteScroll from "react-infinite-scroll-component";
 const SourceView = () => {
   const [modalStates, setModalStates] = useState(false);
   const [UpdatemodalStates, setUpdateModalStates] = useState(false);
-  const [stagesList, setStagesList] = useState([]);
-  const [stagesDataModal, setStagesDataModal] = useState({});
+  const [sourcesList, setStagesList] = useState([]);
+  const [sourcesDataModal, setStagesDataModal] = useState({});
   const { http } = AuthUser();
   //   Delete Aleart
   const [ID, SetID] = useState();
@@ -33,7 +33,7 @@ const SourceView = () => {
   const handleDeleteOrder = (data) => {
     if (data._reactName == "onClick") {
       http
-        .delete(`/stages/delete/${ID}`)
+        .delete(`/sources/delete/${ID}`)
         .then(function (response) {
           if (response.data.status == 0) {
             toast.success(response.data.message);
@@ -59,9 +59,9 @@ const SourceView = () => {
     document.title = "Stagess | Saisupplier Admin";
 
     http
-      .get(`/stages/list?page=${Pages}&limit=30`)
+      .get(`/sources/list?page=${Pages}&limit=30`)
       .then(function (response) {
-        setStagesList([...stagesList, ...response.data.data]);
+        setStagesList([...sourcesList, ...response.data.data]);
         SetPages(Pages + 1);
         if (response.data.data.length === 0) {
           SetNoMore(false);
@@ -106,10 +106,10 @@ const SourceView = () => {
     Setcounts(counts + 1);
   };
 
-  // Edit stages data
+  // Edit sources data
   const [FindData, SetFind] = useState([]);
   const EditUpdate = (index) => {
-    let FindArray = stagesList.filter((_, i) => i == index);
+    let FindArray = sourcesList.filter((_, i) => i == index);
     SetFind(FindArray[0]);
     setUpdateModalStates(!UpdatemodalStates);
   };
@@ -156,7 +156,7 @@ const SourceView = () => {
                     role="tablist"
                   ></Nav>
                   <InfiniteScroll
-                    dataLength={stagesList.length}
+                    dataLength={sourcesList.length}
                     next={fetchData}
                     hasMore={NoMore}
                   >
@@ -182,7 +182,7 @@ const SourceView = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {stagesList.map((data, index) => (
+                        {sourcesList.map((data, index) => (
                           <tr key={index}>
                             <td>
                               <a
@@ -240,7 +240,7 @@ const SourceView = () => {
                 {UpdatemodalStates === true ? (
                   <StagesUpdate
                     modalStates={UpdatemodalStates}
-                    data={stagesDataModal}
+                    data={sourcesDataModal}
                     setModalStates={() => {
                       setUpdateModalStates(false);
                     }}

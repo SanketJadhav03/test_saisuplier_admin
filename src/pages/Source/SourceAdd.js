@@ -53,7 +53,7 @@ const SourceAdd = (props) => {
       setMsg("Stages connot be empty!");
     } else {
       http
-        .post("/stages/store", { name: unitName })
+        .post("/sources/store", { name: unitName })
         .then(function (response) {
           props.checkchang(response.data.message, response.data.status);
         })
