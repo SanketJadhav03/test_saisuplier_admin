@@ -30,7 +30,7 @@ const PriorityUpdate = (props) => {
   const [checkNameStatus,setCheckStatus]=useState({});
   const [msg,setMsg] = useState("");
   const updateData = () => {
-    if(ModalData.unit_name==""){
+    if(ModalData.name==""){
       setCheckStatus({
         borderColor:"red",
         borderStyle:"groove"
@@ -38,7 +38,7 @@ const PriorityUpdate = (props) => {
       setMsg("Priority connot be empty!");
     }else{
     http
-      .put("/stages/update", ModalData)
+      .put(`/priority/update/${ModalData.id}`, ModalData)
       .then(function (response) {
         props.checkchang(response.data.message,response.data.status);
       })
@@ -50,7 +50,7 @@ const PriorityUpdate = (props) => {
     const handlePriority = (e)=>{
       setCheckStatus({});
       setMsg("");
-      setModalData({ ...ModalData,unit_name: e.target.value })
+      setModalData({ ...ModalData,name: e.target.value })
     }
 
   return (
@@ -79,7 +79,7 @@ const PriorityUpdate = (props) => {
                   placeholder="Priority Name"
                   type="text"
                   onChange={handlePriority}
-                  value={ModalData.unit_name}
+                  value={ModalData.name}
                 />
               </div>
             </Card>

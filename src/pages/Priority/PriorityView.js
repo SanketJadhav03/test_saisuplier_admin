@@ -20,8 +20,8 @@ import InfiniteScroll from "react-infinite-scroll-component";
 const PriorityView = () => {
   const [modalStates, setModalStates] = useState(false);
   const [UpdatemodalStates, setUpdateModalStates] = useState(false);
-  const [stagesList, setPriorityList] = useState([]);
-  const [stagesDataModal, setPriorityDataModal] = useState({});
+  const [priorityList, setPriorityList] = useState([]);
+  const [priorityDataModal, setPriorityDataModal] = useState({});
   const { http } = AuthUser();
   //   Delete Aleart
   const [ID, SetID] = useState();
@@ -33,7 +33,7 @@ const PriorityView = () => {
   const handleDeleteOrder = (data) => {
     if (data._reactName == "onClick") {
       http
-        .delete(`/stages/delete/${ID}`)
+        .delete(`/priority/delete/${ID}`)
         .then(function (response) {
           if (response.data.status == 0) {
             toast.success(response.data.message);
@@ -59,9 +59,9 @@ const PriorityView = () => {
     document.title = "Prioritys | Saisupplier Admin";
 
     http
-      .get(`/stages/list?page=${Pages}&limit=30`)
+      .get(`/priority/list?page=${Pages}&limit=30`)
       .then(function (response) {
-        setPriorityList([...stagesList, ...response.data.data]);
+        setPriorityList([...priorityList, ...response.data.data]);
         SetPages(Pages + 1);
         if (response.data.data.length === 0) {
           SetNoMore(false);
@@ -106,10 +106,10 @@ const PriorityView = () => {
     Setcounts(counts + 1);
   };
 
-  // Edit stages data
+  // Edit priority data
   const [FindData, SetFind] = useState([]);
   const EditUpdate = (index) => {
-    let FindArray = stagesList.filter((_, i) => i == index);
+    let FindArray = priorityList.filter((_, i) => i == index);
     SetFind(FindArray[0]);
     setUpdateModalStates(!UpdatemodalStates);
   };
@@ -156,7 +156,7 @@ const PriorityView = () => {
                     role="tablist"
                   ></Nav>
                   <InfiniteScroll
-                    dataLength={stagesList.length}
+                    dataLength={priorityList.length}
                     next={fetchData}
                     hasMore={NoMore}
                   >
@@ -182,7 +182,7 @@ const PriorityView = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {stagesList.map((data, index) => (
+                        {priorityList.map((data, index) => (
                           <tr key={index}>
                             <td>
                               <a
@@ -240,7 +240,7 @@ const PriorityView = () => {
                 {UpdatemodalStates === true ? (
                   <PriorityUpdate
                     modalStates={UpdatemodalStates}
-                    data={stagesDataModal}
+                    data={priorityDataModal}
                     setModalStates={() => {
                       setUpdateModalStates(false);
                     }}

@@ -20,8 +20,8 @@ import InfiniteScroll from "react-infinite-scroll-component";
 const ReferenceView = () => {
   const [modalStates, setModalStates] = useState(false);
   const [UpdatemodalStates, setUpdateModalStates] = useState(false);
-  const [stagesList, setReferenceList] = useState([]);
-  const [stagesDataModal, setReferenceDataModal] = useState({});
+  const [referenceList, setReferenceList] = useState([]);
+  const [referenceDataModal, setReferenceDataModal] = useState({});
   const { http } = AuthUser();
   //   Delete Aleart
   const [ID, SetID] = useState();
@@ -33,7 +33,7 @@ const ReferenceView = () => {
   const handleDeleteOrder = (data) => {
     if (data._reactName == "onClick") {
       http
-        .delete(`/stages/delete/${ID}`)
+        .delete(`/reference/delete/${ID}`)
         .then(function (response) {
           if (response.data.status == 0) {
             toast.success(response.data.message);
@@ -59,9 +59,9 @@ const ReferenceView = () => {
     document.title = "References | Saisupplier Admin";
 
     http
-      .get(`/stages/list?page=${Pages}&limit=30`)
+      .get(`/reference/list?page=${Pages}&limit=30`)
       .then(function (response) {
-        setReferenceList([...stagesList, ...response.data.data]);
+        setReferenceList([...referenceList, ...response.data.data]);
         SetPages(Pages + 1);
         if (response.data.data.length === 0) {
           SetNoMore(false);
@@ -106,10 +106,10 @@ const ReferenceView = () => {
     Setcounts(counts + 1);
   };
 
-  // Edit stages data
+  // Edit reference data
   const [FindData, SetFind] = useState([]);
   const EditUpdate = (index) => {
-    let FindArray = stagesList.filter((_, i) => i == index);
+    let FindArray = referenceList.filter((_, i) => i == index);
     SetFind(FindArray[0]);
     setUpdateModalStates(!UpdatemodalStates);
   };
@@ -156,7 +156,7 @@ const ReferenceView = () => {
                     role="tablist"
                   ></Nav>
                   <InfiniteScroll
-                    dataLength={stagesList.length}
+                    dataLength={referenceList.length}
                     next={fetchData}
                     hasMore={NoMore}
                   >
@@ -182,7 +182,7 @@ const ReferenceView = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {stagesList.map((data, index) => (
+                        {referenceList.map((data, index) => (
                           <tr key={index}>
                             <td>
                               <a
@@ -240,7 +240,7 @@ const ReferenceView = () => {
                 {UpdatemodalStates === true ? (
                   <ReferenceUpdate
                     modalStates={UpdatemodalStates}
-                    data={stagesDataModal}
+                    data={referenceDataModal}
                     setModalStates={() => {
                       setUpdateModalStates(false);
                     }}

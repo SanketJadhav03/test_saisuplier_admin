@@ -53,7 +53,7 @@ const ReferenceAdd = (props) => {
       setMsg("Reference connot be empty!");
     } else {
       http
-        .post("/stages/store", { name: unitName })
+        .post("/reference/store", { name: unitName })
         .then(function (response) {
           props.checkchang(response.data.message, response.data.status);
         })

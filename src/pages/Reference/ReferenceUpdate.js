@@ -30,7 +30,7 @@ const ReferenceUpdate = (props) => {
   const [checkNameStatus,setCheckStatus]=useState({});
   const [msg,setMsg] = useState("");
   const updateData = () => {
-    if(ModalData.unit_name==""){
+    if(ModalData.name==""){
       setCheckStatus({
         borderColor:"red",
         borderStyle:"groove"
@@ -38,7 +38,7 @@ const ReferenceUpdate = (props) => {
       setMsg("Reference connot be empty!");
     }else{
     http
-      .put("/stages/update", ModalData)
+      .put(`/reference/update/${ModalData.id}`, ModalData)
       .then(function (response) {
         props.checkchang(response.data.message,response.data.status);
       })
@@ -50,7 +50,7 @@ const ReferenceUpdate = (props) => {
     const handleReference = (e)=>{
       setCheckStatus({});
       setMsg("");
-      setModalData({ ...ModalData,unit_name: e.target.value })
+      setModalData({ ...ModalData,name: e.target.value })
     }
 
   return (
@@ -79,7 +79,7 @@ const ReferenceUpdate = (props) => {
                   placeholder="Reference Name"
                   type="text"
                   onChange={handleReference}
-                  value={ModalData.unit_name}
+                  value={ModalData.name}
                 />
               </div>
             </Card>

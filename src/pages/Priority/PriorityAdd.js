@@ -53,7 +53,7 @@ const PriorityAdd = (props) => {
       setMsg("Priority connot be empty!");
     } else {
       http
-        .post("/stages/store", { name: unitName })
+        .post("/priority/store", { name: unitName })
         .then(function (response) {
           props.checkchang(response.data.message, response.data.status);
         })
