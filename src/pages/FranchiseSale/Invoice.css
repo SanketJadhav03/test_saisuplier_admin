@@ -1,0 +1,22 @@
+.formss {
+    border: 1px solid black;
+}
+
+.invocess {
+    border: 1px solid black;
+    border-collapse: collapse;
+    padding: 2px;
+}
+
+#per {
+    padding-top: 0px;
+    padding-bottom: 0px;
+    text-align: right;
+}
+
+.header {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin: 0px auto;
+}

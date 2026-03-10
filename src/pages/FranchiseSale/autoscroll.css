@@ -1,0 +1,13 @@
+.table-container {
+    max-height: 300px;
+}
+
+.scroll-container {
+    height: 400px;
+    overflow-y: auto;
+}
+
+.scroll-containers {
+    height: 480px;
+    overflow-y: auto;
+}
