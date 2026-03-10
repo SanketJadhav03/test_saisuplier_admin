@@ -477,6 +477,40 @@ const Navdata = () => {
     },
     {
       id: "SETTINGS",
+      label: "CRM Settings",
+      icon: "bx bx-aperture",
+      link: "/#",
+      click: function (e) {
+        e.preventDefault();
+        setIsProdcut(!isProdcut);
+        setIscurrentState("prodcut");
+        updateIconSidebar(e);
+      },
+      stateVariables: isProdcut,
+      subItems: [
+      
+        {
+          id: "Reference",
+          label: "Reference",
+          link: "/source-list",
+          parentId: "apps",
+        },
+        {
+          id: "Priotity",
+          label: "Priotity",
+          link: "/priority-list",
+          parentId: "apps",
+        },
+        {
+          id: "Stages",
+          label: "Stages",
+          link: "/stages-list",
+          parentId: "apps",
+        },
+      ],
+    },
+    {
+      id: "SETTINGS",
       label: "Settings",
       icon: "bx bx-aperture",
       link: "/#",
