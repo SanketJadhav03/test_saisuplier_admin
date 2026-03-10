@@ -232,8 +232,10 @@ export const GET_API_KEY = "/api-key";
 export const API_URL = "http://localhost:8002/api";
 export const IMG_API_URL = "http://localhost:8002";
 
+ 
 // export const API_URL = "https://testapi.saisuppliers.com/api";
 // export const IMG_API_URL = "https://testapi.saisuppliers.com";
+ 
 
 export const sendMail = async (templateName, item, emailTo) => {
   axios

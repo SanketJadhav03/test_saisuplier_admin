@@ -1,5 +1,5 @@
 {
-  "name": "Saisupplier Admin",
+  "name": "saisupplier-admin",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -191,5 +191,9 @@
   },
   "devDependencies": {
     "babel-plugin-prismjs": "^2.1.0"
-  }
+  },
+  "description": "",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC"
 }
