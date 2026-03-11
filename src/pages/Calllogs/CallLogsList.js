@@ -8,8 +8,10 @@ import {
   Nav,
   Row,
 } from "reactstrap";
+import Flatpickr from "react-flatpickr";
 import { toast, ToastContainer } from "react-toastify";
 import DeleteModal from "../../Components/Common/DeleteModal";
+import CallLogsEdit from "./CallLogsEdit";
 import AuthUser from "../../helpers/Authuser";
 import { useEffect } from "react";
 import { IMG_API_URL } from "../../helpers/url_helper";
@@ -22,9 +24,95 @@ const CallLogsList = () => {
   const { http } = AuthUser();
   const [counts, Setcounts] = useState(1);
   const [callLog, SetCalllog] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   // infinity
   const [Pages, SetPages] = useState(1);
   const [NoMore, SetNoMore] = useState(true);
+  const currentDate = new Date();
+  const day = currentDate.getDate().toString().padStart(2, "0");
+  const month = (currentDate.getMonth() + 1).toString().padStart(2, "0");
+  const year = currentDate.getFullYear();
+  const [activeFilter, setActiveFilter] = useState("today");
+  const formatDate = (date) => date.toLocaleDateString("en-GB");
+  const [Filter_Data, SetFilter_data] = useState({
+    start_date: `${day}/${month}/${year}`,
+    end_date: `${day}/${month}/${year}`,
+  });
+  const filters = [
+    { label: "Today", value: "today" },
+    { label: "Yesterday", value: "yesterday" },
+    { label: "This Week", value: "this_week" },
+    { label: "Last Week", value: "last_week" },
+    { label: "This Month", value: "this_month" },
+    { label: "Last Month", value: "last_month" },
+    { label: "This Year", value: "this_year" },
+    { label: "Last Year", value: "last_year" },
+  ];
+  const handleDateFilter = (type) => {
+    let startDate = null;
+    let endDate = null;
+
+    const today = new Date();
+
+    switch (type) {
+      case "today":
+        startDate = endDate = today;
+        break;
+
+      case "yesterday":
+        startDate = endDate = new Date(today.setDate(today.getDate() - 1));
+        break;
+
+      case "this_week": {
+        const firstDay = new Date(today);
+        firstDay.setDate(today.getDate() - today.getDay());
+        startDate = firstDay;
+        endDate = new Date();
+        break;
+      }
+
+      case "last_week": {
+        const lastWeekEnd = new Date(today);
+        lastWeekEnd.setDate(today.getDate() - today.getDay() - 1);
+
+        const lastWeekStart = new Date(lastWeekEnd);
+        lastWeekStart.setDate(lastWeekEnd.getDate() - 6);
+
+        startDate = lastWeekStart;
+        endDate = lastWeekEnd;
+        break;
+      }
+
+      case "this_month":
+        startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+        endDate = new Date();
+        break;
+      case "last_month":
+        startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        endDate = new Date(today.getFullYear(), today.getMonth(), 0);
+        break;
+      case "last_year":
+        startDate = new Date(today.getFullYear() - 1, 0, 1);
+        endDate = new Date(today.getFullYear() - 1, 11, 31);
+        break;
+
+      case "this_year":
+        startDate = new Date(today.getFullYear(), 0, 1);
+        endDate = new Date();
+        break;
+
+      default:
+        return;
+    }
+
+    setActiveFilter(type);
+
+    SetFilter_data({
+      ...Filter_Data,
+      start_date: formatDate(startDate),
+      end_date: formatDate(endDate),
+    });
+  };
   useEffect(() => {
     document.title = "CallLogs | Saisupplier Admin";
 
@@ -57,7 +145,7 @@ const CallLogsList = () => {
   const handleDeleteOrder = (data) => {
     if (data._reactName == "onClick") {
       http
-        .delete(`/category/delete/${ID}`)
+        .delete(`/callLog/delete/${ID}`)
         .then(function (response) {
           if (response.data.status == 0) {
             toast.success(response.data.message);
@@ -124,20 +212,99 @@ const CallLogsList = () => {
             <Card>
               <CardHeader className="card-header border-0">
                 <Row className="align-items-center gy-3">
+                  <h3 className="text-center fw-bold mb-0">Call Logs</h3>
+                  <div className="col-8 btn-group flex-wrap gap-2">
+                    {filters.map((item) => (
+                      <button
+                        key={item.value}
+                        className={`btn btn-sm rounded-pill ${
+                          activeFilter === item.value
+                            ? "btn-dark  text-white"
+                            : "btn-outline-dark"
+                        }`}
+                        onClick={() => handleDateFilter(item.value)}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </Row>
+                <Row className="align-items-center gy-3">
                   <div className="col-sm">
                     <h5 className="card-title mb-0">Call Logs</h5>
                   </div>
                   <div className="col-sm-auto">
-                    <div className="d-flex gap-1 flex-wrap">
-                      {/* <button
-                        type="button"
-                        className="btn fw-bold btn-success add-btn"
-                        id="create-btn"
-                        onClick={() => setModalStates(!modalStates)}
-                      >
-                        <i className="ri-add-line align-bottom me-1"></i> Add
-                        Category
-                      </button> */}
+                    <div className="d-flex gap-3 flex-wrap align-items-end">
+                      {/* Start Date */}
+                      <div>
+                        <div className="fw-bold mb-1">Start     Date</div>
+                        <Flatpickr
+                          className="form-control"
+                          style={{ width: "140px" }}
+                          options={{
+                            dateFormat: "d/m/Y",
+                            defaultDate: "today",
+                          }}
+                          value={Filter_Data.start_date}
+                          onChange={(selectedDates) => {
+                            if (!selectedDates.length) return;
+
+                            const d = selectedDates[0];
+                            const formattedDate = `${d.getDate().toString().padStart(2, "0")}/${(
+                              d.getMonth() + 1
+                            )
+                              .toString()
+                              .padStart(2, "0")}/${d.getFullYear()}`;
+
+                            SetFilter_data({
+                              ...Filter_Data,
+                              start_date: formattedDate,
+                            });
+                          }}
+                        />
+                      </div>
+
+                      {/* End Date */}
+                      <div>
+                        <div className="fw-bold mb-1">End Date</div>
+                        <Flatpickr
+                          className="form-control"
+                          style={{ width: "140px" }}
+                          options={{
+                            dateFormat: "d/m/Y",
+                            defaultDate: "today",
+                          }}
+                          value={Filter_Data.end_date}
+                          onChange={(selectedDates) => {
+                            if (!selectedDates.length) return;
+
+                            const d = selectedDates[0];
+                            const formattedDate = `${d.getDate().toString().padStart(2, "0")}/${(
+                              d.getMonth() + 1
+                            )
+                              .toString()
+                              .padStart(2, "0")}/${d.getFullYear()}`;
+
+                            SetFilter_data({
+                              ...Filter_Data,
+                              end_date: formattedDate,
+                            });
+                          }}
+                        />
+                      </div>
+
+                      {/* Search */}
+                      <div style={{ minWidth: "260px" }}>
+                        <div className="fw-bold mb-1">Search Area</div>
+                        <input
+                          type="search"
+                          placeholder="Search by Name / Mobile / Call Type"
+                          className="form-control fw-bold rounded"
+                          onChange={(e) =>
+                            setSearchQuery(e.target.value.toLowerCase())
+                          }
+                        />
+                      </div>
                     </div>
                   </div>
                 </Row>
@@ -212,18 +379,28 @@ const CallLogsList = () => {
                             title="Toggle SortBy"
                             style={{ cursor: "pointer" }}
                           >
-                            <th
-                              title="Toggle SortBy"
-                              style={{ cursor: "pointer" }}
-                            >
-                              Lead created By
-                            </th>
+                            Lead created By
                           </th>
                           <th>Action</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {callLog.map((item, index) => (
+                        {[
+                          ...new Map(
+                            (callLog || [])
+                              .filter((item) => {
+                                const query = searchQuery?.toLowerCase() || "";
+                                return (
+                                  item.number?.toLowerCase().includes(query) ||
+                                  item.full_name
+                                    ?.toLowerCase()
+                                    .includes(query) ||
+                                  item.type?.toLowerCase().includes(query)
+                                );
+                              })
+                              .map((item) => [item.id, item]), // dedupe key
+                          ).values(),
+                        ].map((item, index) => (
                           <tr key={index}>
                             <td>
                               <a
@@ -233,6 +410,7 @@ const CallLogsList = () => {
                                 {index + 1}
                               </a>
                             </td>
+
                             <td>{item.number}</td>
                             <td>{item.type}</td>
                             <td>{item.date}</td>
@@ -241,28 +419,7 @@ const CallLogsList = () => {
                             <td>{item.createdAt}</td>
                             <td>{item.updatedAt}</td>
                             <td>{item.full_name}</td>
-                            {/* <td>
-                              {item.category_img ? (
-                                <img
-                                  src={`${IMG_API_URL}/category/${item.category_img}`}
-                                  alt={item.category_img}
-                                  width={"100px"}
-                                />
-                              ) : (
-                                <D_img />
-                              )}
-                            </td> */}
-                            {/* <td>
-                              {item.category_banner ? (
-                                <img
-                                  src={`${IMG_API_URL}/category/${item.category_banner}`}
-                                  alt={item.category_banner}
-                                  width={"100px"}
-                                />
-                              ) : (
-                                <D_img />
-                              )}
-                            </td> */}
+
                             <td>
                               <ul className="list-inline hstack gap-2 mb-0">
                                 <li className="list-inline-item edit">
@@ -273,18 +430,17 @@ const CallLogsList = () => {
                                     <i className="ri-pencil-fill fs-16" />
                                   </button>
                                 </li>
+
                                 <li className="list-inline-item">
-                                  {item.category_id != 1 ? (
+                                  {item.category_id !== 1 && (
                                     <button
                                       onClick={() =>
-                                        onClickDelete(item.category_id)
+                                        onClickDelete(item.id)
                                       }
-                                      className="text-danger d-inline-block remove-item-btn  border-0 bg-transparent"
+                                      className="text-danger d-inline-block remove-item-btn border-0 bg-transparent"
                                     >
                                       <i className="ri-delete-bin-5-fill fs-16" />
                                     </button>
-                                  ) : (
-                                    ""
                                   )}
                                 </li>
                               </ul>
@@ -306,9 +462,9 @@ const CallLogsList = () => {
                   />
                 ) : (
                   ""
-                )}
+                )} */}
                 {UpdatemodalStates === true ? (
-                  <CategoryEdit
+                  <CallLogsEdit
                     modalStates={UpdatemodalStates}
                     setModalStates={() => {
                       setUpdateModalStates(false);
@@ -318,7 +474,7 @@ const CallLogsList = () => {
                   />
                 ) : (
                   ""
-                )} */}
+                )}
                 <ToastContainer closeButton={false} limit={1} />
               </CardBody>
             </Card>
