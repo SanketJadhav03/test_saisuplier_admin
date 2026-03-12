@@ -116,6 +116,8 @@ import StagesView from "../pages/Stages/StagesView";
 import SourceView from "../pages/Source/SourceView";
 import ReferenceView from "../pages/Reference/ReferenceView";
 import PriorityView from "../pages/Priority/PriorityView";
+import LeadView from "../pages/Lead/LeadView";
+import LeadAdd from "../pages/Lead/LeadAdd";
 
 const authProtectedRoutes = [
   // Unauthorized
@@ -151,6 +153,8 @@ const authProtectedRoutes = [
   { path: "/tax-add", component: <TaxAdd /> },
   
   // 
+  { path: "/leads-list", component: <LeadView /> },
+  { path: "/add-leads", component: <LeadAdd /> },
   { path: "/source-list", component: <SourceView /> },
   { path: "/reference-list", component: <ReferenceView /> },
   { path: "/priority-list", component: <PriorityView /> },

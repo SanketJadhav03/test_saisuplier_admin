@@ -120,6 +120,12 @@ const Navdata = () => {
       subItems: [
       
         {
+          id: "Leads",
+          label: "Leads",
+          link: "/leads-list",
+          parentId: "apps",
+        },
+        {
           id: "Source",
           label: "Source",
           link: "/source-list",
