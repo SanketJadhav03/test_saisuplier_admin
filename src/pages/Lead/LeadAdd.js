@@ -24,7 +24,7 @@ import AuthUser from "../../helpers/Authuser";
 import { useRef } from "react";
 import ProductAdd from "../Products/ProductAdd";
 import ProductUpdate from "../Products/ProductUpdate";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import ScrollToBottom from "react-scroll-to-bottom";
 import { API_URL } from "../../helpers/url_helper";
 import UserAddModal from "../Users/UserAddModal";
@@ -37,10 +37,7 @@ const LeadAdd = (props) => {
   const [priorities, setPriorities] = useState([]);
   const [references, setReferences] = useState([]);
   const [customerDetails, setCustomers] = useState({});
-  const [selectPriceOption, setPriceOption] = useState({
-    value: "price_sales",
-    label: "Sale Price",
-  });
+  const { stages_id } = useParams();
   // Helper to format Date objects to YYYY-MM-DD
   const getFormattedDate = (date) => {
     if (!date) return "";
@@ -54,6 +51,24 @@ const LeadAdd = (props) => {
 
     return [year, month, day].join("-");
   };
+  const [MasterArray, SetMasterArray] = useState({
+    user_id: user.user_user_id, // Logged in employee ID
+    customer_id: null,
+    inquiry_date: getFormattedDate(new Date()),
+    followup_date: getFormattedDate(new Date()),
+    priority_id: 1,
+    assignto_id: 1,
+    stage_id: stages_id?stages_id:1,
+    source_id: 1,
+    referenceby_id: 1,
+    feedback: "",
+  });
+  const [selectPriceOption, setPriceOption] = useState({
+    value: "price_sales",
+    label: "Sale Price",
+  });
+  // 2. STAGE_ID SYNC (Added Number check and functional update)
+ 
   const redireaction = useNavigate();
   const [customerModal, setCustomerModal] = useState(false);
   const [startDate, setStartDate] = useState(
@@ -71,18 +86,6 @@ const LeadAdd = (props) => {
       year: "numeric",
     }),
   );
-  const [MasterArray, SetMasterArray] = useState({
-    user_id: 1, // Logged in employee ID
-    customer_id: null,
-    inquiry_date: getFormattedDate(new Date()),
-    followup_date: getFormattedDate(new Date()),
-    stage_id: 1, // Default stage (e.g., New)
-    priority_id: 1,
-    assignto_id: 1,
-    source_id: 1,
-    referenceby_id: 1,
-    feedback: "",
-  });
   useEffect(() => {
     const fetchLeadMetadata = async () => {
       try {
@@ -510,7 +513,7 @@ const LeadAdd = (props) => {
     Total_Net,
     purchase_payment_terms,
   ]);
-
+  const { user } = AuthUser();
   const prepareDataForAPI = () => {
     // Convert Data_View products to the specific string format for lead_product_id
     // Format: "product_id(qty),product_id(qty)"
@@ -519,7 +522,7 @@ const LeadAdd = (props) => {
     ).join(",");
 
     const finalLeadData = {
-      user_id: 1, // Should come from your AuthUser context
+      user_id: user.user.user_id, // Should come from your AuthUser context
       customer_id: customerDetails?.user_id,
       inquiry_date: MasterArray.inquiry_date,
       followup_date: MasterArray.followup_date,
@@ -722,7 +725,7 @@ const LeadAdd = (props) => {
                                     onChange={(e) => {
                                       SetMasterArray({
                                         ...MasterArray,
-                                        lead_assign_to: e.value,
+                                        assignto_id: e.value,
                                       });
                                     }}
                                     options={
@@ -783,7 +786,7 @@ const LeadAdd = (props) => {
                               stages
                                 .map((p) => ({ value: p.id, label: p.name }))
                                 .find(
-                                  (opt) => opt.value === MasterArray.stage_id,
+                                  (opt) => opt.value == MasterArray.stage_id,
                                 ) || null
                             }
                             // Optional: Add a clean class for styling
@@ -977,7 +980,7 @@ const LeadAdd = (props) => {
                             Save Bill
                           </button>
                           <Link
-                            to={"/invoice"}
+                            to={"/leads-list"}
                             className="btn btn-danger  mx-1"
                           >
                             Cancel Bill
@@ -996,12 +999,7 @@ const LeadAdd = (props) => {
                                   <th>Category</th>
                                   <th>Item Name</th>
                                   <th>Qty</th>
-                                  <th>Rate</th>
-                                  <th>Taxable</th>
-                                  <th>Gst %</th>
-                                  <th>Gst Value</th>
-                                  <th>Total</th>
-                                  <th>Action</th>
+                                  
                                 </tr>
                               </thead>
                               <tbody>
@@ -1054,68 +1052,7 @@ const LeadAdd = (props) => {
                                         </button>
                                       </div>
                                     </td>
-                                    <td className="d-flex justify-content-center align-items-center">
-                                      <input
-                                        type="number"
-                                        className="form-control fs-14 fw-bold"
-                                        placeholder="Enter Value"
-                                        value={
-                                          item[selectPriceOption.value] || ""
-                                        }
-                                        onChange={(e) =>
-                                          ChangInput(
-                                            e,
-                                            index,
-                                            selectPriceOption.value,
-                                          )
-                                        }
-                                        step="0.01" // allows decimals
-                                        min="0" // no negative
-                                        style={{ width: "170px" }}
-                                      />
-                                    </td>
-
-                                    <td>
-                                      {(
-                                        Number(item[selectPriceOption.value]) *
-                                        Number(item.qty)
-                                      )?.toFixed(2)}
-                                    </td>
-                                    <td>{Number(item.tax_percentage)} %</td>
-                                    <td>
-                                      {(
-                                        (Number(item[selectPriceOption.value]) *
-                                          Number(item.qty) *
-                                          Number(item.tax_percentage)) /
-                                        100
-                                      )?.toFixed(2)}
-                                    </td>
-                                    <td>
-                                      {(
-                                        (Number(item[selectPriceOption.value]) *
-                                          Number(item.qty) *
-                                          Number(item.tax_percentage)) /
-                                          100 +
-                                        Number(item[selectPriceOption.value]) *
-                                          Number(item.qty)
-                                      )?.toFixed(2)}
-                                    </td>
-                                    <td>
-                                      <div className="d-flex justify-content-around">
-                                        <span
-                                          className="text-danger d-inline-block remove-item-btn cursor-pointer"
-                                          onClick={() => EditUpdate(index)}
-                                        >
-                                          <i className="ri-edit-line fs-18 text-primary"></i>
-                                        </span>
-                                        <span
-                                          className="text-danger d-inline-block remove-item-btn cursor-pointer"
-                                          onClick={() => Deleted(index)}
-                                        >
-                                          <i className="ri-delete-bin-5-fill fs-16"></i>
-                                        </span>
-                                      </div>
-                                    </td>
+                                    
                                   </tr>
                                 ))}
                               </tbody>
