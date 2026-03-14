@@ -21,10 +21,10 @@ import {
 import AuthUser from "../../helpers/Authuser";
 import { toast } from "react-toastify";
 import Select from "react-select";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 const LeadProView = () => {
   const { http } = AuthUser();
-
+  const navigate = useNavigate();
   // 1. States for Data
   const [leads, setLeads] = useState([]);
   const [stages, setStages] = useState([]);
@@ -281,91 +281,170 @@ const LeadProView = () => {
                 />
               </Col>
               <Col lg={2}>
-                <Link to={"/add-leads"} className="btn btn-primary rounded-3 shadow-sm px-4">
+                <Link
+                  to={"/add-leads"}
+                  className="btn btn-primary rounded-3 shadow-sm px-4"
+                >
                   <i className="ri-add-line me-1 fw-bold"></i> Add Lead
                 </Link>
               </Col>
             </Row>
           </CardBody>
         </Card>
-       <div className="bg-white rounded-4 shadow-sm p-4 border border-light-subtle">
-  {loading ? (
-    <div className="text-center py-5">
-      <Spinner color="primary" type="grow" />
-      <p className="text-muted mt-2 fw-medium">Loading your leads...</p>
-    </div>
-  ) : (
-    <div className="kanban-wrapper d-flex overflow-auto pb-4 gap-4">
-      {stages.map((stage) => (
-        <div key={stage.id} className="kanban-column shadow-sm">
-          {/* Column Header - Fixed */}
-          <div className="kanban-header d-flex align-items-center justify-content-between">
-            <div className="d-flex align-items-center">
-              <div className="stage-indicator" />
-              <h6 className="column-title mb-0">{stage.name}</h6>
-              <span className="count-badge">
-                {leads.filter((l) => l.stage_id === stage.id).length}
-              </span>
+        <div className="bg-white rounded-4 shadow-sm p-4 border border-light-subtle">
+          {loading ? (
+            <div className="text-center py-5">
+              <Spinner color="primary" type="grow" />
+              <p className="text-muted mt-2 fw-medium">Loading your leads...</p>
             </div>
-            <button className="btn btn-icon-sm">
-              <i className="ri-more-2-fill"></i>
-            </button>
-          </div>
+          ) : (
+            <div className="kanban-wrapper d-flex overflow-auto pb-4 gap-4 px-2">
+              {stages.map((stage) => {
+                // Determine the theme color from the stage object
+                const themeColor = stage.color || "primary";
+                const columnLeads = leads.filter(
+                  (l) => l.stage_id === stage.id,
+                );
 
-          {/* Scrollable Card Container */}
-          <div className="kanban-card-container">
-            {leads
-              .filter((l) => l.stage_id === stage.id)
-              .map((lead) => (
-                <Card key={lead.lead_id} className="lead-card border-0 shadow-sm mb-3">
-                  <CardBody className="p-3">
-                    <div className="d-flex justify-content-between align-items-start mb-2">
-                      <Badge className={`priority-badge ${lead.priority_name?.toLowerCase() || 'normal'}`}>
-                        {lead.priority_name || "Normal"}
-                      </Badge>
+                return (
+                  <div
+                    key={stage.id}
+                    className="kanban-column shadow-sm bg-light-subtle rounded-3"
+                    style={{ borderTop: `4px solid var(--vz-${themeColor})` }} // Velzon dynamic color variable
+                  >
+                    {/* Column Header */}
+                    <div className="kanban-header d-flex align-items-center justify-content-between p-3 bg-white rounded-top">
+                      <div className="d-flex align-items-center gap-2">
+                        <h6 className="column-title mb-0 fw-bold text-uppercase fs-12 tracking-wider">
+                          {stage.name}
+                        </h6>
+                        <Badge pill color={themeColor} className="ms-1">
+                          {columnLeads.length}
+                        </Badge>
+                      </div>
                       <UncontrolledDropdown>
-                        <DropdownToggle tag="span" className="text-muted cursor-pointer px-1">
-                          <i className="ri-more-fill"></i>
+                        <DropdownToggle
+                          tag="button"
+                          className="btn btn-ghost-muted btn-sm p-0 shadow-none"
+                        >
+                          <i className="ri-more-2-fill fs-16"></i>
                         </DropdownToggle>
-                        <DropdownMenu end className="border-0 shadow-lg">
-                          <DropdownItem><i className="ri-eye-line me-2"></i>View</DropdownItem>
-                          <DropdownItem><i className="ri-pencil-line me-2"></i>Edit</DropdownItem>
-                          <DropdownItem className="text-danger"><i className="ri-delete-bin-line me-2"></i>Delete</DropdownItem>
+                        <DropdownMenu end>
+                          <DropdownItem>
+                            <i className="ri-settings-4-line me-2"></i>Stage
+                            Settings
+                          </DropdownItem>
+                          <DropdownItem className="text-danger">
+                            <i className="ri-delete-bin-line me-2"></i>Archive
+                            All
+                          </DropdownItem>
                         </DropdownMenu>
                       </UncontrolledDropdown>
                     </div>
 
-                    <h6 className="lead-name mb-1">{lead.customer_name}</h6>
-                    <p className="lead-phone mb-3">
-                      <i className="ri-phone-line me-1 text-primary"></i> {lead.customer_mobile}
-                    </p>
+                    {/* Scrollable Card Container */}
+                    <div
+                      className="kanban-card-container px-3 pt-3"
+                      style={{ minHeight: "150px" }}
+                    >
+                      {columnLeads.map((lead) => (
+                        <Card
+                          key={lead.lead_id}
+                          className="lead-card border-0 shadow-sm mb-3 card-animate" // card-animate adds the Velzon hover effect
+                        >
+                          <CardBody className="p-3">
+                            <div className="d-flex justify-content-between align-items-start mb-2">
+                              <Badge
+                                color={
+                                  lead.priority_name === "High"
+                                    ? "danger"
+                                    : lead.priority_name === "Medium"
+                                      ? "warning"
+                                      : "info"
+                                }
+                                className="text-uppercase px-2 py-1"
+                              >
+                                {lead.priority_name || "Normal"}
+                              </Badge>
 
-                    <div className="card-footer-meta pt-2 border-top d-flex justify-content-between align-items-center">
-                      <span className="source-tag">{lead.source_name || "Direct"}</span>
-                      <span className="date-tag">
-                         {new Date(lead.inquiry_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
-                      </span>
+                              <UncontrolledDropdown>
+                                <DropdownToggle
+                                  tag="span"
+                                  className="text-muted cursor-pointer"
+                                >
+                                  <i className="ri-more-fill"></i>
+                                </DropdownToggle>
+                                <DropdownMenu
+                                  end
+                                  className="border-0 shadow-lg"
+                                >
+                                  <DropdownItem
+                                    onClick={() =>
+                                      navigate(`/lead-details/${lead.lead_id}`)
+                                    }
+                                  >
+                                    <i className="ri-eye-line me-2 text-primary"></i>
+                                    View Detail
+                                  </DropdownItem>
+                                  <DropdownItem>
+                                    <i className="ri-pencil-line me-2 text-info"></i>
+                                    Edit
+                                  </DropdownItem>
+                                  <DropdownItem className="text-danger">
+                                    <i className="ri-delete-bin-line me-2"></i>
+                                    Delete
+                                  </DropdownItem>
+                                </DropdownMenu>
+                              </UncontrolledDropdown>
+                            </div>
+
+                            <h6 className="lead-name mb-1 fs-14 fw-semibold text-dark">
+                              {lead.customer_name}
+                            </h6>
+
+                            <p className="lead-phone mb-3 fs-13 text-muted">
+                              <i className="ri-phone-fill me-1 text-success"></i>
+                              {lead.customer_mobile}
+                            </p>
+
+                            <div className="pt-2 border-top border-top-dashed d-flex justify-content-between align-items-center">
+                              <div className="d-flex align-items-center">
+                                <span className="text-muted fs-11">
+                                  {lead.source_name || "Direct"}
+                                </span>
+                              </div>
+                              <span className="badge bg-light text-body border fs-11">
+                                <i className="ri-calendar-event-line me-1 align-bottom"></i>
+                                {new Date(lead.inquiry_date).toLocaleDateString(
+                                  "en-GB",
+                                  { day: "2-digit", month: "short" },
+                                )}
+                              </span>
+                            </div>
+                          </CardBody>
+                        </Card>
+                      ))}
                     </div>
-                  </CardBody>
-                </Card>
-              ))}
-          </div>
 
-          {/* Fixed Footer Button */}
-          <div className="p-2 mt-auto">
-            <Link to={"/add-leads"} className="btn btn-add-task w-100 py-2">
-              <i className="ri-add-circle-line me-1"></i> Add Lead
-            </Link>
-          </div>
+                    {/* Fixed Footer Button */}
+                    <div className="p-3 mt-auto">
+                      <Link
+                        to={`/add-leads/${stage.id}`}
+                        className={`btn btn-soft-${themeColor} w-100 py-2 border-dashed d-flex align-items-center justify-content-center`}
+                      >
+                        <i className="ri-add-line me-1 fs-16"></i> Add Lead
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
-      ))}
-    </div>
-  )}
-</div>
       </Container>
 
       {/* Internal Styles */}
-     <style>{`
+      <style>{`
   .kanban-wrapper::-webkit-scrollbar { height: 7px; }
   .kanban-wrapper::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
 

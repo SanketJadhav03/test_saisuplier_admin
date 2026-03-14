@@ -118,6 +118,7 @@ import ReferenceView from "../pages/Reference/ReferenceView";
 import PriorityView from "../pages/Priority/PriorityView";
 import LeadView from "../pages/Lead/LeadView";
 import LeadAdd from "../pages/Lead/LeadAdd";
+import LeadDetailView from "../pages/Lead/LeadDetailView";
 
 const authProtectedRoutes = [
   // Unauthorized
@@ -154,7 +155,9 @@ const authProtectedRoutes = [
   
   // 
   { path: "/leads-list", component: <LeadView /> },
-  { path: "/add-leads", component: <LeadAdd /> },
+  { path: "/add-leads/", component: <LeadAdd /> },
+  { path: "/add-leads/:stages_id", component: <LeadAdd /> },
+  { path: "/lead-details/:id", component: <LeadDetailView /> },
   { path: "/source-list", component: <SourceView /> },
   { path: "/reference-list", component: <ReferenceView /> },
   { path: "/priority-list", component: <PriorityView /> },

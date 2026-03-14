@@ -7,6 +7,7 @@ import {
   CardHeader,
   Nav,
   Row,
+  Badge,
 } from "reactstrap";
 import { toast, ToastContainer } from "react-toastify";
 import DeleteModal from "../../Components/Common/DeleteModal";
@@ -178,6 +179,13 @@ const StagesView = () => {
                           >
                             Stages Name
                           </th>
+                          <th
+                            title="Toggle SortBy"
+                            style={{ cursor: "pointer" }}
+                          >
+                            Color
+                          </th>
+                         
                           <th>Action</th>
                         </tr>
                       </thead>
@@ -193,6 +201,10 @@ const StagesView = () => {
                               </a>
                             </td>
                             <td>{data.name}</td>
+                            <td>
+                          
+                              <div className={`btn btn-${data.color}`}></div>
+                            </td>
                             <td>
                               <ul className="list-inline hstack gap-2 mb-0">
                                 <li className="list-inline-item edit">
