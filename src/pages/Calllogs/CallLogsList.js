@@ -20,6 +20,7 @@ import D_img from "../D_img";
 
 const CallLogsList = () => {
   const [modalStates, setModalStates] = useState(false);
+  const [Data, SetData] = useState([]);
   const [UpdatemodalStates, setUpdateModalStates] = useState(false);
   const { http } = AuthUser();
   const [counts, Setcounts] = useState(1);
@@ -119,7 +120,8 @@ const CallLogsList = () => {
     http
       .get(`/callLog/list`)
       .then(function (response) {
-        SetCalllog([...response.data.data]);
+        SetCalllog([...callLog, ...response.data.data]);
+        SetData(callLog);
         console.log(callLog);
         SetPages(Pages + 1);
         if (response.data.length === 0) {
@@ -135,6 +137,21 @@ const CallLogsList = () => {
   const fetchData = () => {
     Setcounts(counts + 1);
   };
+  const Filter_data = () => {
+    http
+      .post(`/callLog/filter/data`, Filter_Data)
+      .then(function (response) {
+        SetData(response.data);
+        SetNoMore(false);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  };
+  useEffect(() => {
+    Filter_data();
+  }, [Filter_Data.start_date, Filter_Data.end_date]);
+
   //   Delete Aleart
   const [deleteModal, setDeleteModal] = useState(false);
   const [ID, SetID] = useState();
@@ -211,102 +228,102 @@ const CallLogsList = () => {
           <Col lg={12}>
             <Card>
               <CardHeader className="card-header border-0">
-                <Row className="align-items-center gy-3">
-                  <h3 className="text-center fw-bold mb-0">Call Logs</h3>
-                  <div className="col-8 btn-group flex-wrap gap-2">
-                    {filters.map((item) => (
-                      <button
-                        key={item.value}
-                        className={`btn btn-sm rounded-pill ${
-                          activeFilter === item.value
-                            ? "btn-dark  text-white"
-                            : "btn-outline-dark"
-                        }`}
-                        onClick={() => handleDateFilter(item.value)}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                  </div>
-                </Row>
-                <Row className="align-items-center gy-3">
-                  <div className="col-sm">
-                    <h5 className="card-title mb-0">Call Logs</h5>
-                  </div>
-                  <div className="col-sm-auto">
-                    <div className="d-flex gap-3 flex-wrap align-items-end">
-                      {/* Start Date */}
-                      <div>
-                        <div className="fw-bold mb-1">Start     Date</div>
-                        <Flatpickr
-                          className="form-control"
-                          style={{ width: "140px" }}
-                          options={{
-                            dateFormat: "d/m/Y",
-                            defaultDate: "today",
-                          }}
-                          value={Filter_Data.start_date}
-                          onChange={(selectedDates) => {
-                            if (!selectedDates.length) return;
+                <Row className="align-items-center mb-3">
+                  <Col>
+                    <h4 className="fw-bold mb-0">📞 Call Logs</h4>
+                  </Col>
 
-                            const d = selectedDates[0];
-                            const formattedDate = `${d.getDate().toString().padStart(2, "0")}/${(
-                              d.getMonth() + 1
-                            )
-                              .toString()
-                              .padStart(2, "0")}/${d.getFullYear()}`;
-
-                            SetFilter_data({
-                              ...Filter_Data,
-                              start_date: formattedDate,
-                            });
-                          }}
-                        />
-                      </div>
-
-                      {/* End Date */}
-                      <div>
-                        <div className="fw-bold mb-1">End Date</div>
-                        <Flatpickr
-                          className="form-control"
-                          style={{ width: "140px" }}
-                          options={{
-                            dateFormat: "d/m/Y",
-                            defaultDate: "today",
-                          }}
-                          value={Filter_Data.end_date}
-                          onChange={(selectedDates) => {
-                            if (!selectedDates.length) return;
-
-                            const d = selectedDates[0];
-                            const formattedDate = `${d.getDate().toString().padStart(2, "0")}/${(
-                              d.getMonth() + 1
-                            )
-                              .toString()
-                              .padStart(2, "0")}/${d.getFullYear()}`;
-
-                            SetFilter_data({
-                              ...Filter_Data,
-                              end_date: formattedDate,
-                            });
-                          }}
-                        />
-                      </div>
-
-                      {/* Search */}
-                      <div style={{ minWidth: "260px" }}>
-                        <div className="fw-bold mb-1">Search Area</div>
-                        <input
-                          type="search"
-                          placeholder="Search by Name / Mobile / Call Type"
-                          className="form-control fw-bold rounded"
-                          onChange={(e) =>
-                            setSearchQuery(e.target.value.toLowerCase())
-                          }
-                        />
-                      </div>
+                  {/* Filter Buttons */}
+                  <Col xs="auto">
+                    <div className="btn-group flex-wrap gap-2">
+                      {filters.map((item) => (
+                        <button
+                          key={item.value}
+                          className={`btn btn-sm rounded-pill px-3 ${
+                            activeFilter === item.value
+                              ? "btn-dark text-white"
+                              : "btn-outline-dark"
+                          }`}
+                          onClick={() => handleDateFilter(item.value)}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
                     </div>
-                  </div>
+                  </Col>
+                </Row>
+                {/* Filters Section */}
+                <Row className="g-3 align-items-end">
+                  {/* Start Date */}
+                  <Col md={3}>
+                    <label className="form-label fw-semibold">Start Date</label>
+                    <Flatpickr
+                      className="form-control"
+                      options={{
+                        dateFormat: "d/m/Y",
+                        defaultDate: "today",
+                      }}
+                      value={Filter_Data.start_date}
+                      onChange={(selectedDates) => {
+                        if (!selectedDates.length) return;
+
+                        const d = selectedDates[0];
+                        const formattedDate = `${d
+                          .getDate()
+                          .toString()
+                          .padStart(2, "0")}/${(d.getMonth() + 1)
+                          .toString()
+                          .padStart(2, "0")}/${d.getFullYear()}`;
+
+                        SetFilter_data({
+                          ...Filter_Data,
+                          start_date: formattedDate,
+                        });
+                      }}
+                    />
+                  </Col>
+
+                  {/* End Date */}
+                  <Col md={3}>
+                    <label className="form-label fw-semibold">End Date</label>
+                    <Flatpickr
+                      className="form-control"
+                      options={{
+                        dateFormat: "d/m/Y",
+                        defaultDate: "today",
+                      }}
+                      value={Filter_Data.end_date}
+                      onChange={(selectedDates) => {
+                        if (!selectedDates.length) return;
+
+                        const d = selectedDates[0];
+                        const formattedDate = `${d
+                          .getDate()
+                          .toString()
+                          .padStart(2, "0")}/${(d.getMonth() + 1)
+                          .toString()
+                          .padStart(2, "0")}/${d.getFullYear()}`;
+
+                        SetFilter_data({
+                          ...Filter_Data,
+                          end_date: formattedDate,
+                        });
+                      }}
+                    />
+                  </Col>
+
+                  {/* Search */}
+                  <Col md={6}>
+                    <label className="form-label fw-semibold">Search</label>
+                    <input
+                      type="search"
+                      placeholder="Search by Name / Mobile / Call Type"
+                      className="form-control rounded"
+                      onChange={(e) =>
+                        setSearchQuery(e.target.value.toLowerCase())
+                      }
+                    />
+                  </Col>
                 </Row>
               </CardHeader>
 
@@ -413,7 +430,9 @@ const CallLogsList = () => {
 
                             <td>{item.number}</td>
                             <td>{item.type}</td>
-                            <td>{item.date}</td>
+                            <td>
+                              {new Date(item.date).toLocaleDateString("en-GB")}
+                            </td>
                             <td>{item.time}</td>
                             <td>{item.duration}</td>
                             <td>{item.createdAt}</td>
@@ -434,9 +453,7 @@ const CallLogsList = () => {
                                 <li className="list-inline-item">
                                   {item.category_id !== 1 && (
                                     <button
-                                      onClick={() =>
-                                        onClickDelete(item.id)
-                                      }
+                                      onClick={() => onClickDelete(item.id)}
                                       className="text-danger d-inline-block remove-item-btn border-0 bg-transparent"
                                     >
                                       <i className="ri-delete-bin-5-fill fs-16" />
