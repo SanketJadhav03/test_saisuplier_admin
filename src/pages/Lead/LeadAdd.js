@@ -37,6 +37,7 @@ const LeadAdd = (props) => {
   const [priorities, setPriorities] = useState([]);
   const [references, setReferences] = useState([]);
   const [customerDetails, setCustomers] = useState({});
+    const { http,user} = AuthUser();
   const { stages_id } = useParams();
   // Helper to format Date objects to YYYY-MM-DD
   const getFormattedDate = (date) => {
@@ -52,7 +53,7 @@ const LeadAdd = (props) => {
     return [year, month, day].join("-");
   };
   const [MasterArray, SetMasterArray] = useState({
-    user_id: user.user_user_id, // Logged in employee ID
+    user_id: user.user.user_id, // Logged in employee ID
     customer_id: null,
     inquiry_date: getFormattedDate(new Date()),
     followup_date: getFormattedDate(new Date()),
@@ -119,7 +120,7 @@ const LeadAdd = (props) => {
   const [isProductLoading, setIsProductLoading] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
-  const { http } = AuthUser();
+
   const [BasicInformtion, SetBasicInformtion] = useState([]);
   const [BasiceINF, SetBasiceINF] = useState(1);
 
@@ -513,7 +514,6 @@ const LeadAdd = (props) => {
     Total_Net,
     purchase_payment_terms,
   ]);
-  const { user } = AuthUser();
   const prepareDataForAPI = () => {
     // Convert Data_View products to the specific string format for lead_product_id
     // Format: "product_id(qty),product_id(qty)"
