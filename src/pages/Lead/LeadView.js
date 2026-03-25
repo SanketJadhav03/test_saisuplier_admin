@@ -159,7 +159,7 @@ const LeadProView = () => {
           <CardBody className="p-3">
             <div className="d-flex align-items-center justify-content-center mb-4">
               <div className="text-center">
-                <h3 className="fw-bold mb-0 text-dark">All Leads</h3>
+                <h3 className="fw-bold mb-0 text-dark">Search </h3>
               </div>
             </div>
             <div className="d-flex align-items-center justify-content-center">

@@ -114,6 +114,7 @@ const CallLogsList = () => {
       end_date: formatDate(endDate),
     });
   };
+
   useEffect(() => {
     document.title = "CallLogs | Saisupplier Admin";
 
@@ -138,11 +139,13 @@ const CallLogsList = () => {
     Setcounts(counts + 1);
   };
   const Filter_data = () => {
+    console.log(Filter_Data);
     http
       .post(`/callLog/filter/data`, Filter_Data)
       .then(function (response) {
-        SetData(response.data);
+        SetCalllog(response.data.data)
         SetNoMore(false);
+        console.log(callLog);
       })
       .catch(function (error) {
         console.log(error);
@@ -435,8 +438,30 @@ const CallLogsList = () => {
                             </td>
                             <td>{item.time}</td>
                             <td>{item.duration}</td>
-                            <td>{item.createdAt}</td>
-                            <td>{item.updatedAt}</td>
+                            <td>
+                              {new Date(item.createdAt).toLocaleString(
+                                "en-IN",
+                                {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                },
+                              )}
+                            </td>
+                            <td>
+                              {new Date(item.updatedAt).toLocaleString(
+                                "en-IN",
+                                {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                },
+                              )}
+                            </td>
                             <td>{item.full_name}</td>
 
                             <td>
@@ -451,7 +476,7 @@ const CallLogsList = () => {
                                 </li>
 
                                 <li className="list-inline-item">
-                                  {item.category_id !== 1 && (
+                                  {item.id !== 1 && (
                                     <button
                                       onClick={() => onClickDelete(item.id)}
                                       className="text-danger d-inline-block remove-item-btn border-0 bg-transparent"
