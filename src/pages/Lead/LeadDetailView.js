@@ -383,10 +383,17 @@ const LeadDetailView = () => {
                     </div>
                     <h6 className="fs-13 mb-1">Invoice</h6>
                     {leadData.lead_invoice_id ? (
-                      <button className="btn btn-link btn-sm p-0 fw-medium link-warning">
+                       <Link
+                        to={
+                          !leadData.lead_invoice_id
+                            ? `/quotation-edit/${leadData.lead_quotation_id}`
+                            : `/sale-edit/${leadData.lead_invoice_id}`
+                        }
+                        className="fw-medium link-primary"
+                      >
                         INV-{leadData.lead_invoice_id}{" "}
-                        <i className="ri-download-2-line align-middle ms-1"></i>
-                      </button>
+                        <i className="ri-external-link-line align-middle ms-1"></i>
+                      </Link>
                     ) : (
                       <span className="badge bg-light text-muted border fs-10">
                         Not Invoiced
