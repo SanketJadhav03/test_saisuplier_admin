@@ -14,42 +14,45 @@ const LabelPrint = (props) => {
   const [hasMoreUsers, setHasMoreUsers] = useState(true);
   const [addresses, setAddress] = useState([]);
 
-  useEffect(() => {
-    if (props.isOpen && props.id) {
-      http
-        .get(`/sale/invoice/${props.id}`)
-        .then(function (response) {
-          if (response.data) {
-            //console.log("response.data: ", response.data);
-            setChildData(response.data.Child || []);
-            setCustomer(response.data.customer || {});
-            setBusinessData(response.data.Business?.[0] || {});
-            setMasterData(response.data.Master?.[0] || {});
-            console.log(response.data.Master?.[0]);
-          }
-        })
-        .catch(function (error) {
-          console.log("Error fetching data:", error);
-        });
-    } else {
-      http
-        .get(`/addresses/${props?.user?.user_id}`)
-        .then((response) => {
-          const fetched = response.data || [];
+ useEffect(() => {
+  if (!props.isOpen) return;
 
-          const defaultUser = fetched[0];
-          setUsers(defaultUser);
-          setAddress(fetched);
-          setCustomer(props.user);
-          // console.log(defaultUser);
-          // console.log(fetched);
-        })
-        .catch((err) => {
-          console.error("Failed to fetch users", err);
-          setHasMoreUsers(false);
-        });
+  const fetchInvoice = async () => {
+    try {
+      const response = await http.get(`/sale/invoice/${props.id}`);
+      const data = response.data;
+
+      if (data) {
+        setChildData(data.Child || []);
+        setCustomer(data.customer || {});
+        setBusinessData(data.Business?.[0] || {});
+        setMasterData(data.Master?.[0] || {});
+      }
+    } catch (error) {
+      console.log("Error fetching data:", error);
     }
-  }, [props.id, props.user?.master_id, props.isOpen]);
+  };
+
+  const fetchAddresses = async () => {
+    try {
+      const response = await http.get(`/addresses/${props?.user?.user_id}`);
+      const fetched = response.data || [];
+
+      setUsers(fetched[0]);
+      setAddress(fetched);
+      setCustomer(props.user);
+    } catch (err) {
+      console.error("Failed to fetch users", err);
+      setHasMoreUsers(false);
+    }
+  };
+
+  if (props.id) {
+    fetchInvoice();
+  } else {
+    fetchAddresses();
+  }
+}, [props.id, props.user?.master_id, props.isOpen,http]);
 
   const stripHtml = (html = "") => {
     const temp = document.createElement("div");
@@ -182,7 +185,7 @@ const LabelPrint = (props) => {
     const total =
       parseFloat(itemsTotal.toFixed(2)) + otherCharges + transportCharges;
 
-    return total.toFixed(2);
+     return Math.ceil(total);
   };
 
   const codamount = calculateCodAmount(childData, masterData);
@@ -194,7 +197,7 @@ const LabelPrint = (props) => {
     // label print style for printing
     const pageStyle = `
       @page { 
-        size: ${orientation === "vertical" ? "75mm 100mm" : "100mm 75mm"}; 
+        size: ${orientation === "vertical" ? "100mm 150mm" : "100mm 75mm"}; 
         margin: 0; 
       }
       body { 
@@ -203,8 +206,8 @@ const LabelPrint = (props) => {
         background: white !important;
       }
       .label-box { 
-        width: ${orientation === "vertical" ? "75mm" : "100mm"}; 
-        height: ${orientation === "vertical" ? "100mm" : "75mm"}; 
+        width: ${orientation === "vertical" ? "100mm" : "100mm"}; 
+        height: ${orientation === "vertical" ? "150mm" : "75mm"}; 
         padding: 10px;
         box-sizing: border-box;
         background: white;
@@ -1146,7 +1149,7 @@ const LabelPrint = (props) => {
                             <div
                               className="codamount"
                               style={{
-                                fontSize: "16px",
+                                fontSize: "17px",
                                 fontWeight: "bold",
                                 color: "#000",
                                 backgroundColor: "#fff3cd",
