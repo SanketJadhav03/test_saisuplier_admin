@@ -318,7 +318,7 @@ const LeadDetailView = () => {
                     <h6 className="fs-13 mb-1">Purchase Order</h6>
                     {leadData.lead_purchase_id ? (
                       <Link
-                        to={`/purchase-edit/${leadData.lead_purchase_id}`}
+                        to={  !leadData.lead_quotation_id ? `/purchase-edit/${leadData.lead_purchase_id}` : `/quotation-edit/${leadData.lead_purchase_id}`}
                         className="fw-medium link-primary"
                       >
                         PO-{leadData.lead_purchase_id}{" "}
@@ -336,7 +336,7 @@ const LeadDetailView = () => {
                     <div className="avatar-sm mx-auto mb-2">
                       <div
                         className={`avatar-title rounded-3 fs-22 ${
-                          leadData.quotation_id
+                          leadData.lead_quotation_id
                             ? "bg-success-subtle text-success"
                             : "bg-light text-muted border border-dashed"
                         }`}
@@ -347,7 +347,7 @@ const LeadDetailView = () => {
                     <h6 className="fs-13 mb-1">Quotation</h6>
                        {leadData.lead_quotation_id ? (
                       <Link
-                        to={`/quotation-edit/${leadData.lead_quotation_id}`}
+                        to={!leadData.lead_invoice_id ?`/quotation-edit/${leadData.lead_quotation_id}`:`/sale-edit/${leadData.lead_invoice_id}`}
                         className="fw-medium link-primary"
                       >
                         PO-{leadData.lead_quotation_id}{" "}

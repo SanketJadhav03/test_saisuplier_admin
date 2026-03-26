@@ -129,8 +129,8 @@ const LeadProView = () => {
         startDate: filters.startDate,
         endDate: filters.endDate,
         // priority_id: filters.priorityId,
-      }); 
-      
+      });
+
       setLeads(response.data.data || []);
     } catch (err) {
       console.error("Leads fetch error:", err);
@@ -347,100 +347,104 @@ const LeadProView = () => {
                       className="kanban-card-container px-3 pt-3"
                       style={{ minHeight: "150px" }}
                     >
-                      {columnLeads.map((lead) => (
-                        <Card
-  key={lead.lead_id}
-  className="lead-card border-0 shadow-sm mb-3 card-animate"
-  style={{ borderLeft: `3px solid ${
-    lead.priority_name === "High" ? "#f06548" : 
-    lead.priority_name === "Medium" ? "#f7b84b" : "#299cdb"
-  }` }} // Subtle color strip on the left based on priority
->
-  <CardBody className="p-3">
-    <div className="d-flex justify-content-between align-items-start mb-3">
-      <div className="d-flex align-items-center gap-2">
-        {/* Priority Badge */}
-        <Badge
-          color={
-            lead.priority_name === "High" ? "danger" : 
-            lead.priority_name === "Medium" ? "warning" : "info"
-          }
-          className="rounded-pill px-2"
-        >
-          {lead.priority_name || "Normal"}
-        </Badge>
-
-        {/* Purchase Order Badge */}
-        {lead.lead_purchase_id && (
-          <Badge color="primary" className="text-uppercase border border-primary-subtle">
-            <i className="ri-shopping-cart-2-line me-1"></i>
-            PO-{lead.lead_purchase_id}
+                   {columnLeads.map((lead) => (
+  <Card
+    key={lead.lead_id}
+    className="lead-card border-0 shadow-sm mb-3 card-animate"
+    style={{
+      borderLeft: `3px solid ${
+        lead.priority_name === "High" ? "#f06548" : lead.priority_name === "Medium" ? "#f7b84b" : "#299cdb"
+      }`,
+    }}
+  >
+    <CardBody className="p-3">
+      {/* Header: Priority & Stage */}
+      <div className="d-flex justify-content-between align-items-start mb-3">
+        <div className="d-flex gap-2">
+          <Badge
+            color={lead.priority_name === "High" ? "danger" : lead.priority_name === "Medium" ? "warning" : "info"}
+            className="rounded-pill px-2"
+          >
+            {lead.priority_name || "Normal"}
           </Badge>
-        )}
+          <Badge color="soft-success" className="text-success border-0">
+            {lead.stage_name}
+          </Badge>
+        </div>
+
+        <UncontrolledDropdown>
+          <DropdownToggle tag="span" className="btn btn-soft-secondary btn-sm cursor-pointer">
+            <i className="ri-more-fill"></i>
+          </DropdownToggle>
+          <DropdownMenu end>
+            <DropdownItem onClick={() => navigate(`/lead-details/${lead.lead_id}`)}>
+              <i className="ri-eye-line me-2 align-bottom text-muted"></i> View Detail
+            </DropdownItem>
+            <DropdownItem onClick={() => navigate(`/update-leads/${lead.lead_id}`)}>
+              <i className="ri-pencil-line me-2 align-bottom text-muted"></i> Edit
+            </DropdownItem>
+          </DropdownMenu>
+        </UncontrolledDropdown>
       </div>
 
-      <UncontrolledDropdown>
-        <DropdownToggle tag="span" className="btn btn-soft-secondary btn-sm dropdown cursor-pointer">
-          <i className="ri-more-fill"></i>
-        </DropdownToggle>
-        <DropdownMenu end className="border-0 shadow-lg">
-          <DropdownItem onClick={() => navigate(`/lead-details/${lead.lead_id}`)}>
-            <i className="ri-eye-line me-2 align-bottom text-muted"></i> View Detail
-          </DropdownItem>
-          <DropdownItem onClick={() => navigate(`/update-leads/${lead.lead_id}`)}>
-            <i className="ri-pencil-line me-2 align-bottom text-muted"></i> Edit
-          </DropdownItem>
-          <DropdownItem divider />
-          <DropdownItem className="text-danger">
-            <i className="ri-delete-bin-line me-2 align-bottom"></i> Delete
-          </DropdownItem>
-        </DropdownMenu>
-      </UncontrolledDropdown>
-    </div>
-
-    <div className="d-flex align-items-center mb-3">
-      {/* Avatar Icon */}
-      <div className="flex-shrink-0 avatar-xs me-2">
-        <div className="avatar-title bg-primary rounded-circle fs-13">
-          {lead.customer_name?.charAt(0) || "C"}
+      {/* Customer Name */}
+      <div className="mb-3">
+        <h6 className="fs-14 fw-bold mb-1 text-dark">{lead.customer_name}</h6>
+        <div className="text-muted fs-12">
+          <i className="ri-phone-line me-1 text-success"></i> {lead.customer_mobile}
         </div>
       </div>
-      <div className="flex-grow-1">
-        <h6 className="lead-name mb-0 fs-14 fw-bold text-dark">
-          {lead.customer_name}
-        </h6>
-        <p className="text-muted mb-0 fs-12">
-          <i className="ri-map-pin-2-line me-1 text-primary"></i>
-          {lead.source_name || "Direct Source"}
-        </p>
-      </div>
-    </div>
 
-    <div className="mb-3">
-      <div className="d-flex align-items-center text-muted fs-13 mb-1">
-        <i className="ri-phone-line me-2 text-success"></i>
-        <span>{lead.customer_mobile}</span>
-      </div>
-    </div>
+      {/* STAFF INFO SECTION (Created By & Assigned To) */}
+      <div className="bg-light rounded-3 p-2 mb-3 border border-light">
+        <div className="row g-0 align-items-center">
+          {/* Created By */}
+          <div className="col-5">
+            <p className="text-muted mb-1 fs-10 text-uppercase fw-medium">Created By</p>
+            <div className="d-flex align-items-center">
+              <div className="flex-grow-1">
+                <h6 className="mb-0 fs-12 fw-semibold text-truncate" style={{maxWidth: '80px'}}>
+                  {lead.created_employee_name || "System"}
+                </h6>
+              </div>
+            </div>
+          </div>
 
-    <div className="pt-3 border-top border-top-dashed d-flex justify-content-between align-items-center">
-      <div className="d-flex align-items-center text-muted fs-11">
-        <i className="ri-user-follow-line me-1"></i>
-        <span>ID: #{lead.lead_id}</span>
+          {/* Arrow Icon */}
+          <div className="col-2 text-center">
+            <i className="ri-arrow-right-s-line text-muted fs-16"></i>
+          </div>
+
+          {/* Assigned To */}
+          <div className="col-5 text-end">
+            <p className="text-muted mb-1 fs-10 text-uppercase fw-medium">Assigned To</p>
+            <div className="d-flex align-items-center justify-content-end">
+              <h6 className="mb-0 fs-12 fw-semibold text-primary text-truncate" style={{maxWidth: '80px'}}>
+                {lead.assigned_employee_name || "Pending"}
+              </h6>
+            </div>
+          </div>
+        </div>
       </div>
-      
-      <div className="text-muted fs-11 fw-medium">
-        <i className="ri-calendar-event-line me-1 align-bottom text-primary"></i>
-        {new Date(lead.inquiry_date).toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric"
-        })}
+
+      {/* Footer: Date & Source */}
+      <div className="pt-2 border-top border-top-dashed d-flex justify-content-between align-items-center text-muted fs-11">
+        <div>
+          <i className="ri-calendar-event-line me-1 text-primary"></i>
+          {new Date(lead.inquiry_date).toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          })}
+        </div>
+        <div className="fw-medium">
+          <i className="ri-global-line me-1 text-primary"></i>
+          {lead.source_name || "Direct"}
+        </div>
       </div>
-    </div>
-  </CardBody>
-</Card>
-                      ))}
+    </CardBody>
+  </Card>
+))}
                     </div>
 
                     {/* Fixed Footer Button */}
