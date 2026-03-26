@@ -119,6 +119,7 @@ import PriorityView from "../pages/Priority/PriorityView";
 import LeadView from "../pages/Lead/LeadView";
 import LeadAdd from "../pages/Lead/LeadAdd";
 import LeadDetailView from "../pages/Lead/LeadDetailView";
+import LeadUpdate from "../pages/Lead/LeadUpdate";
 
 const authProtectedRoutes = [
   // Unauthorized
@@ -157,6 +158,7 @@ const authProtectedRoutes = [
   { path: "/leads-list", component: <LeadView /> },
   { path: "/add-leads/", component: <LeadAdd /> },
   { path: "/add-leads/:stages_id", component: <LeadAdd /> },
+  { path: "/update-leads/:lead_id", component: <LeadUpdate /> },
   { path: "/lead-details/:id", component: <LeadDetailView /> },
   { path: "/source-list", component: <SourceView /> },
   { path: "/reference-list", component: <ReferenceView /> },
@@ -216,11 +218,13 @@ const authProtectedRoutes = [
   // ROLES AND PERMISSIONS ROUTES | ROLES
   { path: "/purchase-list", component: <PurchaseList /> },
   { path: "/purchase-create", component: <PurchaseCreate /> },
+  { path: "/purchase-create/:lead_id", component: <PurchaseCreate /> },
   { path: "/purchase-edit/:id", component: <PurchaseUpdate /> },
 
   // ROLES AND PERMISSIONS ROUTES | ROLES
   { path: "/quotation-list", component: <QuotationList /> },
   { path: "/quotation-create", component: <QuotationCreate /> },
+  { path: "/quotation-create/:lead_id", component: <QuotationCreate /> },
   { path: "/quotation-edit/:id", component: <QuotationUpdate status={2} /> },
   { path: "/generate-invoice/:id", component: <QuotationUpdate status={3} /> },
 
@@ -279,6 +283,7 @@ const authProtectedRoutes = [
   { path: "/franchise-sale-create", component: <FranchiseSaleAdd /> },
 
   { path: "/sale-create", component: <Sale_Create /> },
+  { path: "/sale-create/:lead_id", component: <Sale_Create /> },
 
   { path: "/sale-edit/:id", component: <Sale_Edit /> },
 

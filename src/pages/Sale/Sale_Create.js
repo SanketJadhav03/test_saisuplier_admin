@@ -26,7 +26,7 @@ import AuthUser from "../../helpers/Authuser";
 import { useRef } from "react";
 import ProductAdd from "../Products/ProductAdd";
 import ProductUpdate from "../Products/ProductUpdate";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import ScrollToBottom from "react-scroll-to-bottom";
 import SupplierAdd from "../Suppliers/SupplierAdd";
 import { API_URL } from "../../helpers/url_helper";
@@ -40,6 +40,7 @@ const Sale_Create = (props) => {
   const [shippingModal, setShippingModal] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState();
   const [customerDetails, setCustomers] = useState({});
+  const { lead_id } = useParams();
 
   const [selectPriceOption, setPriceOption] = useState({
     value: "price_sales",
@@ -108,30 +109,61 @@ const Sale_Create = (props) => {
   const [BasicInformtion, SetBasicInformtion] = useState([]);
   const [BasiceINF, SetBasiceINF] = useState(1);
 
-  useEffect(() => {
-    document.title = "Saisupplier Admin | Invoice Create";
+ useEffect(() => {
+    document.title = "Saisupplier Admin | Quotation Create";
+
+    const getLead = async () => {
+      if (!lead_id) return;
+
+      try {
+        const res = await http.get(`/lead/view/${lead_id}`);
+        const leadData = res.data.data;
+
+        // Update basic info
+        SetMasterArray((prev) => ({
+          ...prev,
+          purchase_customer_id: leadData.customer_id,
+        }));
+        setCustomers(leadData);
+
+        // Update the products array (This triggers the useMemo below)
+        // We use the spread operator [...] to ensure a new reference
+        SetData_View([...(leadData.products || [])]);
+      } catch (err) {
+        console.error("Lead Error:", err);
+      }
+    };
+
     http
       .get("/purchase/information")
       .then((response) => {
-        SetBasicInformtion(response.data);
+        const data = response.data;
 
-        if (!manageCategory) {
-          SetMasterArray({
-            ...MasterArray,
-            purchase_customer_id: response.data.customer[0].user_id,
-          });
-          setpurchase_payment_term(
-            response.data.payment_term[0].payment_term_id,
-          );
+        SetBasicInformtion(data);
+
+        if (data.payment_term?.length > 0) {
+          setpurchase_payment_term(data.payment_term[0].payment_term_id);
         }
 
-        setCustomers(response.data.customer[0]);
+        if (lead_id) {
+          console.log("Lead Found");
+          getLead(); // Call only if lead_id exists
+        } else if (!manageCategory && data.customer?.length > 0) {
+          SetMasterArray((prev) => ({
+            ...prev,
+            purchase_customer_id: data.customer[0].user_id,
+          }));
+          if (data.customer?.length > 0) {
+            setCustomers(data.customer[0]);
+          }
+        }
+
         SetCheck(true);
       })
       .catch((error) => {
-        console.log(error);
+        console.error("Purchase Info Error:", error);
       });
-  }, [BasiceINF]);
+  }, [lead_id, manageCategory])
 
   const [shippingCount, setShippingCount] = useState(1);
   const getAddressDetails = async (user_id) => {
@@ -567,6 +599,7 @@ const Sale_Create = (props) => {
     return {
       master: masterData,
       prodcut: productData,
+      lead_id: lead_id,
     };
   };
 
@@ -697,6 +730,7 @@ const Sale_Create = (props) => {
                               <div className="form-icon right rounded d-flex bg-primary align-items-center">
                                 <div className="w-100">
                                   <Select
+                                  isDisabled={lead_id ? true : false}
                                     id="contactnumberInput"
                                     className="fw-bold"
                                     value={selectValue}

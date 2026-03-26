@@ -28,7 +28,7 @@ import AuthUser from "../../helpers/Authuser";
 import { useRef } from "react";
 import ProductAdd from "../Products/ProductAdd";
 import ProductUpdate from "../Products/ProductUpdate";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import ScrollToBottom from "react-scroll-to-bottom";
 import SupplierAdd from "../Suppliers/SupplierAdd";
 import { API_URL, sendMail } from "../../helpers/url_helper";
@@ -40,7 +40,7 @@ const QuotationCreate = (props) => {
   const [shippingModal, setShippingModal] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState();
   const [customerDetails, setCustomers] = useState({});
-
+  const { lead_id } = useParams();
   const [otherCharges, setOtherCharges] = useState([]);
   const [selectOtherCharge, setOtherCharge] = useState({
     value: "0",
@@ -95,31 +95,61 @@ const QuotationCreate = (props) => {
   const { http, https } = AuthUser();
   const [BasicInformtion, SetBasicInformtion] = useState([]);
   const [BasiceINF, SetBasiceINF] = useState(1);
-
   useEffect(() => {
     document.title = "Saisupplier Admin | Quotation Create";
+
+    const getLead = async () => {
+      if (!lead_id) return;
+
+      try {
+        const res = await http.get(`/lead/view/${lead_id}`);
+        const leadData = res.data.data;
+
+        // Update basic info
+        SetMasterArray((prev) => ({
+          ...prev,
+          purchase_customer_id: leadData.customer_id,
+        }));
+        setCustomers(leadData);
+
+        // Update the products array (This triggers the useMemo below)
+        // We use the spread operator [...] to ensure a new reference
+        SetData_View([...(leadData.products || [])]);
+      } catch (err) {
+        console.error("Lead Error:", err);
+      }
+    };
+
     http
       .get("/purchase/information")
       .then((response) => {
-        SetBasicInformtion(response.data);
+        const data = response.data;
 
-        if (!manageCategory) {
-          SetMasterArray({
-            ...MasterArray,
-            purchase_customer_id: response.data.customer[0].user_id,
-          });
-          setpurchase_payment_term(
-            response.data.payment_term[0].payment_term_id,
-          );
+        SetBasicInformtion(data);
+
+        if (data.payment_term?.length > 0) {
+          setpurchase_payment_term(data.payment_term[0].payment_term_id);
         }
 
-        setCustomers(response.data.customer[0]);
+        if (lead_id) {
+          console.log("Lead Found");
+          getLead(); // Call only if lead_id exists
+        } else if (!manageCategory && data.customer?.length > 0) {
+          SetMasterArray((prev) => ({
+            ...prev,
+            purchase_customer_id: data.customer[0].user_id,
+          }));
+          if (data.customer?.length > 0) {
+            setCustomers(data.customer[0]);
+          }
+        }
+
         SetCheck(true);
       })
       .catch((error) => {
-        console.log(error);
+        console.error("Purchase Info Error:", error);
       });
-  }, [BasiceINF]);
+  }, [lead_id, manageCategory]);
   const [shippingCount, setShippingCount] = useState(1);
   const getAddressDetails = async (user_id) => {
     try {
@@ -527,6 +557,7 @@ const QuotationCreate = (props) => {
     // Prepare master data
     const masterData = {
       ...MasterArray,
+      purchase_total_qty: totalQty,
       other_charge_id: selectOtherCharge.value,
       master_address_id: selectedAddress?.shipping_id,
       selectPriceOption: selectPriceOption.value,
@@ -544,7 +575,7 @@ const QuotationCreate = (props) => {
       price_sales: item.price_sales,
       purchase_note: item.purchase_note,
       price_wholesaler: item.price_wholesaler,
-      dis_pre: item.dis_pre,
+      dis_pre: item.dis_pre || 0,
       product_weight: item.product_weight,
       dis_value: item.dis_value,
       basic_total: item.basic_total,
@@ -558,6 +589,7 @@ const QuotationCreate = (props) => {
     return {
       master: masterData,
       prodcut: productData,
+      lead_id: lead_id,
     };
   };
 
@@ -594,11 +626,9 @@ const QuotationCreate = (props) => {
       });
   }, []);
   const Onsubmit = () => {
-    
     if (Data_View.length) {
-      
       const finalData = prepareDataForAPI();
-       
+
       if (!finalData.master.master_address_id) {
         toast.warning("Please enter address before submitting");
         return; // stop further execution
@@ -711,6 +741,7 @@ const QuotationCreate = (props) => {
                                       });
                                       setCustomers(e.item);
                                     }}
+                                    isDisabled={lead_id ? true : false}
                                     options={
                                       BasicInformtion.customer &&
                                       BasicInformtion.customer.map(

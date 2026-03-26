@@ -39,7 +39,6 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 const QuoatationUpdate = (props) => {
   const [preview, setPreview] = useState(null); // holds the file URL
-
   const [shippingModal, setShippingModal] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState();
   const [customerDetails, setCustomers] = useState({});

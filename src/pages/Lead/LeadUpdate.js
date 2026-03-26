@@ -2,9 +2,7 @@ import React, { useEffect } from "react";
 import invalidAudio from "../../assets/audio/error.ogg";
 import validAudio from "../../assets/audio/audio_sucess.mp3";
 import { AsyncTypeahead } from "react-bootstrap-typeahead";
-import "./autoscroll.css";
-import { CKEditor } from "@ckeditor/ckeditor5-react";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import "../purchase/autoscroll.css";
 import {
   Card,
   CardBody,
@@ -16,7 +14,6 @@ import {
   Button,
   Row,
   Label,
-  Input,
   Table,
 } from "reactstrap";
 import { ToastContainer, toast } from "react-toastify";
@@ -29,31 +26,50 @@ import ProductAdd from "../Products/ProductAdd";
 import ProductUpdate from "../Products/ProductUpdate";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import ScrollToBottom from "react-scroll-to-bottom";
-import SupplierAdd from "../Suppliers/SupplierAdd";
 import { API_URL } from "../../helpers/url_helper";
 import UserAddModal from "../Users/UserAddModal";
-import ShippingModal from "./ShippingModal";
-import ContactPerson from "./ContactPersons";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
-const QuotationCreate = (props) => {
-  const [shippingModal, setShippingModal] = useState(false);
-  const [selectedAddress, setSelectedAddress] = useState();
+const LeadUpdate = (props) => {
+  const [stages, setStages] = useState([]);
+  const [sources, setSources] = useState([]);
+  const [priorities, setPriorities] = useState([]);
+  const [references, setReferences] = useState([]);
   const [customerDetails, setCustomers] = useState({});
+  const { lead_id } = useParams();
+  const { http, user } = AuthUser();
+  // Helper to format Date objects to YYYY-MM-DD
+  const getFormattedDate = (date) => {
+    if (!date) return "";
+    const d = new Date(date);
+    let month = "" + (d.getMonth() + 1);
+    let day = "" + d.getDate();
+    const year = d.getFullYear();
+
+    if (month.length < 2) month = "0" + month;
+    if (day.length < 2) day = "0" + day;
+
+    return [year, month, day].join("-");
+  };
+  const [MasterArray, SetMasterArray] = useState({
+    user_id: user.user.user_id, // Logged in employee ID
+    customer_id: null,
+    inquiry_date: getFormattedDate(new Date()),
+    followup_date: getFormattedDate(new Date()),
+    priority_id: 1,
+    assignto_id: 1,
+    stage_id: 1,
+    source_id: 1,
+    referenceby_id: 1,
+    feedback: "",
+  });
   const [selectPriceOption, setPriceOption] = useState({
     value: "price_sales",
     label: "Sale Price",
   });
-  const [Data_View, SetData_View] = useState([]);
-  const { lead_id } = useParams();
-  const [selectOtherCharge, setOtherCharge] = useState({
-    value: "0",
-    label: "Select Charge",
-  });
-  const priceOptions = [
-    { value: "price_sales", label: "Sale Price" },
-    { value: "price_wholesaler", label: "Wholesaler Price" },
-    { value: "price_distributor", label: "Distributor Price" },
-  ];
+  // 2. STAGE_ID SYNC (Added Number check and functional update)
+
   const redireaction = useNavigate();
   const [customerModal, setCustomerModal] = useState(false);
   const [startDate, setStartDate] = useState(
@@ -71,13 +87,25 @@ const QuotationCreate = (props) => {
       year: "numeric",
     }),
   );
-  const [daysCount, setDaysCount] = useState(0);
-  const [counts, SetCounts] = useState(0);
-  const [MasterArray, SetMasterArray] = useState({
-    purchase_notes: "",
-    purchase_status: 1,
-    purchase_start_date: startDate,
-  });
+  useEffect(() => {
+    const fetchLeadMetadata = async () => {
+      try {
+        const [stg, src, pri, ref] = await Promise.all([
+          http.get("/stages/list"),
+          http.get("/sources/list"),
+          http.get("/priority/list"),
+          http.get("/reference/list"),
+        ]);
+        setStages(stg.data.data || []);
+        setSources(src.data.data || []);
+        setPriorities(pri.data.data || []);
+        setReferences(ref.data.data || []);
+      } catch (err) {
+        console.error("Metadata fetch error:", err);
+      }
+    };
+    fetchLeadMetadata();
+  }, []);
   const [modal_standard, setmodal_standard] = useState(false);
   const [Product_Model, SetProduct_Model] = useState([]);
   const [modalStates, setModalStates] = useState(false);
@@ -85,42 +113,41 @@ const QuotationCreate = (props) => {
   const [Check, SetCheck] = useState(false);
   const [Disabed, SetDisabed] = useState(false);
   const [manageCategory, setManageCategory] = useState(0);
-  const [C_model, Set_C_model] = useState(false);
+
   const [categories, setCategories] = useState([]);
-  const [otherCharges, setOtherCharges] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [isCategoryLoading, setIsCategoryLoading] = useState(false);
   const [isProductLoading, setIsProductLoading] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
-  const { http, https } = AuthUser();
   const [BasicInformtion, SetBasicInformtion] = useState([]);
   const [BasiceINF, SetBasiceINF] = useState(1);
+
   useEffect(() => {
     document.title = "Saisupplier Admin | Purchase Create";
 
     const getLead = async () => {
-    if (!lead_id) return;
-    
-    try {
-      const res = await http.get(`/lead/view/${lead_id}`);
-      const leadData = res.data.data;
+      if (!lead_id) return;
 
-      // Update basic info
-      SetMasterArray((prev) => ({
-        ...prev,
-        purchase_customer_id: leadData.customer_id,
-      }));
-      setCustomers(leadData);
+      try {
+        const res = await http.get(`/lead/view/${lead_id}`);
+        const leadData = res.data.data;
 
-      // Update the products array (This triggers the useMemo below)
-      // We use the spread operator [...] to ensure a new reference
-      SetData_View([...(leadData.products || [])]);
-      
-    } catch (err) {
-      console.error("Lead Error:", err);
-    }
-  };
+        // Update basic info
+        SetMasterArray((prev) => ({
+          ...leadData,
+          assignto_id: leadData.assignto_id,
+          purchase_customer_id: leadData.customer_id,
+        }));
+        setCustomers(leadData);
+
+        // Update the products array (This triggers the useMemo below)
+        // We use the spread operator [...] to ensure a new reference
+        SetData_View([...(leadData.products || [])]);
+      } catch (err) {
+        console.error("Lead Error:", err);
+      }
+    };
 
     http
       .get("/purchase/information")
@@ -150,35 +177,22 @@ const QuotationCreate = (props) => {
       })
       .catch((error) => {
         console.error("Purchase Info Error:", error);
-      })
-  }, [lead_id, manageCategory]); // Removed BasiceINF to prevent infinite loops
-  const [shippingCount, setShippingCount] = useState(1);
-  const getAddressDetails = async (user_id) => {
-    const { data } = await http.get(`/addresses/${user_id}`);
+      });
+  }, [lead_id, manageCategory]);
 
-    if (data && data.length > 0) {
-      setShipping(data);
-
-      // find default address
-      const defaultAddr = data.find((addr) => addr.defaultAddress === 1);
-
-      if (defaultAddr) {
-        // store id
-        setSelectedAddress(defaultAddr); // store whole object
-      } else {
-        setSelectedAddress(data[0]);
-      }
-    } else {
-      setSelectedAddress({}); // store whole object
-
-      setShipping([]);
-    }
-  };
+  const [assignToUser, setAssignToUser] = useState([]);
   useEffect(() => {
-    if (MasterArray.purchase_customer_id) {
-      getAddressDetails(MasterArray.purchase_customer_id);
-    }
-  }, [shippingCount, MasterArray.purchase_customer_id]);
+    http
+      .get("/user/list")
+      .then((res) => {
+        setAssignToUser(res.data?.users || []);
+      })
+      .catch(function (err) {
+        console.log(err);
+      });
+  }, []);
+
+  // Fetch categories
   // Fetch categories
   const fetchCategories = async () => {
     setIsCategoryLoading(true);
@@ -191,19 +205,10 @@ const QuotationCreate = (props) => {
       setIsCategoryLoading(false);
     }
   };
-  const fetchOtherCharges = async () => {
-    try {
-      const response = await http.get(`${API_URL}/other_charges/list`);
-      setOtherCharges(response.data);
-    } catch (error) {
-      console.error("Failed to load categories:", error);
-    }
-  };
+
   useEffect(() => {
     fetchCategories();
-    fetchOtherCharges();
   }, []);
-
   const [FindData, SetFind] = useState([]);
   const EditUpdate = (index) => {
     let FindArray = Data_View.filter((_, i) => i == index);
@@ -215,7 +220,6 @@ const QuotationCreate = (props) => {
   const handleCallback = (data) => {
     if (data.message == "Supplier create successfully!") {
       setManageCategory(1);
-      Set_C_model(false);
     }
     SetBasiceINF(BasiceINF + 1);
     if (data.message == "Product updated successfully") {
@@ -245,12 +249,10 @@ const QuotationCreate = (props) => {
     setUpdateModalStates(false);
     setModalStates(false);
   };
-  const [shipping, setShipping] = useState([]);
-
   // Product search functionality
   const [searchList, SetSearchList] = useState([]);
   const [Data_product, SetData_product] = useState([]);
-  
+  const [Data_View, SetData_View] = useState([]);
   const [Count, SetCount] = useState(1);
   const searchInputRef = useRef(null);
 
@@ -378,7 +380,7 @@ const QuotationCreate = (props) => {
     );
     if (existingIndex !== -1) {
       const dataUP = Data_View[existingIndex];
-      const Qty = dataUP.qty + 100;
+      const Qty = dataUP.qty + 1;
       const dis_pre = dataUP.dis_pre;
       const dis_values = (Qty * dataUP.price_purchase * dis_pre) / 100;
       const basic = Qty * dataUP.price_purchase - dis_values;
@@ -397,7 +399,7 @@ const QuotationCreate = (props) => {
       SetData_View(updatedData);
       SetCount(Count + 1);
     } else {
-      const Qty = 100;
+      const Qty = 1;
       const basic = Qty * data.price_purchase;
       const gstValue = (basic * data.tax_percentage) / 100;
       const Subtotal = basic + gstValue;
@@ -423,10 +425,10 @@ const QuotationCreate = (props) => {
     const updatedProduct = { ...updatedProductList[index] };
 
     if (check === 1) {
-      updatedProduct[field] += 100;
+      updatedProduct[field] += 1;
     } else if (check === 2) {
-      if (field === "qty" && updatedProduct[field] > 100) {
-        updatedProduct[field] -= 100;
+      if (field === "qty" && updatedProduct[field] >= 2) {
+        updatedProduct[field] -= 1;
       }
     } else {
       if (field === "qty") {
@@ -475,48 +477,51 @@ const QuotationCreate = (props) => {
   const [Total_Net, setTotal_Net] = useState(0);
 
   useEffect(() => {
-    if (!Data_View?.length) {
-      setTotalBasic("0.00");
-      setTotalQty(0);
-      setTotal_Net("0.00");
-      setTotal_GST("0.00");
-      setTotal_Discount("0.00");
-      setTotal_purchse("0.00");
-      return;
-    }
+    if (!Data_View?.length) return;
 
-    let basic = 0;
-    let qty = 0;
-    let purchase = 0;
-    let discount = 0;
-    let gst = 0;
-    let net = 0;
+    const totals = Data_View.reduce(
+      (acc, item) => {
+        const price = Number(item[selectPriceOption?.value] || 0);
+        const qty = Number(item.qty || 0);
+        const discount = Number(item.dis_value || 0);
+        const tax = Number(item.tax_percentage || 0);
+        const weight = Number(item.product_weight || 0);
+        const subTotal = Number(item.sub_total || 0);
+        const basicTotal = Number(item.basic_total || 0);
 
-    Data_View.forEach((item) => {
-      basic += Number(item.basic_total || 0);
-      qty += Number(item.qty || 0);
-      purchase += Number(item.price_purchase || 0);
-      discount += Number(item.dis_value || 0);
-      gst += Number(item.gst_value || 0);
-      net += Number(item.sub_total || 0);
-    });
+        acc.basic += basicTotal;
+        acc.qty += qty;
+        acc.purchase += price * qty;
+        acc.discount += discount;
+        acc.gst += (price * qty * tax) / 100;
+        acc.net += subTotal;
+        acc.weight += qty * weight;
 
-    setTotalBasic(basic.toFixed(2));
-    setTotalQty(qty);
-    setTotal_purchse(purchase.toFixed(2));
-    setTotal_Discount(discount.toFixed(2));
-    setTotal_GST(gst.toFixed(2));
-    setTotal_Net(net.toFixed(2));
-  }, [Data_View]);
+        return acc;
+      },
+      {
+        basic: 0,
+        qty: 0,
+        purchase: 0,
+        discount: 0,
+        gst: 0,
+        net: 0,
+        weight: 0,
+      },
+    );
+
+    setTotalBasic(totals.basic.toFixed(2));
+    setTotalQty(totals.qty);
+    setTotal_purchse(totals.purchase.toFixed(2));
+    setTotal_Discount(totals.discount.toFixed(2));
+    setTotal_GST(totals.gst.toFixed(2));
+    setTotal_Net(totals.net.toFixed(2));
+  }, [Data_View, selectPriceOption]);
 
   useEffect(() => {
     const start = new Date(startDate);
     const end = new Date(endDate);
-
     const diff = isNaN(end - start) ? 0 : (end - start) / (1000 * 3600 * 24);
-
-    setDaysCount(diff);
-
     SetMasterArray((prev) => ({
       ...prev,
       purchase_due_days: diff,
@@ -541,88 +546,45 @@ const QuotationCreate = (props) => {
     Total_Net,
     purchase_payment_terms,
   ]);
-
   const prepareDataForAPI = () => {
-    // Prepare master data
-    const masterData = {
-      ...MasterArray,
-      purchase_total_qty: totalQty,
-      master_address_id: selectedAddress?.shipping_id,
-      selectPriceOption: selectPriceOption.value,
-      purchase_payment_term: purchase_payment_terms,
-      other_charge_id: selectOtherCharge.value,
-      purchase_created_by_id: 1,
+    // Convert Data_View products to the specific string format for lead_product_id
+    // Format: "product_id(qty),product_id(qty)"
+    const productString = Data_View.map(
+      (item) => `${item.product_id}(${item.qty})`,
+    ).join(",");
+
+    const finalLeadData = {
+      user_id: user.user.user_id, // Should come from your AuthUser context
+      customer_id: customerDetails?.user_id,
+      inquiry_date: MasterArray.inquiry_date,
+      followup_date: MasterArray.followup_date,
+      lead_product_id: productString, // Stringified for TEXT field
+      stage_id: MasterArray.stage_id,
+      priority_id: MasterArray.priority_id,
+      assignto_id: MasterArray.assignto_id,
+      referenceby_id: MasterArray.referenceby_id,
+      source_id: MasterArray.source_id,
+      feedback: MasterArray.feedback,
     };
 
-    // Prepare product data in the required format
-    const productData = Data_View.map((item) => ({
-      product_id: item.product_id,
-      attachment: item.attachment || null,
-      qty: item.qty,
-      price_purchase: item.price_purchase,
-      purchase_note: item.purchase_note,
-      price_mrp: item.price_mrp,
-      price_sales: item.price_sales,
-      product_weight: item.product_weight,
-      price_wholesaler: item.price_wholesaler,
-      dis_pre: item.dis_pre || 0,
-      dis_value: item.dis_value,
-      basic_total: item.basic_total,
-      tax_percentage: item.tax_percentage,
-      gst_value: item.gst_value,
-      sub_total: item.sub_total,
-      price_online: item.price_online,
-      price_distributor: item.price_distributor,
-    }));
-
-    return {
-      master: masterData,
-      prodcut: productData,
-      lead_id:lead_id
-    };
+    return finalLeadData;
   };
-  const [contact_persons, setContact_persons] = useState([]);
-  const [contactModal, setContactModal] = useState(false);
-  const [contactCount, setContactCount] = useState(1);
-  const getContactPersons = async (master_id) => {
-    const { data } = await http.get(`/contact/persons/${master_id}`);
-    if (data && data.length > 0) {
-      SetMasterArray({
-        ...MasterArray,
-        contact_person_id: data[0].child_id,
-      });
-      setContact_persons(data);
-    } else {
-      setContact_persons([]);
-    }
-  };
-  useEffect(() => {
-    if (customerDetails && customerDetails.master_id) {
-      getContactPersons(customerDetails.master_id);
-    } else {
-      setContact_persons([]);
-    }
-  }, [contactCount, customerDetails]);
-
-  const Onsubmit =async () => {
+  const Onsubmit = () => {
     if (Data_View.length) {
-      const finalData = await prepareDataForAPI();
-      if (!finalData.master.master_address_id) {
-        toast.warning("Please enter address before submitting");
-        return; // stop further execution
-      }
-      
+      // SetDisabed(true);
+      const finalData = prepareDataForAPI();
       SetDisabed(true);
-      https
-        .post("/purchase/store", finalData)
+
+      http
+        .put(`/lead/update/${lead_id}`, finalData)
         .then(function (response) {
-          redireaction("/purchase-list");
-          toast.success("Purchase Created Successfully!");
+          redireaction("/leads-list");
+          toast.success("Leads Created Successfully!");
           SetDisabed(false);
         })
         .catch(function (error) {
           console.log(error);
-          toast.error("Error creating purchase");
+          toast.error("Error creating Leads");
           SetDisabed(false);
         });
     } else {
@@ -653,56 +615,51 @@ const QuotationCreate = (props) => {
             <Card>
               <CardBody className="pt-2">
                 <div>
-                  <Row className="mt-2 border-bottom pb-3">
-                    <Col
-                      lg={12}
-                      className="d-flex justify-content-between align-items-center mb-2"
-                    >
-                      <h4 className="mb-1 fw-bold">
-                        <i className="ri-shopping-cart-2-line"></i> Create
-                        Purchase Order (PO)
+                  <Row className="mt-2 border-bottom pb-3 align-items-center">
+                    <Col lg={8}>
+                      <h4 className="mb-0 fw-bold d-flex align-items-center text-dark">
+                        <i className="ri-user-add-fill me-2 text-primary"></i>
+                        Update Lead
                       </h4>
+                    </Col>
 
-                      <div className="d-flex gap-2 align-items-center">
-                        <Label
-                          for="lastnameInput"
-                          className="form-label fw-bold d-flex justify-content-between"
-                        >
-                          <span>Date: </span>
-                        </Label>
-                        <Flatpickr
-                          className="form-control"
-                          options={{
-                            dateFormat: "d/m/Y",
-                            defaultDate: "today",
-                          }}
-                          onChange={(selectedDates) => {
-                            const selectedDate = selectedDates[0];
-                            const formattedDate =
-                              selectedDate.toLocaleDateString("en-GB", {
-                                day: "numeric",
-                                month: "numeric",
-                                year: "numeric",
-                              });
-                            SetMasterArray({
-                              ...MasterArray,
-                              purchase_start_date: formattedDate,
-                            });
-                          }}
-                        />
-                      </div>
+                    <Col
+                      lg={4}
+                      className="d-flex justify-content-end align-items-center gap-3"
+                    >
+                      <Label className="fw-bold small text-uppercase mb-0 text-nowrap">
+                        Inquiry Date
+                      </Label>
+
+                      <Flatpickr
+                        className="form-control  shadow-sm ps-3 pe-5 py-2 fw-medium"
+                        value={MasterArray.inquiry_date}
+                        placeholder="Select Date"
+                        options={{
+                          dateFormat: "Y-m-d",
+                          altInput: true,
+                          altFormat: "d/m/Y",
+                          allowInput: true,
+                        }}
+                        onChange={(date) =>
+                          SetMasterArray({
+                            ...MasterArray,
+                            inquiry_date: getFormattedDate(date[0]),
+                          })
+                        }
+                      />
                     </Col>
                   </Row>
-                  <Row className="mt-2 ">
+                  <Row className="mt-3">
                     <Col lg={12} className="mb-3">
                       <Row>
-                        <Col lg={4}>
+                        <Col lg={5}>
                           <div className="mb-3">
                             <Label
                               for="lastnameInput"
                               className="form-label fw-bold d-flex justify-content-between"
                             >
-                              <span>Bill To</span>
+                              <span>Customer </span>
                             </Label>
                             {Check ? (
                               <div className="form-icon right rounded d-flex bg-primary align-items-center">
@@ -718,7 +675,6 @@ const QuotationCreate = (props) => {
                                       });
                                       setCustomers(e.item);
                                     }}
-                                    isDisabled={lead_id ? true : false}
                                     options={
                                       BasicInformtion.customer &&
                                       BasicInformtion.customer.map(
@@ -739,26 +695,25 @@ const QuotationCreate = (props) => {
                                     }
                                     filterOption={(option, inputValue) => {
                                       const c = option.data.item;
+                                      const s = inputValue.toLowerCase();
 
                                       return (
                                         c.master_name
                                           ?.toLowerCase()
-                                          .includes(inputValue.toLowerCase()) ||
+                                          .includes(s) ||
                                         c.user_name
                                           ?.toLowerCase()
-                                          .includes(inputValue.toLowerCase()) ||
+                                          .includes(s) ||
                                         c.master_bank_name
                                           ?.toLowerCase()
-                                          .includes(inputValue.toLowerCase()) ||
+                                          .includes(s) ||
                                         c.master_branch_name
                                           ?.toLowerCase()
-                                          .includes(inputValue.toLowerCase()) ||
+                                          .includes(s) ||
                                         c.master_bank_code
                                           ?.toLowerCase()
-                                          .includes(inputValue.toLowerCase()) ||
-                                        c.master_ifsc
-                                          ?.toLowerCase()
-                                          .includes(inputValue.toLowerCase())
+                                          .includes(s) ||
+                                        c.master_ifsc?.toLowerCase().includes(s)
                                       );
                                     }}
                                   />
@@ -784,246 +739,185 @@ const QuotationCreate = (props) => {
                               ""
                             )}
                           </div>
-                          <div className="card rounded shadow-lg px-2 my-1  ms-2">
-                            {customerDetails ? (
-                              <div>
-                                <p className="mb-1">
-                                  <strong>UID: </strong>{" "}
-                                  {customerDetails.user_unique_id}
-                                </p>
-                                <p className="mb-1">
-                                  <strong>Name: </strong>{" "}
-                                  {customerDetails.user_type == 1
-                                    ? customerDetails.user_name
-                                    : customerDetails.master_name}
-                                </p>
-                                <p className="mb-1">
-                                  <strong>Email:</strong>{" "}
-                                  {customerDetails.user_type == 1
-                                    ? customerDetails.user_email
-                                    : customerDetails.master_email}
-                                </p>
-                                <p className="mb-1">
-                                  <strong>Phone:</strong>{" "}
-                                  {customerDetails.user_type == 1
-                                    ? customerDetails.user_mobile
-                                    : customerDetails.master_mobile}
-                                </p>
-                                {customerDetails.user_type != 1 && (
-                                  <p className="mb-1">
-                                    <strong>GST No:</strong>{" "}
-                                    {customerDetails.master_gst || "N/A"}
-                                  </p>
-                                )}
+                        </Col>
+                        <Col lg={4}>
+                          <div className="mb-3">
+                            <Label
+                              for="lastnameInput"
+                              className="form-label fw-bold d-flex justify-content-between"
+                            >
+                              <span>Assign User</span>
+                            </Label>
+                            {Check ? (
+                              <div className=" rounded d-flex bg-primary align-items-center">
+                                <div className="w-100">
+                                  <Select
+                                    id="contactnumberInput"
+                                    className="fw-bold"
+                                    onChange={(e) => {
+                                      SetMasterArray({
+                                        ...MasterArray,
+                                        assignto_id: e.value,
+                                      });
+                                    }}
+                                    value={
+                                      (assignToUser &&
+                                        assignToUser
+                                          .map((customer) => ({
+                                            value: customer.user_id,
+                                            label: customer.full_name,
+                                            item: customer,
+                                          }))
+                                          .find(
+                                            (option) =>
+                                              option.value ==
+                                              MasterArray.assignto_id,
+                                          )) ||
+                                      null
+                                    }
+                                    options={
+                                      assignToUser &&
+                                      assignToUser.map((customer) => ({
+                                        value: customer.user_id,
+                                        label: customer.full_name,
+                                        item: customer,
+                                      }))
+                                    }
+                                  />
+                                </div>
                               </div>
                             ) : (
-                              <p className="text-muted">No customer selected</p>
+                              ""
                             )}
                           </div>
                         </Col>
-
-                        {props.status != 1 && (
-                          <Col lg={5}>
-                            <div className="mb-3">
-                              <Label
-                                for="lastnameInput"
-                                className="form-label fw-bold d-flex justify-content-between"
-                              >
-                                <span>Ship To</span>
-                              </Label>
-                              <div className="form-icon right rounded d-flex bg-primary align-items-center">
-                                <div className="w-100">
-                                  <Select
-                                    className="fw-bold"
-                                    options={shipping.map((item) => ({
-                                      item: item,
-                                      value: item.shipping_id, // actual value (unique ID)
-                                      label: `${item.address_line1}, ${item.city} - ${item.pincode} - ${item.addressType}`, // label shown in dropdown
-                                    }))}
-                                    onChange={(selectedOption) => {
-                                      setSelectedAddress(selectedOption.item); // store selected shipping_id
-                                    }}
-                                    value={
-                                      shipping
-                                        .map((item) => ({
-                                          value: item.shipping_id,
-                                          label: `${item.address_line1}, ${item.city} - ${item.pincode} - ${item.addressType}`,
-                                        }))
-                                        .find(
-                                          (opt) =>
-                                            opt.value ===
-                                            selectedAddress?.shipping_id,
-                                        ) ||
-                                      shipping
-                                        .map((item) => ({
-                                          value: item.shipping_id,
-                                          label: `${item.address_line1}, ${item.city} - ${item.pincode} - ${item.addressType}`,
-                                        }))
-                                        .find(
-                                          (opt) =>
-                                            shipping.find(
-                                              (s) => s.defaultAddress == 1,
-                                            )?.shipping_id === opt.value,
-                                        ) ||
-                                      null
-                                    }
-                                    placeholder="Select Shipping Address"
-                                  />
-                                </div>
-
-                                <div>
-                                  <button
-                                    type="button"
-                                    style={{
-                                      padding: "1px 7px",
-                                      fontSize: "15px",
-                                    }}
-                                    id="create-btn"
-                                    className="btn btn-primary btn-sm"
-                                    onClick={() => {
-                                      setShippingModal(!customerModal);
-                                    }}
-                                  >
-                                    +
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                            {/* Shipping Address */}
-                            {props.status != 1 && (
-                              <div className="card rounded shadow-lg px-3 py-1 ms-2">
-                                {selectedAddress ? (
-                                  <div className="">
-                                    <div className="">
-                                      <strong>
-                                        Address ({" "}
-                                        {selectedAddress.addressType
-                                          ?.charAt(0)
-                                          .toUpperCase() +
-                                          selectedAddress.addressType?.slice(
-                                            1,
-                                          )}{" "}
-                                        ) :
-                                      </strong>
-                                    </div>
-                                    <div className="mb-1">
-                                      {selectedAddress.address_line1},{" "}
-                                      {selectedAddress.address_line2}
-                                    </div>
-                                    <div className="d-flex justify-content-between">
-                                      <p className="mb-1">
-                                        <strong>City:</strong>{" "}
-                                        {selectedAddress.city}
-                                      </p>
-                                      <p className="mb-1">
-                                        <strong>State:</strong>{" "}
-                                        {selectedAddress.state}
-                                      </p>
-                                      <p className="mb-1">
-                                        <strong>Pincode:</strong>{" "}
-                                        {selectedAddress.pincode}
-                                      </p>
-                                    </div>
-                                    {/* {selectedAddress.defaultAddress && (
-                                                        <span className="badge bg-primary">Default</span>
-                                                      )} */}
-                                  </div>
-                                ) : (
-                                  <p className="text-muted">
-                                    No shipping address selected
-                                  </p>
-                                )}
-                              </div>
-                            )}
-                          </Col>
-                        )}
+                        {/* Follow-up Date */}
                         <Col lg={3}>
-                          <div className="mb-3">
-                            <Label
-                              htmlFor="lastnameInput"
-                              className="form-label fw-bold d-flex justify-content-between"
-                            >
-                              <span>Select Contact</span>
-                            </Label>
-                            <div className="form-icon right rounded d-flex bg-primary align-items-center">
-                              <div className="w-100">
-                                <Select
-                                  options={contact_persons.map((person) => ({
-                                    value: person.child_id,
-                                    label: person.child_name,
-                                  }))}
-                                  value={
-                                    contact_persons
-                                      .map((person) => ({
-                                        value: person.child_id,
-                                        label: person.child_name,
-                                      }))
-                                      .find(
-                                        (opt) =>
-                                          opt.value ===
-                                          MasterArray?.contact_person_id,
-                                      ) || null
-                                  }
-                                  onChange={(selectedOption) => {
-                                    SetMasterArray({
-                                      ...MasterArray,
-                                      contact_person_id: selectedOption.value,
-                                    });
-                                  }}
-                                  placeholder="Select Contact Person"
-                                  className="fw-bold"
-                                />
-                              </div>
-                              <div>
-                                <button
-                                  type="button"
-                                  style={{
-                                    padding: "1px 7px",
-                                    fontSize: "15px",
-                                  }}
-                                  id="create-btn"
-                                  className="btn btn-primary btn-sm"
-                                  onClick={() => setContactModal(!contactModal)}
-                                >
-                                  +
-                                </button>
-                              </div>
-                            </div>
-                          </div>
+                          <Label className="fw-bold">Follow Up Date</Label>
+                          <Flatpickr
+                            className="form-control premium-input"
+                            value={MasterArray.followup_date}
+                            placeholder="Select Follow Up Date"
+                            options={{
+                              dateFormat: "Y-m-d", // Actual value format
+                              altInput: true, // Enable user-friendly display
+                              altFormat: "d/m/Y", // How the user sees it
+                              allowInput: true,
+                            }}
+                            onChange={(date) =>
+                              SetMasterArray({
+                                ...MasterArray,
+                                followup_date: getFormattedDate(date[0]),
+                              })
+                            }
+                          />
+                        </Col>
+                      </Row>
+                      <Row className="mt-2">
+                        {/* Priority Selector */}
+                        <Col lg={3}>
+                          <Label className="fw-bold">Stages</Label>
+                          <Select
+                            options={stages.map((p) => ({
+                              value: p.id,
+                              label: p.name,
+                            }))}
+                            onChange={(e) =>
+                              SetMasterArray({
+                                ...MasterArray,
+                                stage_id: e ? e.value : "",
+                              })
+                            }
+                            // Find the object that matches the ID in your state
+                            value={
+                              stages
+                                .map((p) => ({ value: p.id, label: p.name }))
+                                .find(
+                                  (opt) => opt.value == MasterArray.stage_id,
+                                ) || null
+                            }
+                            // Optional: Add a clean class for styling
+                            className="react-select-container fw-bold"
+                          />
+                        </Col>
 
-                          {/* Show Selected Contact Details */}
-                          {MasterArray?.contact_person_id && (
-                            <div className="card rounded fw-bold">
-                              <div className="px-3 py-2">
-                                {(() => {
-                                  const selectedContact = contact_persons.find(
-                                    (p) =>
-                                      p.child_id ===
-                                      MasterArray.contact_person_id,
-                                  );
-                                  return selectedContact ? (
-                                    <>
-                                      <div>
-                                        Name: {selectedContact.child_name}
-                                      </div>
-                                      <div>
-                                        Email: {selectedContact.child_email}
-                                      </div>
-                                      <div>
-                                        Mobile: {selectedContact.child_mobile}
-                                      </div>
-                                      <div>
-                                        Designation:{" "}
-                                        {selectedContact.child_designation}
-                                      </div>
-                                    </>
-                                  ) : (
-                                    <div>No contact details found</div>
-                                  );
-                                })()}
-                              </div>
-                            </div>
-                          )}
+                        {/* Source Selector */}
+                        <Col lg={3}>
+                          <Label className="fw-bold">Source</Label>
+                          <Select
+                            options={sources.map((s) => ({
+                              value: s.id,
+                              label: s.name,
+                            }))}
+                            onChange={(e) =>
+                              SetMasterArray({
+                                ...MasterArray,
+                                source_id: e.value,
+                              })
+                            }
+                            // Find the object that matches the ID in your state
+                            value={
+                              sources
+                                .map((p) => ({ value: p.id, label: p.name }))
+                                .find(
+                                  (opt) => opt.value === MasterArray.source_id,
+                                ) || null
+                            }
+                            // Optional: Add a clean class for styling
+                            className="react-select-container fw-bold"
+                          />
+                        </Col>
+                        <Col lg={3}>
+                          <Label className="fw-bold">Reference</Label>
+                          <Select
+                            options={references.map((s) => ({
+                              value: s.id,
+                              label: s.name,
+                            }))}
+                            onChange={(e) =>
+                              SetMasterArray({
+                                ...MasterArray,
+                                referenceby_id: e.value,
+                              })
+                            }
+                            // Find the object that matches the ID in your state
+                            value={
+                              references
+                                .map((p) => ({ value: p.id, label: p.name }))
+                                .find(
+                                  (opt) =>
+                                    opt.value === MasterArray.referenceby_id,
+                                ) || null
+                            }
+                            // Optional: Add a clean class for styling
+                            className="react-select-container fw-bold"
+                          />
+                        </Col>
+                        <Col lg={3}>
+                          <Label className="fw-bold">Priority</Label>
+                          <Select
+                            options={priorities.map((p) => ({
+                              value: p.id,
+                              label: p.name,
+                            }))}
+                            onChange={(e) =>
+                              SetMasterArray({
+                                ...MasterArray,
+                                priority_id: e.value,
+                              })
+                            }
+                            // Find the object that matches the ID in your state
+                            value={
+                              priorities
+                                .map((p) => ({ value: p.id, label: p.name }))
+                                .find(
+                                  (opt) =>
+                                    opt.value === MasterArray.priority_id,
+                                ) || null
+                            }
+                            // Optional: Add a clean class for styling
+                            className="react-select-container fw-bold"
+                          />
                         </Col>
                       </Row>
                     </Col>
@@ -1065,7 +959,7 @@ const QuotationCreate = (props) => {
                           for="lastnameInput"
                           className="form-label fw-bold"
                         >
-                          Product Name 
+                          Product Name
                         </Label>
                         <div className="form-icon right">
                           <div className="input-group">
@@ -1109,6 +1003,9 @@ const QuotationCreate = (props) => {
                               onClick={() => setModalStates(!modalStates)}
                             >
                               <div className="d-flex">
+                                <div style={{ backgroundColor: "red" }}>
+                                  {/* <i className="ri-barcode-line fs-4 mx-5"></i> */}
+                                </div>{" "}
                                 <button className="bg-primary text-white">
                                   +
                                 </button>
@@ -1118,50 +1015,8 @@ const QuotationCreate = (props) => {
                         </div>
                       </div>
                     </Col>
-                    <Col
-                      lg={3}
-                      className=" d-flex align-items-center justify-content-start mb-3"
-                    >
-                      {/* <div className="w-100">
-                        <Label
-                          for="lastnameInput"
-                          className="form-label fw-bold d-flex justify-content-between"
-                        >
-                          <span> Other Charges</span>
-                        </Label>
-                        <Select
-                          value={selectOtherCharge}
-                          onChange={(e) => setOtherCharge(e)}
-                          options={[
-                            { value: "0", label: "Select Charge" },
-                            ...otherCharges.map((category) => ({
-                              value: category.other_charges_id,
-                              label: category.other_charges_name,
-                            })),
-                          ]}
-                          placeholder="Select Other Charge"
-                          className="w-100 fw-bold"
-                        />
-                      </div>
-                      {selectOtherCharge.value != "0" && <div className="w-100">
-                        <Label
-                          for="lastnameInput"
-                          className="form-label fw-bold d-flex justify-content-between"
-                        >
-                          <span> Charge Amount</span>
-                        </Label>
-                        <Input
-                          // value={selectPriceOption}
-                          onChange={(e) => SetMasterArray({
-                            ...MasterArray,
-                            other_charge_amount:e.target.value
-                          })}
-                          placeholder="Charge Amt"
-                          className="w-100 fw-bold"
-                        />
-                      </div>} */}
-                    </Col>
-                    <Col lg={2}>
+                    <Col lg={2}></Col>
+                    <Col lg={3}>
                       <div className="mb-3">
                         <div className="text-end mt-4">
                           <button
@@ -1169,13 +1024,13 @@ const QuotationCreate = (props) => {
                             onClick={() => Onsubmit()}
                             disabled={Disabed}
                           >
-                            Save
+                            Save Bill
                           </button>
                           <Link
-                            to={"/purchase-list"}
+                            to={"/leads-list"}
                             className="btn btn-danger  mx-1"
                           >
-                            Cancel
+                            Cancel Bill
                           </Link>
                         </div>
                       </div>
@@ -1190,10 +1045,7 @@ const QuotationCreate = (props) => {
                                   <th>No.</th>
                                   <th>Category</th>
                                   <th>Item Name</th>
-                                  <th>Add Note</th>
-                                  <th>Attachments</th>
                                   <th>Qty</th>
-                                  <th>Action</th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -1210,36 +1062,6 @@ const QuotationCreate = (props) => {
                                       }}
                                     >
                                       {item.product_english_name}
-                                    </td>
-                                    <td>
-                                      <input
-                                        type="text"
-                                        value={item.purchase_note}
-                                        onChange={(e) => {
-                                          Data_View[index].purchase_note =
-                                            e.target.value;
-                                        }}
-                                        className="form-control"
-                                        placeholder={
-                                          "Add " +
-                                          item.product_english_name +
-                                          " Notes"
-                                        }
-                                      />{" "}
-                                    </td>
-                                    <td>
-                                      <div className="ps-5 w-100">
-                                        <input
-                                          type="file"
-                                          accept="image/*,.pdf,.doc,.docx"
-                                          className="form-control w-100"
-                                          style={{ maxWidth: "200px" }}
-                                          onChange={(e) => {
-                                            Data_View[index].attachment =
-                                              e.target.files[0];
-                                          }}
-                                        />
-                                      </div>
                                     </td>
                                     <td>
                                       <div
@@ -1276,23 +1098,6 @@ const QuotationCreate = (props) => {
                                         </button>
                                       </div>
                                     </td>
-
-                                    <td>
-                                      <div className="d-flex justify-content-around">
-                                        <span
-                                          className="text-danger d-inline-block remove-item-btn cursor-pointer"
-                                          onClick={() => EditUpdate(index)}
-                                        >
-                                          <i className="ri-edit-line fs-18 text-primary"></i>
-                                        </span>
-                                        <span
-                                          className="text-danger d-inline-block remove-item-btn cursor-pointer"
-                                          onClick={() => Deleted(index)}
-                                        >
-                                          <i className="ri-delete-bin-5-fill fs-16"></i>
-                                        </span>
-                                      </div>
-                                    </td>
                                   </tr>
                                 ))}
                               </tbody>
@@ -1303,48 +1108,27 @@ const QuotationCreate = (props) => {
                     </Col>
                   </Row>
                 </div>
-                <Row className="align-items-stretch">
-                  {/* Left Column */}
-                  <Col lg={8}>
-                    <div className="h-100 d-flex flex-column">
-                      <Label
-                        for="lastnameInput"
-                        className="form-label fw-bold d-flex justify-content-between"
-                      >
-                        <span>Notes</span>
-                      </Label>
-                      <CKEditor
-                        editor={ClassicEditor}
-                        data={MasterArray?.purchase_notes}
-                        onChange={(e, editor) => {
-                          SetMasterArray({
-                            ...MasterArray,
-                            purchase_notes: editor.getData(),
-                          });
-                        }}
-                        placeholder="Notes"
-                        className="fw-bold flex-grow-1"
-                        rows={3}
-                        style={{ resize: "none" }}
-                      />
-                    </div>
-                  </Col>
-
-                  {/* Right Column */}
-                  <Col
-                    lg={4}
-                    className="mt-4 bg-dark text-white fw-bold d-flex justify-content-center align-items-center text-center fs-3"
-                  >
-                    QTY : {totalQty.toFixed(2)}
+                {/* Feedback Section using CKEditor as requested */}
+                <Row className="mt-4">
+                  <Col lg={12}>
+                    <Label className="fw-bold">Feedback / Discussion</Label>
+                    <CKEditor
+                      editor={ClassicEditor}
+                      data={MasterArray.feedback}
+                      onChange={(event, editor) => {
+                        const data = editor.getData();
+                        SetMasterArray({
+                          ...MasterArray,
+                          feedback: data,
+                        });
+                      }}
+                    />
                   </Col>
                 </Row>
               </CardBody>
             </Card>
           </Col>
         </Row>
-        <div className="container-fluid fixed-bottom fs-5">
-          {/* Footer totals can be added here */}
-        </div>
         {/* model box for price  */}
         <Modal
           id="myModal"
@@ -1430,36 +1214,10 @@ const QuotationCreate = (props) => {
         ) : (
           ""
         )}
-        {shippingModal == true ? (
-          <ShippingModal
-            modalStates={shippingModal}
-            setModalStates={() => {
-              setShippingCount(shippingCount + 1);
-              setShippingModal(false);
-            }}
-            purchase_customer_ids={MasterArray?.purchase_customer_id}
-          />
-        ) : (
-          ""
-        )}
-        {contactModal == true ? (
-          <ContactPerson
-            modalStates={contactModal}
-            setModalStates={() => {
-              setContactCount(contactCount + 1);
-              setContactModal(false);
-            }}
-            setContactCount={setContactCount}
-            contactCount={contactCount}
-            master_id={customerDetails ? customerDetails.master_id : ""}
-          />
-        ) : (
-          ""
-        )}
         <ToastContainer closeButton={false} />
       </Container>
     </div>
   );
 };
 
-export default QuotationCreate;
+export default LeadUpdate;

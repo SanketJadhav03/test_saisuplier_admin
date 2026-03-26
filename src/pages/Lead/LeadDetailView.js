@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   Card,
   CardBody,
@@ -26,7 +26,7 @@ import AuthUser from "../../helpers/Authuser";
 const LeadDetailView = () => {
   const { id } = useParams();
   const { http, user } = AuthUser();
-
+  const navigate = useNavigate();
   const [callLogs, setCallLogs] = useState([]);
   const [leadData, setLeadData] = useState(null);
   const [allStages, setAllStages] = useState([]); // New state for dynamic stages
@@ -43,6 +43,7 @@ const LeadDetailView = () => {
         ]);
 
         if (leadRes.data.success) setLeadData(leadRes.data.data);
+
         if (stagesRes.data.success) setAllStages(stagesRes.data.data);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -106,11 +107,21 @@ const LeadDetailView = () => {
           <Card>
             <CardBody className="text-center">
               <div className="avatar-lg p-1 img-thumbnail rounded-circle bg-light mx-auto">
-                <div className="avatar-title bg-soft-primary text-primary rounded-circle fs-24 text-uppercase">
+                <div className="avatar-title bg-  rounded-circle fs-24 text-uppercase">
                   {leadData.customer_name?.charAt(0)}
                 </div>
               </div>
-              <h5 className="mt-3 mb-1">{leadData.customer_name}</h5>
+              <h5 className="mt-3 mb-1">
+                {leadData.master_type == 1
+                  ? leadData.user_name
+                  : leadData?.master_name}
+              </h5>
+              {leadData?.master_branch_name
+                ? ` ${leadData?.master_branch_name}`
+                : " "}
+              {leadData?.master_branch_code
+                ? ` - ${leadData.master_branch_code}`
+                : " "}
               <p className="text-muted">Lead ID: #{leadData.lead_id}</p>
               <div className="d-flex gap-2 justify-content-center">
                 <Badge color="danger" className="fs-11 text-uppercase">
@@ -161,7 +172,7 @@ const LeadDetailView = () => {
               <div className="d-flex align-items-center mt-3 mb-3">
                 <div className="flex-shrink-0 avatar-xs me-3">
                   <div
-                    className={`avatar-title rounded-circle ${isOverdue ? "bg-danger " : "bg-light "}`}
+                    className={`avatar-title rounded-circle ${isOverdue ? "bg-danger " : "bg-light text-primary"}`}
                   >
                     <Calendar size={16} />
                   </div>
@@ -289,24 +300,32 @@ const LeadDetailView = () => {
             </CardHeader>
             <CardBody>
               {/* Grid changes from 1 column on mobile to 3 columns on LG+ */}
-              <Row className="text-center gy-2 gy-lg-0">
+              <Row className="text-center gy-3 gy-lg-0 mt-2">
                 {/* Purchase Order Status */}
                 <Col xs={12} lg={4} className="border-end-lg">
                   <div className="p-2">
-                    <div className="avatar-sm mx-auto mb-1">
+                    <div className="avatar-sm mx-auto mb-2">
                       <div
-                        className={`avatar-title rounded-circle fs-20 ${leadData.po_id ? "bg-soft-primary text-primary" : "bg-light text-muted"}`}
+                        className={`avatar-title rounded-3 fs-22 ${
+                          leadData.lead_purchase_id
+                            ? "bg-primary-subtle text-primary"
+                            : "bg-light text-muted border border-dashed"
+                        }`}
                       >
                         <i className="ri-shopping-basket-2-line"></i>
                       </div>
                     </div>
-
-                    {leadData.po_id ? (
-                      <button className="btn btn-link btn-sm p-0">
-                        View #{leadData.po_no}
-                      </button>
+                    <h6 className="fs-13 mb-1">Purchase Order</h6>
+                    {leadData.lead_purchase_id ? (
+                      <Link
+                        to={  !leadData.lead_quotation_id ? `/purchase-edit/${leadData.lead_purchase_id}` : `/quotation-edit/${leadData.lead_purchase_id}`}
+                        className="fw-medium link-primary"
+                      >
+                        PO-{leadData.lead_purchase_id}{" "}
+                        <i className="ri-external-link-line align-middle ms-1"></i>
+                      </Link>
                     ) : (
-                      <p className="text-muted mb-0 fs-12">Pending PO</p>
+                      <span className="text-muted fs-12 italic">Pending</span>
                     )}
                   </div>
                 </Col>
@@ -314,19 +333,28 @@ const LeadDetailView = () => {
                 {/* Quotation Status */}
                 <Col xs={12} lg={4} className="border-end-lg">
                   <div className="p-2">
-                    <div className="avatar-sm mx-auto mb-1">
+                    <div className="avatar-sm mx-auto mb-2">
                       <div
-                        className={`avatar-title rounded-circle fs-20 ${leadData.quotation_id ? "bg-soft-success text-success" : "bg-light text-muted"}`}
+                        className={`avatar-title rounded-3 fs-22 ${
+                          leadData.lead_quotation_id
+                            ? "bg-success-subtle text-success"
+                            : "bg-light text-muted border border-dashed"
+                        }`}
                       >
                         <i className="ri-file-list-3-line"></i>
                       </div>
                     </div>
-                    {leadData.quotation_id ? (
-                      <button className="btn btn-link btn-sm p-0">
-                        View #{leadData.quotation_no}
-                      </button>
+                    <h6 className="fs-13 mb-1">Quotation</h6>
+                       {leadData.lead_quotation_id ? (
+                      <Link
+                        to={!leadData.lead_invoice_id ?`/quotation-edit/${leadData.lead_quotation_id}`:`/sale-edit/${leadData.lead_invoice_id}`}
+                        className="fw-medium link-primary"
+                      >
+                        PO-{leadData.lead_quotation_id}{" "}
+                        <i className="ri-external-link-line align-middle ms-1"></i>
+                      </Link>
                     ) : (
-                      <p className="text-muted mb-0 fs-12">Not Generated</p>
+                      <span className="text-muted fs-12 italic">Pending</span>
                     )}
                   </div>
                 </Col>
@@ -334,48 +362,76 @@ const LeadDetailView = () => {
                 {/* Invoice Status */}
                 <Col xs={12} lg={4}>
                   <div className="p-2">
-                    <div className="avatar-sm mx-auto mb-1">
+                    <div className="avatar-sm mx-auto mb-2">
                       <div
-                        className={`avatar-title rounded-circle fs-20 ${leadData.invoice_id ? "bg-soft-warning text-warning" : "bg-light text-muted"}`}
+                        className={`avatar-title rounded-3 fs-22 ${
+                          leadData.invoice_id
+                            ? "bg-warning-subtle text-warning"
+                            : "bg-light text-muted border border-dashed"
+                        }`}
                       >
                         <i className="ri-bill-line"></i>
                       </div>
                     </div>
+                    <h6 className="fs-13 mb-1">Invoice</h6>
                     {leadData.invoice_id ? (
-                      <button className="btn btn-link btn-sm p-0">
-                        View #{leadData.invoice_no}
+                      <button className="btn btn-link btn-sm p-0 fw-medium link-warning">
+                        #{leadData.invoice_no}{" "}
+                        <i className="ri-download-2-line align-middle ms-1"></i>
                       </button>
                     ) : (
-                      <p className="text-muted mb-0 fs-12">Not Invoiced</p>
+                      <span className="badge bg-light text-muted border fs-10">
+                        Not Invoiced
+                      </span>
                     )}
                   </div>
                 </Col>
               </Row>
 
               {/* Quick Action to Convert */}
-              {!leadData.invoice_id && (
+              {!leadData.invoice_data && (
                 <div className="mt-2 pt-2 text-center border-top border-top-dashed">
                   <p className="text-muted mb-3 fs-13 fw-medium">
                     Ready to move this lead forward?
                   </p>
                   <div className="d-flex flex-column flex-sm-row gap-2 justify-content-center align-items-center">
                     {/* Primary Conversion Action */}
-                    <button className="btn btn-soft-primary btn-sm px-3 shadow-none">
-                      <i className="ri-exchange-funds-line align-bottom me-1"></i>
-                      Convert to PO
-                    </button>
+                    {!leadData.lead_purchase_id && (
+                      <Link
+                        className="btn btn-soft-primary btn-sm px-3 shadow-none"
+                        to={`/purchase-create/${leadData.lead_id}`}
+                      >
+                        <i className="ri-exchange-funds-line align-bottom me-1"></i>
+                        Convert to PO
+                      </Link>
+                    )}
 
                     {/* Secondary Actions */}
-                    <button className="btn btn-soft-info btn-sm px-3 shadow-none">
-                      <i className="ri-file-list-3-line align-bottom me-1"></i>
-                      Create Quotation
-                    </button>
+                    {!leadData.lead_quotation_id && (
+                      <Link
+                        className="btn btn-soft-primary btn-sm px-3 shadow-none"
+                        to={
+                          !leadData.lead_purchase_id
+                            ? `/quotation-create/${leadData.lead_id}`
+                            : `/quotation-edit/${leadData.lead_purchase_id}`
+                        }
+                      >
+                        <i className="ri-file-list-3-line align-bottom me-1"></i>
+                        Create Quotation
+                      </Link>
+                    )}
 
                     {/* Final Action */}
-                    <button className="btn btn-soft-secondary btn-sm px-3 shadow-none">
+                    {!leadData.lead_invoice_id && <Link
+                        className="btn btn-soft-primary btn-sm px-3 shadow-none"
+                        to={
+                          !leadData.lead_purchase_id
+                            ? `/sale-create/${leadData.lead_id}`
+                            : `/generate-invoice/${leadData.lead_purchase_id}`
+                        }>
                       <i className="ri-bill-line align-bottom me-1"></i>
                       Create Invoice
-                    </button>
+                    </Link>}
                   </div>
                 </div>
               )}
@@ -571,14 +627,13 @@ const LeadDetailView = () => {
             </CardHeader>
             <CardBody>
               <div className="table-responsive table-card">
-                <Table className="align-middle table-nowrap mb-0">
+                <Table className="align-middle text-center table-nowrap mb-0">
                   <thead className="table-light text-muted">
                     <tr>
                       <th scope="col">Product Name</th>
                       <th scope="col">Qty</th>
                       <th scope="col">HSN Code</th>
                       <th scope="col">Category</th>
-                      <th scope="col">Price</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -600,11 +655,10 @@ const LeadDetailView = () => {
                             </div>
                           </td>
                           <td>{item.quantity || 0}</td>
-                          <td>{item.product_hsn_code || ""}</td>
-                          <td>{item.category_name || "General"}</td>
-                          <td>
-                            {item.price_sales ? `₹${item.price_sales}` : "N/A"}
+                          <td className={"text-center"}>
+                            {item.product_hsn_code || "-"}
                           </td>
+                          <td>{item.category_name || "General"}</td>
                         </tr>
                       ))
                     ) : (
