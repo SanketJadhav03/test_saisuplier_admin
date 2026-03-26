@@ -735,6 +735,7 @@ const QuoatationUpdate = (props) => {
                       <h4 className="mb-1 fw-bold">
                         {props.status == 2 ? (
                           <>
+                          
                             <FiFileText size={20} /> Generate Quotation
                           </>
                         ) : (

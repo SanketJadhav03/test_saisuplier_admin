@@ -318,7 +318,11 @@ const LeadDetailView = () => {
                     <h6 className="fs-13 mb-1">Purchase Order</h6>
                     {leadData.lead_purchase_id ? (
                       <Link
-                        to={  !leadData.lead_quotation_id ? `/purchase-edit/${leadData.lead_purchase_id}` : `/quotation-edit/${leadData.lead_purchase_id}`}
+                        to={
+                          !leadData.lead_quotation_id
+                            ? `/purchase-edit/${leadData.lead_purchase_id}`
+                            : `/quotation-edit/${leadData.lead_purchase_id}`
+                        }
                         className="fw-medium link-primary"
                       >
                         PO-{leadData.lead_purchase_id}{" "}
@@ -345,9 +349,13 @@ const LeadDetailView = () => {
                       </div>
                     </div>
                     <h6 className="fs-13 mb-1">Quotation</h6>
-                       {leadData.lead_quotation_id ? (
+                    {leadData.lead_quotation_id ? (
                       <Link
-                        to={!leadData.lead_invoice_id ?`/quotation-edit/${leadData.lead_quotation_id}`:`/sale-edit/${leadData.lead_invoice_id}`}
+                        to={
+                          !leadData.lead_invoice_id
+                            ? `/quotation-edit/${leadData.lead_quotation_id}`
+                            : `/sale-edit/${leadData.lead_invoice_id}`
+                        }
                         className="fw-medium link-primary"
                       >
                         PO-{leadData.lead_quotation_id}{" "}
@@ -365,7 +373,7 @@ const LeadDetailView = () => {
                     <div className="avatar-sm mx-auto mb-2">
                       <div
                         className={`avatar-title rounded-3 fs-22 ${
-                          leadData.invoice_id
+                          leadData.lead_invoice_id
                             ? "bg-warning-subtle text-warning"
                             : "bg-light text-muted border border-dashed"
                         }`}
@@ -374,9 +382,9 @@ const LeadDetailView = () => {
                       </div>
                     </div>
                     <h6 className="fs-13 mb-1">Invoice</h6>
-                    {leadData.invoice_id ? (
+                    {leadData.lead_invoice_id ? (
                       <button className="btn btn-link btn-sm p-0 fw-medium link-warning">
-                        #{leadData.invoice_no}{" "}
+                        INV-{leadData.lead_invoice_id}{" "}
                         <i className="ri-download-2-line align-middle ms-1"></i>
                       </button>
                     ) : (
@@ -389,7 +397,7 @@ const LeadDetailView = () => {
               </Row>
 
               {/* Quick Action to Convert */}
-              {!leadData.invoice_data && (
+              {!leadData.lead_invoice_id && (
                 <div className="mt-2 pt-2 text-center border-top border-top-dashed">
                   <p className="text-muted mb-3 fs-13 fw-medium">
                     Ready to move this lead forward?
@@ -422,16 +430,19 @@ const LeadDetailView = () => {
                     )}
 
                     {/* Final Action */}
-                    {!leadData.lead_invoice_id && <Link
+                    {leadData.lead_quotation_id && (
+                      <Link
                         className="btn btn-soft-primary btn-sm px-3 shadow-none"
                         to={
                           !leadData.lead_purchase_id
                             ? `/sale-create/${leadData.lead_id}`
                             : `/generate-invoice/${leadData.lead_purchase_id}`
-                        }>
-                      <i className="ri-bill-line align-bottom me-1"></i>
-                      Create Invoice
-                    </Link>}
+                        }
+                      >
+                        <i className="ri-bill-line align-bottom me-1"></i>
+                        Create Invoice
+                      </Link>
+                    )}
                   </div>
                 </div>
               )}
