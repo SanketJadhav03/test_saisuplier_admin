@@ -27,7 +27,7 @@ import AuthUser from "../../helpers/Authuser";
 import { useRef } from "react";
 import ProductAdd from "../Products/ProductAdd";
 import ProductUpdate from "../Products/ProductUpdate";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import ScrollToBottom from "react-scroll-to-bottom";
 import SupplierAdd from "../Suppliers/SupplierAdd";
 import { API_URL } from "../../helpers/url_helper";
@@ -43,6 +43,8 @@ const QuotationCreate = (props) => {
     value: "price_sales",
     label: "Sale Price",
   });
+  const [Data_View, SetData_View] = useState([]);
+  const { lead_id } = useParams();
   const [selectOtherCharge, setOtherCharge] = useState({
     value: "0",
     label: "Select Charge",
@@ -91,35 +93,65 @@ const QuotationCreate = (props) => {
   const [isProductLoading, setIsProductLoading] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
-  
-
   const { http, https } = AuthUser();
   const [BasicInformtion, SetBasicInformtion] = useState([]);
   const [BasiceINF, SetBasiceINF] = useState(1);
   useEffect(() => {
-        document.title = "Saisupplier Admin | Purchase Create";
+    document.title = "Saisupplier Admin | Purchase Create";
+
+    const getLead = async () => {
+    if (!lead_id) return;
+    
+    try {
+      const res = await http.get(`/lead/view/${lead_id}`);
+      const leadData = res.data.data;
+
+      // Update basic info
+      SetMasterArray((prev) => ({
+        ...prev,
+        purchase_customer_id: leadData.customer_id,
+      }));
+      setCustomers(leadData);
+
+      // Update the products array (This triggers the useMemo below)
+      // We use the spread operator [...] to ensure a new reference
+      SetData_View([...(leadData.products || [])]);
+      
+    } catch (err) {
+      console.error("Lead Error:", err);
+    }
+  };
+
     http
       .get("/purchase/information")
       .then((response) => {
-        SetBasicInformtion(response.data);
+        const data = response.data;
 
-        if (!manageCategory) {
-          SetMasterArray({
-            ...MasterArray,
-            purchase_customer_id: response.data.customer[0].user_id,
-          });
-          setpurchase_payment_term(
-            response.data.payment_term[0].payment_term_id,
-          );
+        SetBasicInformtion(data);
+
+        if (data.payment_term?.length > 0) {
+          setpurchase_payment_term(data.payment_term[0].payment_term_id);
         }
 
-        setCustomers(response.data.customer[0]);
+        if (lead_id) {
+          console.log("Lead Found");
+          getLead(); // Call only if lead_id exists
+        } else if (!manageCategory && data.customer?.length > 0) {
+          SetMasterArray((prev) => ({
+            ...prev,
+            purchase_customer_id: data.customer[0].user_id,
+          }));
+          if (data.customer?.length > 0) {
+            setCustomers(data.customer[0]);
+          }
+        }
+
         SetCheck(true);
       })
       .catch((error) => {
-        console.log(error);
-      });
-  }, [BasiceINF]);
+        console.error("Purchase Info Error:", error);
+      })
+  }, [lead_id, manageCategory]); // Removed BasiceINF to prevent infinite loops
   const [shippingCount, setShippingCount] = useState(1);
   const getAddressDetails = async (user_id) => {
     const { data } = await http.get(`/addresses/${user_id}`);
@@ -218,7 +250,7 @@ const QuotationCreate = (props) => {
   // Product search functionality
   const [searchList, SetSearchList] = useState([]);
   const [Data_product, SetData_product] = useState([]);
-  const [Data_View, SetData_View] = useState([]);
+  
   const [Count, SetCount] = useState(1);
   const searchInputRef = useRef(null);
 
@@ -346,7 +378,7 @@ const QuotationCreate = (props) => {
     );
     if (existingIndex !== -1) {
       const dataUP = Data_View[existingIndex];
-      const Qty = dataUP.qty + 1;
+      const Qty = dataUP.qty + 100;
       const dis_pre = dataUP.dis_pre;
       const dis_values = (Qty * dataUP.price_purchase * dis_pre) / 100;
       const basic = Qty * dataUP.price_purchase - dis_values;
@@ -365,7 +397,7 @@ const QuotationCreate = (props) => {
       SetData_View(updatedData);
       SetCount(Count + 1);
     } else {
-      const Qty = 1;
+      const Qty = 100;
       const basic = Qty * data.price_purchase;
       const gstValue = (basic * data.tax_percentage) / 100;
       const Subtotal = basic + gstValue;
@@ -391,10 +423,10 @@ const QuotationCreate = (props) => {
     const updatedProduct = { ...updatedProductList[index] };
 
     if (check === 1) {
-      updatedProduct[field] += 1;
+      updatedProduct[field] += 100;
     } else if (check === 2) {
-      if (field === "qty" && updatedProduct[field] >= 2) {
-        updatedProduct[field] -= 1;
+      if (field === "qty" && updatedProduct[field] > 100) {
+        updatedProduct[field] -= 100;
       }
     } else {
       if (field === "qty") {
@@ -442,81 +474,79 @@ const QuotationCreate = (props) => {
   const [Total_GST, setTotal_GST] = useState(0);
   const [Total_Net, setTotal_Net] = useState(0);
 
-useEffect(() => {
-  if (!Data_View?.length) {
-    setTotalBasic("0.00");
-    setTotalQty(0);
-    setTotal_Net("0.00");
-    setTotal_GST("0.00");
-    setTotal_Discount("0.00");
-    setTotal_purchse("0.00");
-    return;
-  }
+  useEffect(() => {
+    if (!Data_View?.length) {
+      setTotalBasic("0.00");
+      setTotalQty(0);
+      setTotal_Net("0.00");
+      setTotal_GST("0.00");
+      setTotal_Discount("0.00");
+      setTotal_purchse("0.00");
+      return;
+    }
 
-  let basic = 0;
-  let qty = 0;
-  let purchase = 0;
-  let discount = 0;
-  let gst = 0;
-  let net = 0;
+    let basic = 0;
+    let qty = 0;
+    let purchase = 0;
+    let discount = 0;
+    let gst = 0;
+    let net = 0;
 
-  Data_View.forEach(item => {
-    basic += Number(item.basic_total || 0);
-    qty += Number(item.qty || 0);
-    purchase += Number(item.price_purchase || 0);
-    discount += Number(item.dis_value || 0);
-    gst += Number(item.gst_value || 0);
-    net += Number(item.sub_total || 0);
-  });
+    Data_View.forEach((item) => {
+      basic += Number(item.basic_total || 0);
+      qty += Number(item.qty || 0);
+      purchase += Number(item.price_purchase || 0);
+      discount += Number(item.dis_value || 0);
+      gst += Number(item.gst_value || 0);
+      net += Number(item.sub_total || 0);
+    });
 
-  setTotalBasic(basic.toFixed(2));
-  setTotalQty(qty);
-  setTotal_purchse(purchase.toFixed(2));
-  setTotal_Discount(discount.toFixed(2));
-  setTotal_GST(gst.toFixed(2));
-  setTotal_Net(net.toFixed(2));
+    setTotalBasic(basic.toFixed(2));
+    setTotalQty(qty);
+    setTotal_purchse(purchase.toFixed(2));
+    setTotal_Discount(discount.toFixed(2));
+    setTotal_GST(gst.toFixed(2));
+    setTotal_Net(net.toFixed(2));
+  }, [Data_View]);
 
-}, [Data_View]);
+  useEffect(() => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
 
-useEffect(() => {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
+    const diff = isNaN(end - start) ? 0 : (end - start) / (1000 * 3600 * 24);
 
-  const diff = isNaN(end - start) ? 0 : (end - start) / (1000 * 3600 * 24);
+    setDaysCount(diff);
 
-  setDaysCount(diff);
-
-  SetMasterArray(prev => ({
-    ...prev,
-    purchase_due_days: diff,
-    purchase_end_date: endDate,
-    purchase_total_qty: totalQty,
-    purchase_total_purchase: Total_purchse,
-    purchase_total_basic: totalBasic,
-    purchase_total_discount: Total_Discount,
-    purchase_total_gst: Total_GST,
-    purchase_total_bill_amount: Total_Net,
-    purchase_invoice_no: "",
-    purchase_payment_term: purchase_payment_terms,
-  }));
-
-}, [
-  startDate,
-  endDate,
-  totalQty,
-  Total_purchse,
-  totalBasic,
-  Total_Discount,
-  Total_GST,
-  Total_Net,
-  purchase_payment_terms,
-]);
-
+    SetMasterArray((prev) => ({
+      ...prev,
+      purchase_due_days: diff,
+      purchase_end_date: endDate,
+      purchase_total_qty: totalQty,
+      purchase_total_purchase: Total_purchse,
+      purchase_total_basic: totalBasic,
+      purchase_total_discount: Total_Discount,
+      purchase_total_gst: Total_GST,
+      purchase_total_bill_amount: Total_Net,
+      purchase_invoice_no: "",
+      purchase_payment_term: purchase_payment_terms,
+    }));
+  }, [
+    startDate,
+    endDate,
+    totalQty,
+    Total_purchse,
+    totalBasic,
+    Total_Discount,
+    Total_GST,
+    Total_Net,
+    purchase_payment_terms,
+  ]);
 
   const prepareDataForAPI = () => {
     // Prepare master data
     const masterData = {
       ...MasterArray,
+      purchase_total_qty: totalQty,
       master_address_id: selectedAddress?.shipping_id,
       selectPriceOption: selectPriceOption.value,
       purchase_payment_term: purchase_payment_terms,
@@ -535,7 +565,7 @@ useEffect(() => {
       price_sales: item.price_sales,
       product_weight: item.product_weight,
       price_wholesaler: item.price_wholesaler,
-      dis_pre: item.dis_pre,
+      dis_pre: item.dis_pre || 0,
       dis_value: item.dis_value,
       basic_total: item.basic_total,
       tax_percentage: item.tax_percentage,
@@ -548,6 +578,7 @@ useEffect(() => {
     return {
       master: masterData,
       prodcut: productData,
+      lead_id:lead_id
     };
   };
   const [contact_persons, setContact_persons] = useState([]);
@@ -573,15 +604,15 @@ useEffect(() => {
     }
   }, [contactCount, customerDetails]);
 
-  const Onsubmit = () => {
+  const Onsubmit =async () => {
     if (Data_View.length) {
-     
-      const finalData = prepareDataForAPI(); 
+      const finalData = await prepareDataForAPI();
       if (!finalData.master.master_address_id) {
-            toast.warning("Please enter address before submitting");
-            return; // stop further execution
-          }
-           SetDisabed(true);
+        toast.warning("Please enter address before submitting");
+        return; // stop further execution
+      }
+      
+      SetDisabed(true);
       https
         .post("/purchase/store", finalData)
         .then(function (response) {
@@ -687,6 +718,7 @@ useEffect(() => {
                                       });
                                       setCustomers(e.item);
                                     }}
+                                    isDisabled={lead_id ? true : false}
                                     options={
                                       BasicInformtion.customer &&
                                       BasicInformtion.customer.map(
@@ -1033,7 +1065,7 @@ useEffect(() => {
                           for="lastnameInput"
                           className="form-label fw-bold"
                         >
-                          Product Name
+                          Product Name 
                         </Label>
                         <div className="form-icon right">
                           <div className="input-group">
@@ -1169,12 +1201,14 @@ useEffect(() => {
                                   <tr key={index}>
                                     <td>{index + 1}</td>
                                     <td>{item.category_name}</td>
-                                    <td style={{
+                                    <td
+                                      style={{
                                         maxWidth: "200px",
                                         wordBreak: "break-word",
                                         overflowWrap: "break-word",
                                         whiteSpace: "normal",
-                                      }}>
+                                      }}
+                                    >
                                       {item.product_english_name}
                                     </td>
                                     <td>

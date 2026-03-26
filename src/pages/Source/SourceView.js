@@ -10,8 +10,8 @@ import {
 } from "reactstrap";
 import { toast, ToastContainer } from "react-toastify";
 import DeleteModal from "../../Components/Common/DeleteModal";
-import StagesAdd from "./SourceAdd";
-import StagesUpdate from "./SourceUpdate";
+import SourcesAdd from "./SourceAdd";
+import SourcesUpdate from "./SourceUpdate";
 import axios from "axios";
 import { API_URL } from "../../helpers/url_helper";
 import AuthUser from "../../helpers/Authuser";
@@ -20,8 +20,8 @@ import InfiniteScroll from "react-infinite-scroll-component";
 const SourceView = () => {
   const [modalStates, setModalStates] = useState(false);
   const [UpdatemodalStates, setUpdateModalStates] = useState(false);
-  const [sourcesList, setStagesList] = useState([]);
-  const [sourcesDataModal, setStagesDataModal] = useState({});
+  const [sourcesList, setSourcesList] = useState([]);
+  const [sourcesDataModal, setSourcesDataModal] = useState({});
   const { http } = AuthUser();
   //   Delete Aleart
   const [ID, SetID] = useState();
@@ -46,7 +46,7 @@ const SourceView = () => {
           console.log(error);
         });
     }
-    setStagesList([]);
+    setSourcesList([]);
     SetPages(1);
     setDeleteModal(false);
   };
@@ -55,13 +55,13 @@ const SourceView = () => {
   // infinity
   const [Pages, SetPages] = useState(1);
   const [NoMore, SetNoMore] = useState(true);
-  const getStagessList = () => {
-    document.title = "Stagess | Saisupplier Admin";
+  const getSourcessList = () => {
+    document.title = "Sourcess | Saisupplier Admin";
 
     http
       .get(`/sources/list?page=${Pages}&limit=30`)
       .then(function (response) {
-        setStagesList([...sourcesList, ...response.data.data]);
+        setSourcesList([...sourcesList, ...response.data.data]);
         SetPages(Pages + 1);
         if (response.data.data.length === 0) {
           SetNoMore(false);
@@ -94,7 +94,7 @@ const SourceView = () => {
   //   end Alert
   const [counts, Setcounts] = useState(1);
   const handleCallback = (data, status) => {
-    setStagesList([]);
+    setSourcesList([]);
     SetPages(1);
     if (status == 0) {
       toast.success(data);
@@ -114,7 +114,7 @@ const SourceView = () => {
     setUpdateModalStates(!UpdatemodalStates);
   };
   useEffect(() => {
-    getStagessList();
+    getSourcessList();
   }, [counts]);
 
   return (
@@ -131,7 +131,7 @@ const SourceView = () => {
               <CardHeader className="card-header border-0">
                 <Row className="align-items-center gy-3">
                   <div className="col-sm">
-                    <h5 className="card-title mb-0">Stages </h5>
+                    <h5 className="card-title mb-0">Sources </h5>
                   </div>
                   <div className="col-sm-auto">
                     <div className="d-flex gap-1 flex-wrap">
@@ -142,7 +142,7 @@ const SourceView = () => {
                         onClick={() => setModalStates(!modalStates)}
                       >
                         <i className="ri-add-line align-bottom me-1"></i> Create
-                        Stages
+                        Sources
                       </button>
                     </div>
                   </div>
@@ -176,7 +176,7 @@ const SourceView = () => {
                             title="Toggle SortBy"
                             style={{ cursor: "pointer" }}
                           >
-                            Stages Name
+                            Sources Name
                           </th>
                           <th>Action</th>
                         </tr>
@@ -227,7 +227,7 @@ const SourceView = () => {
                 </div>
 
                 {modalStates === true ? (
-                  <StagesAdd
+                  <SourcesAdd
                     modalStates={modalStates}
                     setModalStates={() => {
                       setModalStates(false);
@@ -238,7 +238,7 @@ const SourceView = () => {
                   ""
                 )}
                 {UpdatemodalStates === true ? (
-                  <StagesUpdate
+                  <SourcesUpdate
                     modalStates={UpdatemodalStates}
                     data={sourcesDataModal}
                     setModalStates={() => {

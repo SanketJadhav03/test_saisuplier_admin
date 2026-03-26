@@ -216,11 +216,13 @@ const authProtectedRoutes = [
   // ROLES AND PERMISSIONS ROUTES | ROLES
   { path: "/purchase-list", component: <PurchaseList /> },
   { path: "/purchase-create", component: <PurchaseCreate /> },
+  { path: "/purchase-create/:lead_id", component: <PurchaseCreate /> },
   { path: "/purchase-edit/:id", component: <PurchaseUpdate /> },
 
   // ROLES AND PERMISSIONS ROUTES | ROLES
   { path: "/quotation-list", component: <QuotationList /> },
   { path: "/quotation-create", component: <QuotationCreate /> },
+  { path: "/quotation-create/:lead_id", component: <QuotationCreate /> },
   { path: "/quotation-edit/:id", component: <QuotationUpdate status={2} /> },
   { path: "/generate-invoice/:id", component: <QuotationUpdate status={3} /> },
 
@@ -279,6 +281,7 @@ const authProtectedRoutes = [
   { path: "/franchise-sale-create", component: <FranchiseSaleAdd /> },
 
   { path: "/sale-create", component: <Sale_Create /> },
+  { path: "/sale-create/:lead_id", component: <Sale_Create /> },
 
   { path: "/sale-edit/:id", component: <Sale_Edit /> },
 

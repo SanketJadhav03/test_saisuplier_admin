@@ -35,7 +35,7 @@ const SourceUpdate = (props) => {
         borderColor:"red",
         borderStyle:"groove"
       });
-      setMsg("Stages connot be empty!");
+      setMsg("Sources connot be empty!");
     }else{
     http
       .put(`/sources/update/${ModalData.id}`, ModalData)
@@ -47,7 +47,7 @@ const SourceUpdate = (props) => {
       });
     }
     }
-    const handleStages = (e)=>{
+    const handleSources = (e)=>{
       setCheckStatus({});
       setMsg("");
       setModalData({ ...ModalData,name: e.target.value })
@@ -57,7 +57,7 @@ const SourceUpdate = (props) => {
     <div>
       <Modal id="showModal" isOpen={modal} toggle={toggle} centered>
         <ModalHeader className="bg-light p-3" toggle={toggle}>
-          Edit Stages
+          Edit Sources
         </ModalHeader>
         <span className="tablelist-form">
           <ModalBody>
@@ -65,7 +65,7 @@ const SourceUpdate = (props) => {
               <div className="mb-3">
               <Label htmlFor="categoryname-field" className="form-label fw-bold d-flex justify-content-between">
                   <div>
-                    Stages Name<span style={{color:"red"}}> *</span>
+                    Sources Name<span style={{color:"red"}}> *</span>
                   </div>
                   <div style={{color:"red"}}>
                     {msg}
@@ -76,9 +76,9 @@ const SourceUpdate = (props) => {
                   name="category"
                   id="category-field"
                   className="form-control fw-bold"
-                  placeholder="Stages Name"
+                  placeholder="Sources Name"
                   type="text"
-                  onChange={handleStages}
+                  onChange={handleSources}
                   value={ModalData.name}
                 />
               </div>

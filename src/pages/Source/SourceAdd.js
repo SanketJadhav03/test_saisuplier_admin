@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 
 const SourceAdd = (props) => {
   const [modal, setModal] = useState(false);
-  const [unitName, setStagesName] = useState("");
+  const [unitName, setSourcesName] = useState("");
   const { http } = AuthUser();
   const Close = () => {
     setModal(false);
@@ -39,10 +39,10 @@ const SourceAdd = (props) => {
   }, [modal, props]);
   const [checkNameStatus, setCheckStatus] = useState({});
   const [msg, setMsg] = useState("");
-  const handleStages = (e) => {
+  const handleSources = (e) => {
     setCheckStatus({});
     setMsg("");
-    setStagesName(e.target.value);
+    setSourcesName(e.target.value);
   };
   const SubmitData = () => {
     if (unitName == "") {
@@ -50,7 +50,7 @@ const SourceAdd = (props) => {
         borderColor: "red",
         borderStyle: "groove",
       });
-      setMsg("Stages connot be empty!");
+      setMsg("Sources connot be empty!");
     } else {
       http
         .post("/sources/store", { name: unitName })
@@ -90,7 +90,7 @@ const SourceAdd = (props) => {
     <div>
       <Modal id="showModal" isOpen={modal} toggle={toggle} centered>
         <ModalHeader className="bg-light p-3" toggle={toggle}>
-          Add Stages
+          Add Sources
         </ModalHeader>
         <span className="tablelist-form">
           <ModalBody>
@@ -101,19 +101,19 @@ const SourceAdd = (props) => {
                   className="form-label fw-bold d-flex justify-content-between"
                 >
                   <div>
-                    Stages Name<span style={{ color: "red" }}> *</span>
+                    Sources Name<span style={{ color: "red" }}> *</span>
                   </div>
                   <div style={{ color: "red" }}>{msg}</div>
                 </Label>
                 <CustomInput
                   name="category"
                   id="category-field"
-                  placeholder="Stages Name"
+                  placeholder="Sources Name"
                   className="form-control fw-bold"
-                  onChange={handleStages}
+                  onChange={handleSources}
                   type="text"
                   checkNameStatus={checkNameStatus}
-                  handleStages={handleStages}
+                  handleSources={handleSources}
                   unitName={unitName}
                 />
               </div>

@@ -129,8 +129,8 @@ const LeadProView = () => {
         startDate: filters.startDate,
         endDate: filters.endDate,
         // priority_id: filters.priorityId,
-      });
-
+      }); 
+      
       setLeads(response.data.data || []);
     } catch (err) {
       console.error("Leads fetch error:", err);
@@ -349,80 +349,97 @@ const LeadProView = () => {
                     >
                       {columnLeads.map((lead) => (
                         <Card
-                          key={lead.lead_id}
-                          className="lead-card border-0 shadow-sm mb-3 card-animate" // card-animate adds the Velzon hover effect
-                        >
-                          <CardBody className="p-3">
-                            <div className="d-flex justify-content-between align-items-start mb-2">
-                              <Badge
-                                color={
-                                  lead.priority_name === "High"
-                                    ? "danger"
-                                    : lead.priority_name === "Medium"
-                                      ? "warning"
-                                      : "info"
-                                }
-                                className="text-uppercase px-2 py-1"
-                              >
-                                {lead.priority_name || "Normal"}
-                              </Badge>
+  key={lead.lead_id}
+  className="lead-card border-0 shadow-sm mb-3 card-animate"
+  style={{ borderLeft: `3px solid ${
+    lead.priority_name === "High" ? "#f06548" : 
+    lead.priority_name === "Medium" ? "#f7b84b" : "#299cdb"
+  }` }} // Subtle color strip on the left based on priority
+>
+  <CardBody className="p-3">
+    <div className="d-flex justify-content-between align-items-start mb-3">
+      <div className="d-flex align-items-center gap-2">
+        {/* Priority Badge */}
+        <Badge
+          color={
+            lead.priority_name === "High" ? "danger" : 
+            lead.priority_name === "Medium" ? "warning" : "info"
+          }
+          className="rounded-pill px-2"
+        >
+          {lead.priority_name || "Normal"}
+        </Badge>
 
-                              <UncontrolledDropdown>
-                                <DropdownToggle
-                                  tag="span"
-                                  className="text-muted cursor-pointer"
-                                >
-                                  <i className="ri-more-fill"></i>
-                                </DropdownToggle>
-                                <DropdownMenu
-                                  end
-                                  className="border-0 shadow-lg"
-                                >
-                                  <DropdownItem
-                                    onClick={() =>
-                                      navigate(`/lead-details/${lead.lead_id}`)
-                                    }
-                                  >
-                                    <i className="ri-eye-line me-2 text-primary"></i>
-                                    View Detail
-                                  </DropdownItem>
-                                  <DropdownItem>
-                                    <i className="ri-pencil-line me-2 text-info"></i>
-                                    Edit
-                                  </DropdownItem>
-                                  <DropdownItem className="text-danger">
-                                    <i className="ri-delete-bin-line me-2"></i>
-                                    Delete
-                                  </DropdownItem>
-                                </DropdownMenu>
-                              </UncontrolledDropdown>
-                            </div>
+        {/* Purchase Order Badge */}
+        {lead.lead_purchase_id && (
+          <Badge color="primary" className="text-uppercase border border-primary-subtle">
+            <i className="ri-shopping-cart-2-line me-1"></i>
+            PO-{lead.lead_purchase_id}
+          </Badge>
+        )}
+      </div>
 
-                            <h6 className="lead-name mb-1 fs-14 fw-semibold text-dark">
-                              {lead.customer_name}
-                            </h6>
+      <UncontrolledDropdown>
+        <DropdownToggle tag="span" className="btn btn-soft-secondary btn-sm dropdown cursor-pointer">
+          <i className="ri-more-fill"></i>
+        </DropdownToggle>
+        <DropdownMenu end className="border-0 shadow-lg">
+          <DropdownItem onClick={() => navigate(`/lead-details/${lead.lead_id}`)}>
+            <i className="ri-eye-line me-2 align-bottom text-muted"></i> View Detail
+          </DropdownItem>
+          <DropdownItem>
+            <i className="ri-pencil-line me-2 align-bottom text-muted"></i> Edit
+          </DropdownItem>
+          <DropdownItem divider />
+          <DropdownItem className="text-danger">
+            <i className="ri-delete-bin-line me-2 align-bottom"></i> Delete
+          </DropdownItem>
+        </DropdownMenu>
+      </UncontrolledDropdown>
+    </div>
 
-                            <p className="lead-phone mb-3 fs-13 text-muted">
-                              <i className="ri-phone-fill me-1 text-success"></i>
-                              {lead.customer_mobile}
-                            </p>
+    <div className="d-flex align-items-center mb-3">
+      {/* Avatar Icon */}
+      <div className="flex-shrink-0 avatar-xs me-2">
+        <div className="avatar-title bg-primary rounded-circle fs-13">
+          {lead.customer_name?.charAt(0) || "C"}
+        </div>
+      </div>
+      <div className="flex-grow-1">
+        <h6 className="lead-name mb-0 fs-14 fw-bold text-dark">
+          {lead.customer_name}
+        </h6>
+        <p className="text-muted mb-0 fs-12">
+          <i className="ri-map-pin-2-line me-1 text-primary"></i>
+          {lead.source_name || "Direct Source"}
+        </p>
+      </div>
+    </div>
 
-                            <div className="pt-2 border-top border-top-dashed d-flex justify-content-between align-items-center">
-                              <div className="d-flex align-items-center">
-                                <span className="text-muted fs-11">
-                                  {lead.source_name || "Direct"}
-                                </span>
-                              </div>
-                              <span className="badge bg-light text-body border fs-11">
-                                <i className="ri-calendar-event-line me-1 align-bottom"></i>
-                                {new Date(lead.inquiry_date).toLocaleDateString(
-                                  "en-GB",
-                                  { day: "2-digit", month: "short" },
-                                )}
-                              </span>
-                            </div>
-                          </CardBody>
-                        </Card>
+    <div className="mb-3">
+      <div className="d-flex align-items-center text-muted fs-13 mb-1">
+        <i className="ri-phone-line me-2 text-success"></i>
+        <span>{lead.customer_mobile}</span>
+      </div>
+    </div>
+
+    <div className="pt-3 border-top border-top-dashed d-flex justify-content-between align-items-center">
+      <div className="d-flex align-items-center text-muted fs-11">
+        <i className="ri-user-follow-line me-1"></i>
+        <span>ID: #{lead.lead_id}</span>
+      </div>
+      
+      <div className="text-muted fs-11 fw-medium">
+        <i className="ri-calendar-event-line me-1 align-bottom text-primary"></i>
+        {new Date(lead.inquiry_date).toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric"
+        })}
+      </div>
+    </div>
+  </CardBody>
+</Card>
                       ))}
                     </div>
 
