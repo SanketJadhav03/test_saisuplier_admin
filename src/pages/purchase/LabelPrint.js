@@ -14,45 +14,45 @@ const LabelPrint = (props) => {
   const [hasMoreUsers, setHasMoreUsers] = useState(true);
   const [addresses, setAddress] = useState([]);
 
- useEffect(() => {
-  if (!props.isOpen) return;
+  useEffect(() => {
+    if (!props.isOpen) return;
 
-  const fetchInvoice = async () => {
-    try {
-      const response = await http.get(`/sale/invoice/${props.id}`);
-      const data = response.data;
+    const fetchInvoice = async () => {
+      try {
+        const response = await http.get(`/sale/invoice/${props.id}`);
+        const data = response.data;
 
-      if (data) {
-        setChildData(data.Child || []);
-        setCustomer(data.customer || {});
-        setBusinessData(data.Business?.[0] || {});
-        setMasterData(data.Master?.[0] || {});
+        if (data) {
+          setChildData(data.Child || []);
+          setCustomer(data.customer || {});
+          setBusinessData(data.Business?.[0] || {});
+          setMasterData(data.Master?.[0] || {});
+        }
+      } catch (error) {
+        console.log("Error fetching data:", error);
       }
-    } catch (error) {
-      console.log("Error fetching data:", error);
+    };
+
+    const fetchAddresses = async () => {
+      try {
+        const response = await http.get(`/addresses/${props?.user?.user_id}`);
+        const fetched = response.data || [];
+
+        setUsers(fetched[0]);
+        setAddress(fetched);
+        setCustomer(props.user);
+      } catch (err) {
+        console.error("Failed to fetch users", err);
+        setHasMoreUsers(false);
+      }
+    };
+
+    if (props.id) {
+      fetchInvoice();
+    } else {
+      fetchAddresses();
     }
-  };
-
-  const fetchAddresses = async () => {
-    try {
-      const response = await http.get(`/addresses/${props?.user?.user_id}`);
-      const fetched = response.data || [];
-
-      setUsers(fetched[0]);
-      setAddress(fetched);
-      setCustomer(props.user);
-    } catch (err) {
-      console.error("Failed to fetch users", err);
-      setHasMoreUsers(false);
-    }
-  };
-
-  if (props.id) {
-    fetchInvoice();
-  } else {
-    fetchAddresses();
-  }
-}, [props.id, props.user?.master_id, props.isOpen,http]);
+  }, [props.id, props.user?.master_id, props.isOpen, http]);
 
   const stripHtml = (html = "") => {
     const temp = document.createElement("div");
@@ -185,7 +185,7 @@ const LabelPrint = (props) => {
     const total =
       parseFloat(itemsTotal.toFixed(2)) + otherCharges + transportCharges;
 
-     return Math.ceil(total);
+    return Math.ceil(total);
   };
 
   const codamount = calculateCodAmount(childData, masterData);

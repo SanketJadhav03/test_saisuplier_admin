@@ -70,7 +70,7 @@ const Dashboardmain = () => {
       className="page-content"
       style={{ backgroundColor: "#f8f9fa", minHeight: "100vh" }}
     >
-      <Container fluid className="py-4">
+      <Container fluid className="py-2">
         {/* --- Header & Main Filter Card --- */}
         <Card className="border-0 shadow-sm mb-5 rounded-4 overflow-hidden">
           <div

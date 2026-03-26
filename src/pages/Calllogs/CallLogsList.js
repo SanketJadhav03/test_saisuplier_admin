@@ -143,7 +143,7 @@ const CallLogsList = () => {
     http
       .post(`/callLog/filter/data`, Filter_Data)
       .then(function (response) {
-        SetCalllog(response.data.data)
+        SetCalllog(response.data.data);
         SetNoMore(false);
         console.log(callLog);
       })
@@ -401,7 +401,7 @@ const CallLogsList = () => {
                           >
                             Lead created By
                           </th>
-                          <th>Action</th>
+                          {/* <th>Action</th> */}
                         </tr>
                       </thead>
                       <tbody>
@@ -436,8 +436,15 @@ const CallLogsList = () => {
                             <td>
                               {new Date(item.date).toLocaleDateString("en-GB")}
                             </td>
-                            <td>{item.time}</td>
-                            <td>{item.duration}</td>
+                            <td>
+                              {(() => {
+                                const [hours, minutes] = item.time.split(":");
+                                const h = hours % 12 || 12;
+                                const ampm = hours >= 12 ? "PM" : "AM";
+                                return `${h}:${minutes} ${ampm}`;
+                              })()}
+                            </td>
+                            <td>{item.duration} sec</td>
                             <td>
                               {new Date(item.createdAt).toLocaleString(
                                 "en-IN",
@@ -445,8 +452,6 @@ const CallLogsList = () => {
                                   day: "2-digit",
                                   month: "short",
                                   year: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
                                 },
                               )}
                             </td>
@@ -457,14 +462,12 @@ const CallLogsList = () => {
                                   day: "2-digit",
                                   month: "short",
                                   year: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
                                 },
                               )}
                             </td>
                             <td>{item.full_name}</td>
 
-                            <td>
+                            {/* <td>
                               <ul className="list-inline hstack gap-2 mb-0">
                                 <li className="list-inline-item edit">
                                   <button
@@ -486,7 +489,7 @@ const CallLogsList = () => {
                                   )}
                                 </li>
                               </ul>
-                            </td>
+                            </td> */}
                           </tr>
                         ))}
                       </tbody>
