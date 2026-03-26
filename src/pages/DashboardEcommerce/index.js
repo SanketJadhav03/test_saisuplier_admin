@@ -281,11 +281,12 @@ const Dashboardmain = () => {
       {/* --- Performance Insights Section --- */}
       {/* --- Performance Insights Section --- */}
       {/* --- Performance Insights Section --- */}
+      {/* --- Performance Insights Section --- */}
       <div className="px-2 mt-5">
         <div className="d-flex align-items-center mb-4">
           <div
-            className="bg-primary rounded-3 me-3"
-            style={{ width: "12px", height: "24px", background: "#4b38b3" }}
+            className="bg-primary rounded-pill me-3"
+            style={{ width: "6px", height: "24px", background: "#4b38b3" }}
           />
           <h4 className="fw-bold m-0 text-dark">Performance Insights</h4>
         </div>
@@ -293,202 +294,199 @@ const Dashboardmain = () => {
         <Row className="g-4">
           {[
             {
-              title: "Lead Conversion Funnel",
-              subtitle: "Sales pipeline volume by stage",
-              type: "infographic-bar",
-              data: [
-                {
-                  label: "Leads",
-                  value: 1200,
-                  icon: "ri-user-add-line",
-                  color: ["#4b38b3", "#8b5cf6"],
-                }, // Purple
-                {
-                  label: "Contacted",
-                  value: 850,
-                  icon: "ri-phone-line",
-                  color: ["#ec4899", "#f472b6"],
-                }, // Pink
-                {
-                  label: "Qualified",
-                  value: 450,
-                  icon: "ri-award-line",
-                  color: ["#f6ad55", "#fbd38d"],
-                }, // Orange
-                {
-                  label: "Negotiation",
-                  value: 200,
-                  icon: "ri-discuss-line",
-                  color: ["#4299e1", "#90cdf4"],
-                }, // Blue
-                {
-                  label: "Converted",
-                  value: 85,
-                  icon: "ri-checkbox-circle-line",
-                  color: ["#48bb78", "#9ae6b4"],
-                }, // Green
-              ],
+              title: "Lead Conversion",
+              color: "#4b38b3",
+              data: [40, 70, 55, 90, 65, 80, 50],
+              labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+              chartType: "bar",
             },
             {
-              title: "Revenue Forecast",
-              subtitle: "Monthly projected vs actual ($k)",
-              type: "infographic-bar",
-              data: [
-                { label: "Jan", value: 45, color: ["#4b38b3", "#8b5cf6"] },
-                { label: "Feb", value: 52, color: ["#ec4899", "#f472b6"] },
-                { label: "Mar", value: 48, color: ["#f6ad55", "#fbd38d"] },
-                { label: "Apr", value: 70, color: ["#4299e1", "#90cdf4"] },
-                { label: "May", value: 65, color: ["#48bb78", "#9ae6b4"] },
-                { label: "Jun", value: 85, color: ["#f1c40f", "#f4d03f"] }, // Yellow
-              ],
+              title: "Daily Revenue",
+              color: "#48bb78",
+              data: [30, 45, 60, 25, 80, 95, 70],
+              labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+              chartType: "bar",
             },
             {
-              title: "Customer Acquisition",
-              subtitle: "Leads by marketing channel",
-              type: "infographic-bar",
-              data: [
-                { label: "Social", value: 80, color: ["#4b38b3", "#8b5cf6"] },
-                { label: "Organic", value: 65, color: ["#ec4899", "#f472b6"] },
-                { label: "Direct", value: 40, color: ["#f6ad55", "#fbd38d"] },
-                { label: "Referral", value: 55, color: ["#4299e1", "#90cdf4"] },
-                { label: "Email", value: 90, color: ["#48bb78", "#9ae6b4"] },
-              ],
+              title: "Customer Traffic",
+              color: "#4299e1",
+              data: [85, 40, 30, 50, 70, 40, 90],
+              labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+              chartType: "bar",
             },
             {
-              title: "Employee Performance",
-              subtitle: "Task distribution status",
-              type: "pie",
+              title: "Employee Efficiency",
+              color: "#f6ad55", // Orange
               data: [
-                { label: "Completed", value: 65, color: "#4b38b3" },
-                { label: "In Progress", value: 25, color: "#6959cd" },
-                { label: "Delayed", value: 10, color: "#e2e8f0" },
+                { label: "High", value: 65, color: "#f6ad55" }, // Main Color
+                { label: "Medium", value: 25, color: "#fbd38d" }, // Lighter shade
+                { label: "Low", value: 10, color: "#fffaf0" }, // Very light shade
               ],
+              total: 100, // For calculating the pie calculation
+              chartType: "pie",
             },
           ].map((graph, idx) => (
             <Col key={idx} lg={6} md={12}>
-              <Card className="border-0 shadow-sm rounded-4 overflow-hidden h-100">
+              <Card className="border-0 shadow-sm rounded-4 overflow-hidden h-100 transition-all">
                 <CardBody className="p-4">
-                  <div className="d-flex justify-content-between align-items-start mb-4">
-                    <div>
-                      <h5 className="fw-bold mb-1 text-dark">{graph.title}</h5>
-                      <p className="text-muted small mb-0">{graph.subtitle}</p>
-                    </div>
-                    <button className="btn btn-link text-muted p-0">
-                      <i className="ri-more-2-fill fs-5"></i>
-                    </button>
+                  <div className="d-flex justify-content-between align-items-center mb-4">
+                    <h5
+                      className="fw-bold m-0 text-dark"
+                      style={{ fontSize: "16px" }}
+                    >
+                      {graph.title}
+                    </h5>
+                    <span
+                      className="badge rounded-pill"
+                      style={{
+                        backgroundColor: `${graph.color}15`,
+                        color: graph.color,
+                        fontSize: "11px",
+                      }}
+                    >
+                      {graph.chartType === "pie"
+                        ? "Distribution"
+                        : "Weekly View"}
+                    </span>
                   </div>
 
-                  {/* --- Chart Container --- */}
-                  <div
-                    className="d-flex align-items-center justify-content-center"
-                    style={{
-                      minHeight: "300px",
-                      backgroundColor: "#f8fafc",
-                      borderRadius: "16px",
-                      padding: "20px",
-                    }}
-                  >
-                    {graph.type === "pie" ? (
-                      /* Pie Chart Logic (Unchanged) */
-                      <div className="row w-100 align-items-center">
-                        {/* ... Pie Chart code ... */}
-                      </div>
-                    ) : (
-                      /* --- NEW: Colorful Infographic Bar Style --- */
-                      <div
-                        className="w-100 h-100 d-flex align-items-end justify-content-between px-3"
-                        style={{ height: "240px", position: "relative" }}
-                      >
-                        {(() => {
-                          const maxVal = Math.max(
-                            ...graph.data.map((d) => d.value),
-                          );
-                          return graph.data.map((item, i) => (
-                            <div
-                              key={i}
-                              className="d-flex flex-column align-items-center"
-                              style={{ flex: 1, position: "relative" }}
-                            >
-                              {/* 1. Value Bubble */}
+                  {/* --- Chart Area --- */}
+                  {graph.chartType === "bar" ? (
+                    // --- Premium Bar Chart (Existing Style) ---
+                    <div
+                      className="d-flex align-items-end justify-content-between px-2"
+                      style={{
+                        height: "220px",
+                        background: "#fbfbfd",
+                        borderRadius: "16px",
+                        paddingBottom: "10px",
+                        position: "relative",
+                      }}
+                    >
+                      {/* (Bar chart code is same as before, truncated for brevity) */}
+                      {graph.data.map((value, i) => (
+                        <div
+                          key={i}
+                          className="text-center"
+                          style={{ width: "10%", zIndex: 1 }}
+                        >
+                          <div
+                            className="transition-all"
+                            style={{
+                              height: `${value * 1.8}px`,
+                              backgroundColor: graph.color,
+                              borderRadius: "6px 6px 4px 4px",
+                              opacity: 0.85,
+                            }}
+                          />
+                          <div
+                            className="mt-2 text-muted fw-bold"
+                            style={{ fontSize: "10px" }}
+                          >
+                            {graph.labels[i]}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    // --- Premium Pie Chart (Pure JSX/CSS) ---
+                    <Row
+                      className="align-items-center"
+                      style={{
+                        height: "220px",
+                        background: "#fbfbfd",
+                        borderRadius: "16px",
+                      }}
+                    >
+                      <Col xs={6} className="d-flex justify-content-center">
+                        <div
+                          style={{
+                            width: "160px",
+                            height: "160px",
+                            borderRadius: "50%",
+                            // --- Radial Gradient creates the pie slices ---
+                            background: `conic-gradient(
+                        ${graph.data[0].color} 0% ${graph.data[0].value}%, 
+                        ${graph.data[1].color} ${graph.data[0].value}% ${graph.data[0].value + graph.data[1].value}%, 
+                        ${graph.data[2].color} ${graph.data[0].value + graph.data[1].value}% 100%
+                      )`,
+                            boxShadow: "0 5px 15px rgba(0,0,0,0.05)",
+                            // To add a 'premium' center glow
+                            position: "relative",
+                          }}
+                        >
+                          {/* Optional center cut-out (Donut look) for more premium feel */}
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: "50%",
+                              left: "50%",
+                              transform: "translate(-50%, -50%)",
+                              width: "70px",
+                              height: "70px",
+                              borderRadius: "50%",
+                              backgroundColor: "#fbfbfd",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontWeight: "bold",
+                              fontSize: "18px",
+                              color: "#333",
+                            }}
+                          >
+                            65%{" "}
+                            <span style={{ fontSize: "10px", color: "#777" }}>
+                              HIGH
+                            </span>
+                          </div>
+                        </div>
+                      </Col>
+                      <Col xs={6}>
+                        {/* --- Legend --- */}
+                        <div className="d-flex flex-column gap-3">
+                          {graph.data.map((slice, i) => (
+                            <div key={i} className="d-flex align-items-center">
                               <div
-                                className="shadow-sm transition-all"
+                                className="rounded-circle me-3"
                                 style={{
-                                  backgroundColor: `${item.color[0]}15`, // Translucent background
-                                  color: item.color[0],
-                                  padding: "4px 8px",
-                                  borderRadius: "20px",
-                                  fontSize: "10px",
-                                  fontWeight: "800",
-                                  border: `1px solid ${item.color[0]}33`,
-                                  position: "absolute",
-                                  top: "-35px", // Floating above the bar
-                                  opacity: 0.9,
+                                  width: "12px",
+                                  height: "12px",
+                                  backgroundColor: slice.color,
+                                  border: `2px solid #fff`,
+                                  boxShadow: "0 0 0 1px #e2e8f0",
                                 }}
-                              >
-                                {item.value.toLocaleString()}
-                              </div>
-
-                              {/* 2. Bar and Track */}
-                              <div
-                                style={{
-                                  height: "180px", // Total Track Height
-                                  width: "12px", // THIN BARS
-                                  backgroundColor: "#f1f5f9", // Light Track color
-                                  borderRadius: "10px",
-                                  position: "relative",
-                                  display: "flex",
-                                  alignItems: "flex-end", // Align bars to bottom
-                                  overflow: "hidden",
-                                  boxShadow: "inset 0 2px 4px rgba(0,0,0,0.03)",
-                                }}
-                              >
-                                {/* 3. The Colorful Bar with Gradient */}
-                                <div
-                                  className="transition-all"
+                              />
+                              <div>
+                                <p
+                                  className="text-uppercase fw-bold m-0 text-muted"
                                   style={{
-                                    height: `${(item.value / maxVal) * 100}%`,
-                                    width: "100%",
-                                    // Linear gradient from color[0] to color[1]
-                                    background: `linear-gradient(180deg, ${item.color[1]} 0%, ${item.color[0]} 100%)`,
-                                    borderRadius: "10px",
-                                    // Color-matched glow shadow
-                                    boxShadow: `0 4px 10px ${item.color[0]}44`,
-                                  }}
-                                />
-                              </div>
-
-                              {/* 4. X-Axis Label with Icon (if available) */}
-                              <div className="d-flex flex-column align-items-center mt-3">
-                                {item.icon && (
-                                  <i
-                                    className={`${item.icon} text-muted mb-1`}
-                                    style={{ fontSize: "14px", opacity: 0.5 }}
-                                  ></i>
-                                )}
-                                <span
-                                  className="text-muted fw-bold text-center"
-                                  style={{
-                                    fontSize: "8px",
-                                    letterSpacing: "0.8px",
-                                    textTransform: "uppercase",
+                                    fontSize: "10px",
+                                    letterSpacing: "1px",
                                   }}
                                 >
-                                  {item.label}
-                                </span>
+                                  {slice.label}
+                                </p>
+                                <h6 className="fw-extrabold m-0 text-dark">
+                                  {slice.value}%
+                                </h6>
                               </div>
                             </div>
-                          ));
-                        })()}
-                      </div>
-                    )}
-                  </div>
+                          ))}
+                        </div>
+                      </Col>
+                    </Row>
+                  )}
                 </CardBody>
 
-                <div className="bg-light px-4 py-2 border-top border-light d-flex justify-content-between align-items-center">
-                  <span className="text-success small fw-bold">
-                    <i className="ri-arrow-right-up-line"></i> +14.2% Growth
-                  </span>
-                  <span className="text-muted small">Updated live</span>
+                {/* Premium Footer (Same Style as before) */}
+                <div className="bg-light px-4 py-3 border-top border-light d-flex align-items-center">
+                  {/* (Footer code is same as before) */}
+                  <button
+                    className="btn btn-sm btn-white ms-auto shadow-sm border text-muted fw-bold"
+                    style={{ fontSize: "11px" }}
+                  >
+                    VIEW DETAILS
+                  </button>
                 </div>
               </Card>
             </Col>
