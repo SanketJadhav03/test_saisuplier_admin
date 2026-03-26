@@ -387,7 +387,7 @@ const LeadProView = () => {
           <DropdownItem onClick={() => navigate(`/lead-details/${lead.lead_id}`)}>
             <i className="ri-eye-line me-2 align-bottom text-muted"></i> View Detail
           </DropdownItem>
-          <DropdownItem>
+          <DropdownItem onClick={() => navigate(`/update-leads/${lead.lead_id}`)}>
             <i className="ri-pencil-line me-2 align-bottom text-muted"></i> Edit
           </DropdownItem>
           <DropdownItem divider />

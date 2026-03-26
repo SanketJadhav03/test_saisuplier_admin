@@ -172,7 +172,7 @@ const LeadDetailView = () => {
               <div className="d-flex align-items-center mt-3 mb-3">
                 <div className="flex-shrink-0 avatar-xs me-3">
                   <div
-                    className={`avatar-title rounded-circle ${isOverdue ? "bg-danger " : "bg-light "}`}
+                    className={`avatar-title rounded-circle ${isOverdue ? "bg-danger " : "bg-light text-primary"}`}
                   >
                     <Calendar size={16} />
                   </div>
