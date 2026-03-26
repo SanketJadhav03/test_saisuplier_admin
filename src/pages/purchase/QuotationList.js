@@ -683,12 +683,14 @@ const QuotationList = () => {
                                 .filter((item) => {
                                   const query =
                                     SearchQuery?.toLowerCase() || "";
-
                                   return (
                                     item.master_name
                                       ?.toLowerCase()
                                       .includes(query) ||
                                     item.user_name
+                                      ?.toLowerCase()
+                                      .includes(query) ||
+                                    item.purchase_invoice_no
                                       ?.toLowerCase()
                                       .includes(query) ||
                                     item.user_unique_id
@@ -713,9 +715,19 @@ const QuotationList = () => {
                                 .map((item) => [
                                   item.purchase_invoice_no,
                                   item,
-                                ]), // ✅ dedupe by user_id
+                                ]),
                             ).values(),
                           ]
+                            .sort((a, b) =>
+                              // This sorts them in ascending order (1, 2, 3...)
+                              a.purchase_invoice_no
+                                .toString()
+                                .localeCompare(
+                                  b.purchase_invoice_no.toString(),
+                                  undefined,
+                                  { numeric: true, sensitivity: "base" },
+                                ),
+                            )
                             .reverse()
                             .map((item, index) => (
                               <tr key={index}>

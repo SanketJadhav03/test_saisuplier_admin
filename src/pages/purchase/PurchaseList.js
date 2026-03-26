@@ -610,7 +610,6 @@ const PurchaseList = () => {
                                 .filter((item) => {
                                   const query =
                                     SearchQuery?.toLowerCase() || "";
-
                                   return (
                                     item.master_name
                                       ?.toLowerCase()
@@ -643,9 +642,19 @@ const PurchaseList = () => {
                                 .map((item) => [
                                   item.purchase_invoice_no,
                                   item,
-                                ]), // ✅ dedupe by user_id
+                                ]),
                             ).values(),
                           ]
+                            .sort((a, b) =>
+                              // This sorts them in ascending order (1, 2, 3...)
+                              a.purchase_invoice_no
+                                .toString()
+                                .localeCompare(
+                                  b.purchase_invoice_no.toString(),
+                                  undefined,
+                                  { numeric: true, sensitivity: "base" },
+                                ),
+                            )
                             .reverse()
                             .map((item, index) => (
                               <tr key={index}>
@@ -657,10 +666,10 @@ const PurchaseList = () => {
                                     {index + 1}
                                   </a>
                                 </td>
-                                <td>{item.purchase_start_date}</td>
+                                <td>{item?.purchase_start_date}</td>
                                 <td>
                                   {/* {invoiceDetails ? invoiceDetails : ""}- */}
-                                  PO-{item.purchase_invoice_no}
+                                  PO-{item?.purchase_invoice_no}
                                 </td>
 
                                 <td style={{ maxWidth: "120px" }}>
@@ -670,13 +679,13 @@ const PurchaseList = () => {
                                       wordBreak: "break-word",
                                     }}
                                   >
-                                    {item.user_type == 1
+                                    {item?.user_type == 1
                                       ? item.user_name
                                       : item.master_name}
-                                    {item.user_type == 3
+                                    {item?.user_type == 3
                                       ? ` - ${item.master_branch_name}`
                                       : " "}
-                                    {item.user_type == 3
+                                    {item?.user_type == 3
                                       ? ` - ${item.master_branch_code}`
                                       : " "}
                                   </div>
