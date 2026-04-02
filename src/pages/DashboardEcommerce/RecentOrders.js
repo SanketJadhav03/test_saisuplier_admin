@@ -53,7 +53,7 @@ const RecentOrders = ({ Comp }) => {
                     Comp.pos_recent_bill.map((item, key) => (
                       <tr key={key}>
                         <td>
-                          INV-{item.master_invoice_no}
+                          {item.master_invoice_no}
                         </td>
                         <td style={{ maxWidth: "130px" }}>
                           <div className="d-flex align-items-center">

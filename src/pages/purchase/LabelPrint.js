@@ -597,7 +597,7 @@ const LabelPrint = (props) => {
     //                               }}
     //                             >
     //                               Order ID:{" "}
-    //                               {"INV-" + masterData.master_invoice_no || ""}
+    //                               {"" + masterData.master_invoice_no || ""}
     //                             </div>
     //                           </div>
     //                           <div className="mt-2" style={{ fontSize: "13px" }}>
@@ -1099,7 +1099,7 @@ const LabelPrint = (props) => {
                               }}
                             >
                               Order ID:{" "}
-                              {"INV-" + masterData.master_invoice_no || ""}
+                              {"" + masterData.master_invoice_no || ""}
                             </div>
                           </div>
                         </div>

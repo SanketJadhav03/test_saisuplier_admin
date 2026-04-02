@@ -737,7 +737,7 @@ const PurchaseList = () => {
                                             item.user_mobile,
                                             [
                                               item.master_name,
-                                              `INV-${item.master_invoice_no}`,
+                                              `${item.master_invoice_no}`,
                                               item.master_bill_date,
                                               (
                                                 parseFloat(

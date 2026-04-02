@@ -99,7 +99,7 @@ const OrderDetailsModal = ({ order: orderProp, onClose }) => {
         <div className="d-flex justify-content-between w-100 align-items-center">
           <div>
             <h4 className="mb-1 fw-bold text-primary">
-              Order #{orderProp.master_invoice_no || `INV-${orderProp.master_id}`}
+              Order #{orderProp.master_invoice_no || `${orderProp.master_id}`}
             </h4>
             <p className="text-muted mb-0">
               <span className="me-3">
