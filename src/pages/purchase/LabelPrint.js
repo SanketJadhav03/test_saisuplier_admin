@@ -198,7 +198,7 @@ const LabelPrint = (props) => {
     // label print style for printing
     const pageStyle = `
       @page { 
-        size: ${orientation === "vertical" ? "100mm 150mm" : "100mm 75mm"}; 
+        size: ${ props.id ? "100mm 150mm" : "75mm 100mm"}; 
         margin: 0; 
       }
       body { 
@@ -207,8 +207,8 @@ const LabelPrint = (props) => {
         background: white !important;
       }
       .label-box { 
-        width: ${orientation === "vertical" ? "100mm" : "100mm"};                                                                                                                                                                                                                                                                                                                                             
-        height: ${orientation === "vertical" ? "150mm" : "75mm"};
+        width: ${props.id ? "100mm" : "75mm"};                                                                                                                                                                                                                                                                                                                                             
+        height: ${props.id? "150mm" : "100mm"};
         padding: 10px;
         box-sizing: border-box;
         background: white;
@@ -266,7 +266,7 @@ const LabelPrint = (props) => {
       
       .bank-name {
         font-weight: 600;
-        font-size: 16px;
+        font-size: 18px;
         text-transform: uppercase;
         line-height: 1;
         margin-bottom: 3px;
@@ -274,8 +274,12 @@ const LabelPrint = (props) => {
       
       .address, .meta {
         margin-bottom: 2px;
-        font-size: 10px;
+        font-size: 14px;
       }
+       .address-customer,.meta-customer{
+       margin-bottom: 2px;
+       font-size: 14px;
+       }
       
       .from-title {
         margin-top: 8px;
@@ -285,12 +289,12 @@ const LabelPrint = (props) => {
       
       .from-company {
         font-weight: bold;
-        font-size: 11px;
+        font-size: 15px;
         margin-bottom: 2px;
       }
       
       .from-details {
-        font-size: 10px;
+        font-size: 13px;
         line-height: 1.2;
       }
       
@@ -366,7 +370,7 @@ const LabelPrint = (props) => {
       </html>
     `);
 
-   // printWindow.document.close();
+   printWindow.document.close();
   };
 
   return (
@@ -895,14 +899,20 @@ const LabelPrint = (props) => {
         }
 
         .label-vertical {
+          width: 75mm;
+          height: 100mm;
+        }
+          .label-landscape {
+          width: 100mm;
+          height: 75mm;
+        }
+
+        .label-vertical-invoice {
           width: 100mm;
           height: 150mm;
         }
         
-        .label-landscape {
-          width: 100mm;
-          height: 75mm;
-        }
+        
 
         .hrline {
     width: 100%;
@@ -1044,7 +1054,7 @@ const LabelPrint = (props) => {
                 <div
                   className={`label-box ${
                     orientation === "vertical"
-                      ? "label-vertical"
+                      ? "label-vertical-invoice"
                       : "label-landscape"
                   }`}
                 >
@@ -1294,7 +1304,7 @@ const LabelPrint = (props) => {
                         : ""}
                     </div>
 
-                    <div className="address">
+                    <div className="address-customer">
                       {users.address_line1 && (
                         <>
                           {users.address_line1}
@@ -1307,7 +1317,7 @@ const LabelPrint = (props) => {
                       )}
                     </div>
 
-                    <div className="meta">
+                    <div className="meta-customer">
                       <b>PIN Code:</b> {users.pincode || "N/A"}
                     </div>
                     <div className="meta">
