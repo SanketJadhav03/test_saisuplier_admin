@@ -391,7 +391,7 @@ const LeadDetailView = () => {
                         }
                         className="fw-medium link-primary"
                       >
-                        INV-{leadData.lead_invoice_id}{" "}
+                        {leadData.lead_invoice_id}{" "}
                         <i className="ri-external-link-line align-middle ms-1"></i>
                       </Link>
                     ) : (

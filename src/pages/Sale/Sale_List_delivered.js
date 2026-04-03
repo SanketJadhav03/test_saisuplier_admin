@@ -218,7 +218,7 @@ const Sale_List_delivered = () => {
       "dispatched",
       {
         Name: selectedStatusOrder.user_name,
-        Order_Number: `INV-${selectedStatusOrder.master_invoice_no}`,
+        Order_Number: `${selectedStatusOrder.master_invoice_no}`,
         transport_details: trackingDescription,
       },
       selectedStatusOrder.user_email,
@@ -628,7 +628,7 @@ const Sale_List_delivered = () => {
                           .map((item, index) => (
                             <tr key={index}>
                               <td>{index + 1}</td>
-                              <td>INV-{item.master_invoice_no}</td>
+                              <td>{item.master_invoice_no}</td>
                               <td>
                                 {item.purchase_type == 2 ? "Sample" : "Regular"}
                               </td>

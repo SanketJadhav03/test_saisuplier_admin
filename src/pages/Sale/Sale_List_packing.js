@@ -89,7 +89,7 @@ const Sale_List_packing = () => {
     { label: "Last Year", value: "last_year" },
   ];
   const [activeFilter, setActiveFilter] = useState("today");
-   const handleDateFilter = (type) => {
+  const handleDateFilter = (type) => {
     let startDate = null;
     let endDate = null;
 
@@ -157,7 +157,6 @@ const Sale_List_packing = () => {
 
   const formatDate = (date) => date.toLocaleDateString("en-GB");
 
-
   const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [selectedStatusOrder, setSelectedStatusOrder] = useState(null);
   const [newStatus, setNewStatus] = useState("");
@@ -177,7 +176,6 @@ const Sale_List_packing = () => {
     { value: "5", label: "Rejected" },
     // { value: '6', label: 'Delivered' },
   ];
-
 
   useEffect(() => {
     http
@@ -218,7 +216,7 @@ const Sale_List_packing = () => {
       "dispatched",
       {
         Name: selectedStatusOrder.user_name,
-        Order_Number: `INV-${selectedStatusOrder.master_invoice_no}`,
+        Order_Number: `${selectedStatusOrder.master_invoice_no}`,
         transport_details: trackingDescription,
       },
       selectedStatusOrder.user_email,
@@ -258,7 +256,7 @@ const Sale_List_packing = () => {
           "dispatched",
           {
             Name: selectedStatusOrder.user_name,
-            Order_Number: `INV-${selectedStatusOrder.master_invoice_no}`,
+            Order_Number: `${selectedStatusOrder.master_invoice_no}`,
             transport_details: trackingDescription,
             image: base64Image, // send as base64
           },
@@ -271,7 +269,7 @@ const Sale_List_packing = () => {
         "dispatched",
         {
           Name: selectedStatusOrder.user_name,
-          Order_Number: `INV-${selectedStatusOrder.master_invoice_no}`,
+          Order_Number: `${selectedStatusOrder.master_invoice_no}`,
           transport_details: trackingDescription,
           image: null,
         },
@@ -474,23 +472,41 @@ const Sale_List_packing = () => {
     };
     reader.readAsDataURL(file);
   };
-
+  const toggleCamera = () => {
+    setFacingMode((prevMode) => (prevMode === "user" ? "environment" : "user"));
+  };
+  const [facingMode, setFacingMode] = useState("user"); // "user" for front, "environment" for back
+  const streamRef = useRef(null); // Keep track of the stream to stop it before switching
+  // We need an effect to restart the camera whenever facingMode changes
+  useEffect(() => {
+    if (showVideo) {
+      openCamera();
+    }
+  }, [facingMode]);
   const openCamera = async () => {
     try {
-      setShowVideo(true); // Show video first so the <video> element renders
+      setShowVideo(true);
 
-      // Wait for the video element to render
+      // Stop any existing stream before starting a new one
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+      }
+
       setTimeout(async () => {
         if (videoRef.current) {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            video: true,
-          });
+          const constraints = {
+            video: { facingMode: facingMode }, // Uses the state value
+          };
+
+          const stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+          streamRef.current = stream; // Store stream in ref for later cleanup
           videoRef.current.srcObject = stream;
           videoRef.current.play();
         }
-      }, 100); // 100ms delay ensures video element exists
+      }, 100);
     } catch (err) {
-      console.error("Camera not accessible:", err);
+      console.error("Camera access error:", err);
       alert("Cannot access camera: " + err.message);
     }
   };
@@ -532,7 +548,8 @@ const Sale_List_packing = () => {
                   <div className="col-4">
                     <div className="col-12">
                       <h3 className="text-center fw-bold mb-0">
-                        Packing-order                      </h3>
+                        Packing-order{" "}
+                      </h3>
                     </div>
                   </div>
                   <div className="col-8 btn-group flex-wrap gap-2">
@@ -687,165 +704,165 @@ const Sale_List_packing = () => {
                       </thead>
                       <tbody>
                         {[
-                            ...new Map(
-                              (Data || [])
-                                .filter((item) => {
-                                  const query =
-                                    searchQuery?.toLowerCase() || "";
-                                  return (
-                                    item.user_name
-                                      ?.toLowerCase()
-                                      .includes(query) ||
-                                    item.master_name
-                                      ?.toLowerCase()
-                                      .includes(query) ||
-                                    item.user_unique_id
-                                      ?.toLowerCase()
-                                      .includes(query) ||
-                                    item.master_ifsc
-                                      ?.toLowerCase()
-                                      .includes(query) ||
-                                    item.user_mobile
-                                      ?.toString()
-                                      .includes(query) ||
-                                    item.master_mobile
-                                      ?.toString()
-                                      .includes(query) ||
-                                    item.user_email
-                                      ?.toLowerCase()
-                                      .includes(query)
-                                  );
-                                })
-                                .map((item) => [item.master_invoice_no, item]), // ✅ dedupe by user_id
-                            ).values(),
-                          ]
-                            .filter((temp) =>temp.master_bill_status == 3 ).map((item, index) => (
-                          <tr key={index}>
-                            <td>{index + 1}</td>
-                            <td>INV-{item.master_invoice_no}</td>
-                            <td>
-                              {item.purchase_type == 2 ? "Sample" : "Regular"}
-                            </td>
-                            <td style={{ maxWidth: "120px" }}>
-                              <div
-                                style={{
-                                  whiteSpace: "normal",
-                                  wordBreak: "break-word",
-                                }}
-                              >
-                                {item.user_type == 1
-                                  ? item.user_name
-                                  : item.master_name}
-                                {item.user_type == 3
-                                  ? ` - ${item.master_branch_name}`
-                                  : " "}
-                                {item.user_type == 3
-                                  ? ` - ${item.master_branch_code}`
-                                  : " "}
-                              </div>
-                            </td>
-                            <td>{item.master_bill_date}</td>
-                            <td>{item.master_qty}</td>
-                            <td>
-                              &#8377;{" "}
-                              {(parseFloat(
-                                (
-                                  parseFloat(item.gstTotal) +
-                                  parseFloat(item.master_total_bill_amt)
-                                )?.toFixed(2),
-                              ) +
-                                parseFloat(item.other_charge_amount) +
-                                parseFloat(item.transport_types_total_charge))?.toFixed(2)}
-                            </td>
-
-                            <td>
-                              {item.payment_id == "2" ? (
+                          ...new Map(
+                            (Data || [])
+                              .filter((item) => {
+                                const query = searchQuery?.toLowerCase() || "";
+                                return (
+                                  item.user_name
+                                    ?.toLowerCase()
+                                    .includes(query) ||
+                                  item.master_name
+                                    ?.toLowerCase()
+                                    .includes(query) ||
+                                  item.user_unique_id
+                                    ?.toLowerCase()
+                                    .includes(query) ||
+                                  item.master_ifsc
+                                    ?.toLowerCase()
+                                    .includes(query) ||
+                                  item.user_mobile
+                                    ?.toString()
+                                    .includes(query) ||
+                                  item.master_mobile
+                                    ?.toString()
+                                    .includes(query) ||
+                                  item.user_email?.toLowerCase().includes(query)
+                                );
+                              })
+                              .map((item) => [item.master_invoice_no, item]), // ✅ dedupe by user_id
+                          ).values(),
+                        ]
+                          .filter((temp) => temp.master_bill_status == 3)
+                          .map((item, index) => (
+                            <tr key={index}>
+                              <td>{index + 1}</td>
+                              <td>{item.master_invoice_no}</td>
+                              <td>
+                                {item.purchase_type == 2 ? "Sample" : "Regular"}
+                              </td>
+                              <td style={{ maxWidth: "120px" }}>
                                 <div
-                                  onClick={() => {
-                                    handlePreview(item);
+                                  style={{
+                                    whiteSpace: "normal",
+                                    wordBreak: "break-word",
                                   }}
-                                  className="d-flex align-items-center justify-content-center gap-2 btn btn-sm btn-outline-info"
                                 >
-                                  {item.payment_type}
-                                  <i className="ri-file-info-line fs-16 align-bottom me-1"></i>
+                                  {item.user_type == 1
+                                    ? item.user_name
+                                    : item.master_name}
+                                  {item.user_type == 3
+                                    ? ` - ${item.master_branch_name}`
+                                    : " "}
+                                  {item.user_type == 3
+                                    ? ` - ${item.master_branch_code}`
+                                    : " "}
                                 </div>
-                              ) : (
-                                item.payment_type
-                              )}
-                            </td>
-                            <td>
-                              <button
-                                className="btn btn-outline-info btn-sm d-flex align-items-center"
-                                onClick={() => {
-                                  setSelectedStatusOrder(item);
-                                  setTrackingModalOpen(true);
-                                  setTrackingDescription(
-                                    item.master_tracking_details,
-                                  );
-                                }}
-                              >
-                                {item.master_tracking_details ? (
-                                  <i className="ri-eye-fill me-2 fs-16"></i>
+                              </td>
+                              <td>{item.master_bill_date}</td>
+                              <td>{item.master_qty}</td>
+                              <td>
+                                &#8377;{" "}
+                                {(
+                                  parseFloat(
+                                    (
+                                      parseFloat(item.gstTotal) +
+                                      parseFloat(item.master_total_bill_amt)
+                                    )?.toFixed(2),
+                                  ) +
+                                  parseFloat(item.other_charge_amount) +
+                                  parseFloat(item.transport_types_total_charge)
+                                )?.toFixed(2)}
+                              </td>
+
+                              <td>
+                                {item.payment_id == "2" ? (
+                                  <div
+                                    onClick={() => {
+                                      handlePreview(item);
+                                    }}
+                                    className="d-flex align-items-center justify-content-center gap-2 btn btn-sm btn-outline-info"
+                                  >
+                                    {item.payment_type}
+                                    <i className="ri-file-info-line fs-16 align-bottom me-1"></i>
+                                  </div>
                                 ) : (
-                                  <i className="ri-add-fill me-2 fs-16"></i>
+                                  item.payment_type
                                 )}
-                                Tracking
-                              </button>
-                            </td>
-                            <td style={{ minWidth: 150 }}>
-                              <Select
-                                onChange={(selectedOption) => {
-                                  setOrderDescription("");
-                                  setImagePreview(null);
-                                  if (selectedOption.value == 4) {
-                                    setSelectedStatusOrder(item);
-                                    setStatusModalOpen(true);
-                                    setNewStatus(selectedOption.value);
-                                  } else {
-                                    handleStatusUpdate(item, selectedOption);
-                                  }
-                                }}
-                                options={statusOptions}
-                                value={statusOptions.find(
-                                  (opt) =>
-                                    opt.value ==
-                                    item.master_bill_status.toString(),
-                                )}
-                                isSearchable={true}
-                                menuPortalTarget={document.body} // 👈 Render dropdown in body
-                                styles={{
-                                  menuPortal: (base) => ({
-                                    ...base,
-                                    zIndex: 9999,
-                                  }), // 👈 Ensure it's on top
-                                }}
-                              />
-                            </td>
-                            <td>
-                              <div className="d-flex gap-2 justify-content-center">
-                                <Button
-                                  color="light"
-                                  size="sm"
+                              </td>
+                              <td>
+                                <button
+                                  className="btn btn-outline-info btn-sm d-flex align-items-center"
                                   onClick={() => {
-                                    setSelectedSaleID(item.master_id);
-                                    setIsOpen(true);
+                                    setSelectedStatusOrder(item);
+                                    setTrackingModalOpen(true);
+                                    setTrackingDescription(
+                                      item.master_tracking_details,
+                                    );
                                   }}
-                                  className="btn-icon text-primary"
                                 >
-                                  <i className="ri-price-tag-3-line"></i>
-                                </Button>
-                                <Button
-                                  color="light"
-                                  size="sm"
-                                  onClick={() => View_invoce(item.master_id)}
-                                  className="btn-icon text-primary"
-                                >
-                                  <i className="ri-printer-line"></i>
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
+                                  {item.master_tracking_details ? (
+                                    <i className="ri-eye-fill me-2 fs-16"></i>
+                                  ) : (
+                                    <i className="ri-add-fill me-2 fs-16"></i>
+                                  )}
+                                  Tracking
+                                </button>
+                              </td>
+                              <td style={{ minWidth: 150 }}>
+                                <Select
+                                  onChange={(selectedOption) => {
+                                    setOrderDescription("");
+                                    setImagePreview(null);
+                                    if (selectedOption.value == 4) {
+                                      setSelectedStatusOrder(item);
+                                      setStatusModalOpen(true);
+                                      setNewStatus(selectedOption.value);
+                                    } else {
+                                      handleStatusUpdate(item, selectedOption);
+                                    }
+                                  }}
+                                  options={statusOptions}
+                                  value={statusOptions.find(
+                                    (opt) =>
+                                      opt.value ==
+                                      item.master_bill_status.toString(),
+                                  )}
+                                  isSearchable={true}
+                                  menuPortalTarget={document.body} // 👈 Render dropdown in body
+                                  styles={{
+                                    menuPortal: (base) => ({
+                                      ...base,
+                                      zIndex: 9999,
+                                    }), // 👈 Ensure it's on top
+                                  }}
+                                />
+                              </td>
+                              <td>
+                                <div className="d-flex gap-2 justify-content-center">
+                                  <Button
+                                    color="light"
+                                    size="sm"
+                                    onClick={() => {
+                                      setSelectedSaleID(item.master_id);
+                                      setIsOpen(true);
+                                    }}
+                                    className="btn-icon text-primary"
+                                  >
+                                    <i className="ri-price-tag-3-line"></i>
+                                  </Button>
+                                  <Button
+                                    color="light"
+                                    size="sm"
+                                    onClick={() => View_invoce(item.master_id)}
+                                    className="btn-icon text-primary"
+                                  >
+                                    <i className="ri-printer-line"></i>
+                                  </Button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
                       </tbody>
                     </table>
                   </InfiniteScroll>
@@ -927,14 +944,55 @@ const Sale_List_packing = () => {
 
             {/* Video preview for live camera */}
             {showVideo && (
-              <div className="text-center mb-3">
+              <div className="flex flex-col items-center border p-3 rounded bg-light mb-3">
+                {/* SINGLE Video Element */}
                 <video
                   ref={videoRef}
-                  style={{ width: "100%", maxHeight: "300px" }}
+                  autoPlay
+                  playsInline
+                  style={{
+                    width: "100%",
+                    maxWidth: "500px",
+                    maxHeight: "300px",
+                    borderRadius: "8px",
+                    backgroundColor: "#000",
+                  }}
                 />
-                <Button color="primary" className="mt-2" onClick={takePhoto}>
-                  Capture Photo
-                </Button>
+
+                <div className="mt-4 flex flex-wrap justify-center gap-2">
+                  {/* 1. Rotate Button */}
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={toggleCamera}
+                  >
+                    🔄 Rotate Camera
+                  </button>
+
+                  {/* 2. Capture Button */}
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={takePhoto}
+                  >
+                    📸 Capture Photo
+                  </button>
+
+                  {/* 3. Close Button */}
+                  <button
+                    type="button"
+                    className="btn btn-danger"
+                    onClick={() => {
+                      setShowVideo(false);
+                      if (streamRef.current) {
+                        streamRef.current.getTracks().forEach((t) => t.stop());
+                        streamRef.current = null;
+                      }
+                    }}
+                  >
+                    Close Camera
+                  </button>
+                </div>
               </div>
             )}
 

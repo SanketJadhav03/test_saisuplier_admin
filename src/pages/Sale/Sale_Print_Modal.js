@@ -429,7 +429,7 @@ const Sale_Print_Modal = (props) => {
                     </td>
                     <td style={{ padding: 8, width: "21%" }}>
                       {masterData?.master_invoice_no
-                        ? "INV-" + masterData.master_invoice_no
+                        ? "" + masterData.master_invoice_no
                         : "N/A"}
                     </td>
 

@@ -140,7 +140,7 @@ const BillingSettings = () => {
       };
       
       const masterDetails = {
-        master_invoice_no: "INV-1001",
+        master_invoice_no: "1001",
         master_bill_date: "2024-07-31",
         master_total_bill_amt: 1500.00,
         master_total_bill_mrp: 2000.00,

@@ -394,7 +394,7 @@ const POSList = () => {
             </div>
             <div class="invoice-title">
               <h1>INVOICE</h1>
-              <div class="invoice-number">#INV-${order.master_invoice_no}</div>
+              <div class="invoice-number">#${order.master_invoice_no}</div>
             </div>
           </div>
           
@@ -525,7 +525,7 @@ const POSList = () => {
       return `
         <tr>
           <td>${index + 1}</td>
-          <td>INV-${order.master_invoice_no}</td>
+          <td>${order.master_invoice_no}</td>
           <td>${order.user_name || 'Customer'}</td>
           <td>${formattedOrderDate}</td>
           <td>${order.master_qty}</td>
@@ -813,7 +813,7 @@ const POSList = () => {
     const csvContent = [
       headers.join(','),
       ...posBills.map(order => [
-        `INV-${order.master_invoice_no}`,
+        `${order.master_invoice_no}`,
         `"${order.user_name || ''}"`,
         order.master_bill_date,
         order.master_qty,
@@ -1027,7 +1027,7 @@ const POSList = () => {
                     {posBills.map((item, index) => (
                       <tr key={index}>
                         <td>{index + 1}</td>
-                        <td>INV-{item.master_invoice_no}</td>
+                        <td>{item.master_invoice_no}</td>
                         <td>{item.master_type == 2 ? "Sample" : "Regular"}</td>
                         <td>{item.user_name}</td>
                         <td>{item.master_bill_date}</td>
