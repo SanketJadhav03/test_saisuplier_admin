@@ -14,45 +14,46 @@ const LabelPrint = (props) => {
   const [hasMoreUsers, setHasMoreUsers] = useState(true);
   const [addresses, setAddress] = useState([]);
 
-  useEffect(() => {
-    if (!props.isOpen) return;
+ useEffect(() => {
+  if (!props.isOpen) return;
 
-    const fetchInvoice = async () => {
-      try {
-        const response = await http.get(`/sale/invoice/${props.id}`);
-        const data = response.data;
+  const fetchInvoice = async () => {
+    try {
+      const response = await http.get(`/sale/invoice/${props.id}`);
+      const data = response.data;
 
-        if (data) {
-          setChildData(data.Child || []);
-          setCustomer(data.customer || {});
-          setBusinessData(data.Business?.[0] || {});
-          setMasterData(data.Master?.[0] || {});
-        }
-      } catch (error) {
-        console.log("Error fetching data:", error);
+      if (data) {
+        setChildData(data.Child || []);
+        setCustomer(data.customer || {});
+        setBusinessData(data.Business?.[0] || {});
+        setMasterData(data.Master?.[0] || {});
       }
-    };
-
-    const fetchAddresses = async () => {
-      try {
-        const response = await http.get(`/addresses/${props?.user?.user_id}`);
-        const fetched = response.data || [];
-
-        setUsers(fetched[0]);
-        setAddress(fetched);
-        setCustomer(props.user);
-      } catch (err) {
-        console.error("Failed to fetch users", err);
-        setHasMoreUsers(false);
-      }
-    };
-
-    if (props.id) {
-      fetchInvoice();
-    } else {
-      fetchAddresses();
+    } catch (error) {
+      console.log("Error fetching data:", error);
     }
-  }, [props.id, props.user?.master_id, props.isOpen, http]);
+  };
+
+  const fetchAddresses = async () => {
+    try {
+      const response = await http.get(`/addresses/${props?.user?.user_id}`);
+      const fetched = response.data || [];
+
+      setUsers(fetched[0]);
+      setAddress(fetched);
+      console.log(fetched);
+      setCustomer(props.user);
+    } catch (err) {
+      console.error("Failed to fetch users", err);
+      setHasMoreUsers(false);
+    }
+  };
+
+  if (props.id) {
+    fetchInvoice();
+  } else {
+    fetchAddresses();
+  }
+}, [props.id, props.user?.master_id, props.isOpen]);
 
   const stripHtml = (html = "") => {
     const temp = document.createElement("div");
@@ -185,7 +186,7 @@ const LabelPrint = (props) => {
     const total =
       parseFloat(itemsTotal.toFixed(2)) + otherCharges + transportCharges;
 
-    return Math.ceil(total);
+     return Math.ceil(total);
   };
 
   const codamount = calculateCodAmount(childData, masterData);
@@ -206,8 +207,8 @@ const LabelPrint = (props) => {
         background: white !important;
       }
       .label-box { 
-        width: ${orientation === "vertical" ? "100mm" : "100mm"}; 
-        height: ${orientation === "vertical" ? "150mm" : "75mm"}; 
+        width: ${orientation === "vertical" ? "100mm" : "100mm"};                                                                                                                                                                                                                                                                                                                                             
+        height: ${orientation === "vertical" ? "150mm" : "75mm"};
         padding: 10px;
         box-sizing: border-box;
         background: white;
@@ -224,12 +225,12 @@ const LabelPrint = (props) => {
       margin: 0 !important;
       padding: 0 !important;
      
-     border-top: 1px solid #000000; /* optional */
+     border-top: 2px solid #000000; /* optional */
    
   }
       .codbox{
-        width: ${orientation === "vertical" ? "90px" : "90px"}; 
-        height: ${orientation === "vertical" ? "20px" : "60px"}; 
+        width: ${orientation === "vertical" ? "120px" : "90px"}; 
+        height: ${orientation === "vertical" ? "80px" : "60px"}; 
     } 
         
     .nonbanpl{
@@ -365,7 +366,7 @@ const LabelPrint = (props) => {
       </html>
     `);
 
-    printWindow.document.close();
+   // printWindow.document.close();
   };
 
   return (
@@ -894,8 +895,8 @@ const LabelPrint = (props) => {
         }
 
         .label-vertical {
-          width: 75mm;
-          height: 100mm;
+          width: 100mm;
+          height: 150mm;
         }
         
         .label-landscape {
@@ -919,15 +920,15 @@ const LabelPrint = (props) => {
 
         .bank-name {
           font-weight: 800;
-          font-size: 16px;
+          font-size: 18px;
           text-transform: uppercase;
           line-height: 1;
-          margin-bottom: 6px;
+          margin-bottom: 4px;
         }
 
         .address, .meta {
           margin-bottom: 3px;
-          font-size: 10px;
+          font-size: 15px;
         }
 
         .from-title {
@@ -938,12 +939,12 @@ const LabelPrint = (props) => {
 
         .from-company {
           font-weight: bold;
-          font-size: 11px;
+          font-size: 16px;
           margin-bottom: 2px;
         }
 
         .from-details {
-          font-size: 10px;
+          font-size: 14px;
           line-height: 1.2;
         }
 
@@ -1070,8 +1071,8 @@ const LabelPrint = (props) => {
                               //fontWeight: "bold",
                               fontSize: "12px",
                               textAlign: "center",
-                              minWidth: "110px",
-                              minHeight: "37px",
+                              minWidth: "150px",
+                              minHeight: "70px",
                               border: "1px solid black",
                             }}
                           >
@@ -1088,14 +1089,14 @@ const LabelPrint = (props) => {
                               display: "inline-block",
                               backgroundColor: "#fff",
                               whiteSpace: "nowrap",
-                              marginTop: "2px",
+                              marginTop: "5px", 
                               textAlign: "center",
                             }}
                           >
                             <div
                               style={{
                                 fontWeight: "bold",
-                                fontSize: "12px",
+                                fontSize: "14px",
                               }}
                             >
                               Order ID:{" "}
@@ -1110,7 +1111,7 @@ const LabelPrint = (props) => {
                             display: "flex",
                             flexDirection: "column",
                             alignItems: "center",
-                            gap: "4px",
+                            gap: "3px",
                           }}
                         >
                           {/* COD BOX */}
@@ -1129,8 +1130,8 @@ const LabelPrint = (props) => {
                                 : {
                                     border: "2px solid #000",
                                     textAlign: "center",
-                                    minWidth: "100px",
-                                    minHeight: "55px",
+                                    minWidth: "180px",
+                                    minHeight: "95px",
                                     backgroundColor: "#fff",
                                     paddingTop: "10px",
                                   }
@@ -1140,8 +1141,8 @@ const LabelPrint = (props) => {
                               style={{
                                 textAlign: "center",
                                 fontWeight: "bold",
-                                fontSize: "13px",
-                                //marginBottom: "3px",
+                                fontSize: "19px",
+                                margin: "2px 2px",
                               }}
                             >
                               COD{" "}
@@ -1149,7 +1150,7 @@ const LabelPrint = (props) => {
                             <div
                               className="codamount"
                               style={{
-                                fontSize: "17px",
+                                fontSize: "19px",
                                 fontWeight: "bold",
                                 color: "#000",
                                 backgroundColor: "#fff3cd",
@@ -1168,7 +1169,7 @@ const LabelPrint = (props) => {
                       <div
                         style={{
                           fontWeight: "12px",
-                          fontSize: "12px",
+                          fontSize: "16px",
                           // textAlign: "center",
                         }}
                       >
@@ -1178,15 +1179,15 @@ const LabelPrint = (props) => {
                         style={{
                           padding: "0px",
                           display: "flex",
-                          marginTop: "0.25rem", // mt-1
+                           
                           gap: "0.5rem", // gap-2
                           justifyContent: "flex-start",
                         }}
                       >
-                        <div className="non-banpl" style={{ fontSize: "12px" }}>
+                        <div className="non-banpl" style={{ fontSize: "14px" }}>
                           NON-BANPL A/C No: <b>1000059729</b>
                         </div>
-                        <div style={{ fontSize: "12px" }}>
+                        <div style={{ fontSize: "14px" }}>
                           CONTRACT ID: <b>40098702</b>
                         </div>
                       </div>

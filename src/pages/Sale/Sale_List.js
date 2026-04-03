@@ -1023,6 +1023,14 @@ const Sale_List = () => {
                                     >
                                       <i className="ri-printer-line"></i>
                                     </Button>
+                                    <Button
+                                      color="light"
+                                      size="md"
+                                      onClick
+                                      className="btn-icon text-primary"
+                                    >
+                                      <i className="ri-delete-bin-line"></i>
+                                    </Button>
                                   </div>
                                 </td>
                               </tr>
