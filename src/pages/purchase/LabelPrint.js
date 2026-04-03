@@ -522,7 +522,7 @@ const LabelPrint = (props) => {
     //                   options={addresses.map((item) => ({
     //                     item: item,
     //                     value: item.shipping_id,
-    //                     label: `${item.address_line1}, ${item.city} - ${item.pincode} - ${item.addressType}`,
+    //                     label: `${item?.address_line1 || ""}, ${item.city} - ${item?.pincode || ""} - ${item.addressType}`,
     //                   }))}
     //                   placeholder="Select Shipping Address..."
     //                   onChange={(option) => {
@@ -801,9 +801,9 @@ const LabelPrint = (props) => {
     //                     </div>
 
     //                     <div className="address">
-    //                       {users.address_line1 && (
+    //                       {users?.address_line1 || "" && (
     //                         <>
-    //                           {users.address_line1}
+    //                           {users?.address_line1 || ""}
     //                           <br />
     //                           {users.taluka && `Tq. ${users.taluka}`}
     //                           {users.district && ` Dist. ${users.district}`}
@@ -814,7 +814,7 @@ const LabelPrint = (props) => {
     //                     </div>
 
     //                     <div className="meta">
-    //                       <b>PIN Code:</b> {users.pincode || "N/A"}
+    //                       <b>PIN Code:</b> {users?.pincode || "" || "N/A"}
     //                     </div>
     //                     <div className="meta">
     //                       <b>Phone:</b> {customer.user_mobile}
@@ -1026,7 +1026,7 @@ const LabelPrint = (props) => {
                   options={addresses.map((item) => ({
                     item: item,
                     value: item.shipping_id,
-                    label: `${item.address_line1}, ${item.city} - ${item.pincode} - ${item.addressType}`,
+                    label: `${item?.address_line1 || ""}, ${item.city} - ${item?.pincode || ""} - ${item.addressType}`,
                   }))}
                   placeholder="Select Shipping Address..."
                   onChange={(option) => {
@@ -1322,9 +1322,9 @@ const LabelPrint = (props) => {
                     </div>
 
                     <div className="address-customer">
-                      {users.address_line1 && (
+                      {users?.address_line1 || "" && (
                         <>
-                          {users.address_line1}
+                          {users?.address_line1 || ""}
                           <br />
                           {users.taluka && `Tq. ${users.taluka}`}
                           {users.district && ` Dist. ${users.district}`}
@@ -1335,7 +1335,7 @@ const LabelPrint = (props) => {
                     </div>
 
                     <div className="meta-customer">
-                      <b>PIN Code:</b> {users.pincode || "N/A"}
+                      <b>PIN Code:</b> {users?.pincode || "" || "N/A"}
                     </div>
                     <div className="meta-customer">
                       <b>Phone:</b> {customer.user_mobile}
