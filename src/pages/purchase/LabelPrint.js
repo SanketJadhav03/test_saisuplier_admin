@@ -3,6 +3,7 @@ import { Modal, ModalBody, ModalHeader, Button, ModalFooter } from "reactstrap";
 import AuthUser from "../../helpers/Authuser";
 import Select from "react-select";
 import { Weight } from "lucide-react";
+import ShippingModal from "./ShippingModal";
 const LabelPrint = (props) => {
   const { http } = AuthUser();
   const [childData, setChildData] = useState([]);
@@ -13,47 +14,49 @@ const LabelPrint = (props) => {
   const [users, setUsers] = useState([]);
   const [hasMoreUsers, setHasMoreUsers] = useState(true);
   const [addresses, setAddress] = useState([]);
+  const [shippingCount, setShippingCount] = useState(1);  
+   const [shippingModal, setShippingModal] = useState(false);
 
- useEffect(() => {
-  if (!props.isOpen) return;
+  useEffect(() => {
+    if (!props.isOpen) return;
 
-  const fetchInvoice = async () => {
-    try {
-      const response = await http.get(`/sale/invoice/${props.id}`);
-      const data = response.data;
+    const fetchInvoice = async () => {
+      try {
+        const response = await http.get(`/sale/invoice/${props.id}`);
+        const data = response.data;
 
-      if (data) {
-        setChildData(data.Child || []);
-        setCustomer(data.customer || {});
-        setBusinessData(data.Business?.[0] || {});
-        setMasterData(data.Master?.[0] || {});
+        if (data) {
+          setChildData(data.Child || []);
+          setCustomer(data.customer || {});
+          setBusinessData(data.Business?.[0] || {});
+          setMasterData(data.Master?.[0] || {});
+        }
+      } catch (error) {
+        console.log("Error fetching data:", error);
       }
-    } catch (error) {
-      console.log("Error fetching data:", error);
+    };
+
+    const fetchAddresses = async () => {
+      try {
+        const response = await http.get(`/addresses/${props?.user?.user_id}`);
+        const fetched = response.data || [];
+
+        setUsers(fetched[0]);
+        setAddress(fetched);
+        // console.log(fetched);
+        setCustomer(props.user);
+      } catch (err) {
+        console.error("Failed to fetch users", err);
+        setHasMoreUsers(false);
+      }
+    };
+
+    if (props.id) {
+      fetchInvoice();
+    } else {
+      fetchAddresses();
     }
-  };
-
-  const fetchAddresses = async () => {
-    try {
-      const response = await http.get(`/addresses/${props?.user?.user_id}`);
-      const fetched = response.data || [];
-
-      setUsers(fetched[0]);
-      setAddress(fetched);
-      console.log(fetched);
-      setCustomer(props.user);
-    } catch (err) {
-      console.error("Failed to fetch users", err);
-      setHasMoreUsers(false);
-    }
-  };
-
-  if (props.id) {
-    fetchInvoice();
-  } else {
-    fetchAddresses();
-  }
-}, [props.id, props.user?.master_id, props.isOpen]);
+  }, [props.id, props.user?.master_id, props.isOpen,shippingCount]);
 
   const stripHtml = (html = "") => {
     const temp = document.createElement("div");
@@ -186,7 +189,7 @@ const LabelPrint = (props) => {
     const total =
       parseFloat(itemsTotal.toFixed(2)) + otherCharges + transportCharges;
 
-     return Math.ceil(total);
+    return Math.ceil(total);
   };
 
   const codamount = calculateCodAmount(childData, masterData);
@@ -198,7 +201,7 @@ const LabelPrint = (props) => {
     // label print style for printing
     const pageStyle = `
       @page { 
-        size: ${ props.id ? "100mm 150mm" : "75mm 100mm"}; 
+        size: ${props.id ? "100mm 150mm" : "75mm 100mm"}; 
         margin: 0; 
       }
       body { 
@@ -208,7 +211,7 @@ const LabelPrint = (props) => {
       }
       .label-box { 
         width: ${props.id ? "100mm" : "75mm"};                                                                                                                                                                                                                                                                                                                                             
-        height: ${props.id? "150mm" : "100mm"};
+        height: ${props.id ? "150mm" : "100mm"};
         padding: 10px;
         box-sizing: border-box;
         background: white;
@@ -278,7 +281,7 @@ const LabelPrint = (props) => {
       }
        .address-customer,.meta-customer{
        margin-bottom: 2px;
-       font-size: 14px;
+       font-size: 13px;
        }
       
       .from-title {
@@ -370,7 +373,7 @@ const LabelPrint = (props) => {
       </html>
     `);
 
-   printWindow.document.close();
+    printWindow.document.close();
   };
 
   return (
@@ -1043,6 +1046,20 @@ const LabelPrint = (props) => {
                   }}
                 />
               </div>
+              <button
+                type="button"
+                style={{
+                  padding: "1px 7px",
+                  fontSize: "15px",
+                }}
+                id="create-btn"
+                className="btn btn-primary btn-sm"
+                onClick={() => {
+                  setShippingModal(true);
+                }}
+              >
+                +
+              </button>
             </div>
           )}
         </ModalHeader>
@@ -1099,7 +1116,7 @@ const LabelPrint = (props) => {
                               display: "inline-block",
                               backgroundColor: "#fff",
                               whiteSpace: "nowrap",
-                              marginTop: "5px", 
+                              marginTop: "5px",
                               textAlign: "center",
                             }}
                           >
@@ -1189,7 +1206,7 @@ const LabelPrint = (props) => {
                         style={{
                           padding: "0px",
                           display: "flex",
-                           
+
                           gap: "0.5rem", // gap-2
                           justifyContent: "flex-start",
                         }}
@@ -1320,11 +1337,11 @@ const LabelPrint = (props) => {
                     <div className="meta-customer">
                       <b>PIN Code:</b> {users.pincode || "N/A"}
                     </div>
-                    <div className="meta">
+                    <div className="meta-customer">
                       <b>Phone:</b> {customer.user_mobile}
                       {customer.master_mobile && `, ${customer.master_mobile}`}
                     </div>
-                    <div className="meta">
+                    <div className="meta-customer">
                       <b>E-Mail:</b> {customer.user_email || "N/A"}
                     </div>
                   </div>
@@ -1377,6 +1394,18 @@ const LabelPrint = (props) => {
           </div>
         </ModalFooter>
       </Modal>
+      {shippingModal == true ? (
+                <ShippingModal
+                  modalStates={shippingModal}
+                  setModalStates={() => {
+                    setShippingCount(shippingCount + 1);
+                    setShippingModal(false);
+                  }}
+                  purchase_customer_ids={props?.user?.user_id}
+                />
+              ) : (
+                ""
+              )}
     </>
   );
 };
