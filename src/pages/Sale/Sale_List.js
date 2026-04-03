@@ -401,23 +401,41 @@ const Sale_List = () => {
     };
     reader.readAsDataURL(file);
   };
-
+  const toggleCamera = () => {
+    setFacingMode((prevMode) => (prevMode === "user" ? "environment" : "user"));
+  };
+  const [facingMode, setFacingMode] = useState("user"); // "user" for front, "environment" for back
+  const streamRef = useRef(null); // Keep track of the stream to stop it before switching
+  // We need an effect to restart the camera whenever facingMode changes
+  useEffect(() => {
+    if (showVideo) {
+      openCamera();
+    }
+  }, [facingMode]);
   const openCamera = async () => {
     try {
-      setShowVideo(true); // Show video first so the <video> element renders
+      setShowVideo(true);
 
-      // Wait for the video element to render
+      // Stop any existing stream before starting a new one
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+      }
+
       setTimeout(async () => {
         if (videoRef.current) {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            video: true,
-          });
+          const constraints = {
+            video: { facingMode: facingMode }, // Uses the state value
+          };
+
+          const stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+          streamRef.current = stream; // Store stream in ref for later cleanup
           videoRef.current.srcObject = stream;
           videoRef.current.play();
         }
-      }, 100); // 100ms delay ensures video element exists
+      }, 100);
     } catch (err) {
-      console.error("Camera not accessible:", err);
+      console.error("Camera access error:", err);
       alert("Cannot access camera: " + err.message);
     }
   };
@@ -1116,14 +1134,55 @@ const Sale_List = () => {
 
             {/* Video preview for live camera */}
             {showVideo && (
-              <div className="text-center mb-3">
+              <div className="flex flex-col items-center border p-3 rounded bg-light mb-3">
+                {/* SINGLE Video Element */}
                 <video
                   ref={videoRef}
-                  style={{ width: "100%", maxHeight: "300px" }}
+                  autoPlay
+                  playsInline
+                  style={{
+                    width: "100%",
+                    maxWidth: "500px",
+                    maxHeight: "300px",
+                    borderRadius: "8px",
+                    backgroundColor: "#000",
+                  }}
                 />
-                <Button color="primary" className="mt-2" onClick={takePhoto}>
-                  Capture Photo
-                </Button>
+
+                <div className="mt-4 flex flex-wrap justify-center gap-2">
+                  {/* 1. Rotate Button */}
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={toggleCamera}
+                  >
+                    🔄 Rotate Camera
+                  </button>
+
+                  {/* 2. Capture Button */}
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={takePhoto}
+                  >
+                    📸 Capture Photo
+                  </button>
+
+                  {/* 3. Close Button */}
+                  <button
+                    type="button"
+                    className="btn btn-danger"
+                    onClick={() => {
+                      setShowVideo(false);
+                      if (streamRef.current) {
+                        streamRef.current.getTracks().forEach((t) => t.stop());
+                        streamRef.current = null;
+                      }
+                    }}
+                  >
+                    Close Camera
+                  </button>
+                </div>
               </div>
             )}
             {/* Display preview */}
