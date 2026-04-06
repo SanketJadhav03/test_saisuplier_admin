@@ -14,8 +14,9 @@ const LabelPrint = (props) => {
   const [users, setUsers] = useState([]);
   const [hasMoreUsers, setHasMoreUsers] = useState(true);
   const [addresses, setAddress] = useState([]);
-  const [shippingCount, setShippingCount] = useState(1);  
-   const [shippingModal, setShippingModal] = useState(false);
+  const [shippingCount, setShippingCount] = useState(1);
+  const [shippingModal, setShippingModal] = useState(false);
+  const [selectedAddressOption, setSelectedAddressOption] = useState(null);
 
   useEffect(() => {
     if (!props.isOpen) return;
@@ -40,9 +41,18 @@ const LabelPrint = (props) => {
       try {
         const response = await http.get(`/addresses/${props?.user?.user_id}`);
         const fetched = response.data || [];
-
-        setUsers(fetched[0]);
         setAddress(fetched);
+        if (fetched.length > 0) {
+          const newest = fetched[fetched.length - 1]; // Assuming newest is last
+          const option = {
+            item: newest,
+            value: newest.shipping_id,
+            label: `${newest?.address_line1 || ""}, ${newest.city} - ${newest?.pincode || ""} - ${newest.addressType}`,
+          };
+          setUsers(newest); // Updates the label preview
+          setSelectedAddressOption(option); // Updates the dropdown UI
+        }
+
         // console.log(fetched);
         setCustomer(props.user);
       } catch (err) {
@@ -56,7 +66,7 @@ const LabelPrint = (props) => {
     } else {
       fetchAddresses();
     }
-  }, [props.id, props.user?.master_id, props.isOpen,shippingCount]);
+  }, [props.id, props.user?.master_id, props.isOpen, shippingCount]);
 
   const stripHtml = (html = "") => {
     const temp = document.createElement("div");
@@ -219,6 +229,7 @@ const LabelPrint = (props) => {
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        gap: 15px;
         font-size: 12px;
         line-height: 1.2;
         border:2px black solid;
@@ -228,7 +239,7 @@ const LabelPrint = (props) => {
       margin: 0 !important;
       padding: 0 !important;
      
-     border-top: 2px solid #000000; /* optional */
+     border-top: 2px solid #000000;  
    
   }
       .codbox{
@@ -280,7 +291,7 @@ const LabelPrint = (props) => {
         font-size: 14px;
       }
        .address-customer,.meta-customer{
-       margin-bottom: 2px;
+       margin-bottom: 6px;
        font-size: 13px;
        }
       
@@ -295,9 +306,18 @@ const LabelPrint = (props) => {
         font-size: 15px;
         margin-bottom: 2px;
       }
+        .from-company-customer {
+        font-weight: bold;
+        font-size: 17px;
+        margin-bottom: 3px;
+      }
       
       .from-details {
         font-size: 13px;
+        line-height: 1.2;
+      }
+        .from-details-customer {
+        font-size: 15px;
         line-height: 1.2;
       }
       
@@ -894,8 +914,9 @@ const LabelPrint = (props) => {
           font-family: Arial, sans-serif;
           display: flex;
           flex-direction: column;
-          justify-content: space-between;
+          justify-content:flex-start;
           font-size: 12px;
+          gap: 15px;
           line-height: 1.2;
           border:2px black solid;
           box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -944,6 +965,11 @@ const LabelPrint = (props) => {
           font-size: 15px;
         }
 
+        .address-customer,.meta-customer{
+       margin-bottom: 6px;
+       font-size: 13px;
+       }
+
         .from-title {
           margin-top: 8px;
           font-weight: bold;
@@ -955,11 +981,20 @@ const LabelPrint = (props) => {
           font-size: 16px;
           margin-bottom: 2px;
         }
+       .from-company-customer {
+        font-weight: bold;
+        font-size: 17px;
+        margin-bottom: 3px;
+      }
 
         .from-details {
           font-size: 14px;
           line-height: 1.2;
         }
+          .from-details-customer {
+        font-size: 15px;
+        line-height: 1.2;
+      }
 
         .print-controls {
           display: flex;
@@ -1023,6 +1058,7 @@ const LabelPrint = (props) => {
                 style={{ minWidth: "260px", maxWidth: "350px", width: "100%" }}
               >
                 <Select
+                  value={selectedAddressOption}
                   options={addresses.map((item) => ({
                     item: item,
                     value: item.shipping_id,
@@ -1103,9 +1139,9 @@ const LabelPrint = (props) => {
                               border: "1px solid black",
                             }}
                           >
-                            Transport Type:{" "}
-                            {stripHtml(masterData.master_tracking_details) ||
-                              "N/A"}
+                            <b className="fs-5">Transport Type:{" "}</b>
+                            <div>{stripHtml(masterData.master_tracking_details) ||
+                              "N/A"}</div>
                           </div>
 
                           {/* Order ID */}
@@ -1211,10 +1247,29 @@ const LabelPrint = (props) => {
                           justifyContent: "flex-start",
                         }}
                       >
-                        <div className="non-banpl" style={{ fontSize: "14px" }}>
+                        <div
+                          className="non-banpl"
+                          style={{
+                            fontSize: "14px",
+                            border: "2px solid #000",
+                            textAlign: "center",
+                            minWidth: "80px",
+                            minHeight: "45px",
+                            backgroundColor: "#fff",
+                            paddingTop: "2px",
+                          }}
+                        >
                           NON-BANPL A/C No: <b>1000059729</b>
                         </div>
-                        <div style={{ fontSize: "14px" }}>
+                        <div style={{
+                            fontSize: "14px",
+                            border: "2px solid #000",
+                            textAlign: "center",
+                            minWidth: "80px",
+                            minHeight: "45px",
+                            backgroundColor: "#fff",
+                            paddingTop: "2px",
+                          }}>
                           CONTRACT ID: <b>40098702</b>
                         </div>
                       </div>
@@ -1322,16 +1377,17 @@ const LabelPrint = (props) => {
                     </div>
 
                     <div className="address-customer">
-                      {users?.address_line1 || "" && (
-                        <>
-                          {users?.address_line1 || ""}
-                          <br />
-                          {users.taluka && `Tq. ${users.taluka}`}
-                          {users.district && ` Dist. ${users.district}`}
-                          {users.city && `, ${users.city}`}
-                          {users.state && `, ${users.state}`}
-                        </>
-                      )}
+                      {users?.address_line1 ||
+                        ("" && (
+                          <>
+                            {users?.address_line1 || ""}
+                            <br />
+                            {users.taluka && `Tq. ${users.taluka}`}
+                            {users.district && ` Dist. ${users.district}`}
+                            {users.city && `, ${users.city}`}
+                            {users.state && `, ${users.state}`}
+                          </>
+                        ))}
                     </div>
 
                     <div className="meta-customer">
@@ -1346,10 +1402,14 @@ const LabelPrint = (props) => {
                     </div>
                   </div>
 
+                  <div></div>
+
                   <div>
                     <div className="to">From,</div>
-                    <div className="from-company">Sai Suppliers (25-26)</div>
-                    <div className="from-details">
+                    <div className="from-company-customer">
+                      Sai Suppliers (25-26)
+                    </div>
+                    <div className="from-details-customer">
                       265 Kasba Peth Shankar Market Road, Phaltan Tal Satara
                       415523 <br />
                       Contact : 9226439223 <br />
@@ -1395,17 +1455,17 @@ const LabelPrint = (props) => {
         </ModalFooter>
       </Modal>
       {shippingModal == true ? (
-                <ShippingModal
-                  modalStates={shippingModal}
-                  setModalStates={() => {
-                    setShippingCount(shippingCount + 1);
-                    setShippingModal(false);
-                  }}
-                  purchase_customer_ids={props?.user?.user_id}
-                />
-              ) : (
-                ""
-              )}
+        <ShippingModal
+          modalStates={shippingModal}
+          setModalStates={() => {
+            setShippingCount(shippingCount + 1);
+            setShippingModal(false);
+          }}
+          purchase_customer_ids={props?.user?.user_id}
+        />
+      ) : (
+        ""
+      )}
     </>
   );
 };
