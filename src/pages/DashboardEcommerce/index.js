@@ -4,6 +4,49 @@ import { Button, Card, CardBody, Col, Container, Row } from "reactstrap";
 import AuthUser from "../../helpers/Authuser";
 
 const Dashboardmain = () => {
+  const [counters, setCounters] = useState({
+    total_leads: 0,
+    total_purchases: 0,
+    total_quotations: 0,
+    total_invoices: 0,
+  });
+  const [chartData, setChartData] = useState([
+    {
+      title: "Lead Conversion",
+      color: "#4b38b3",
+      data: [0, 0, 0, 0, 0, 0, 0],
+      labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      chartType: "bar",
+    },
+    {
+      title: "Daily Revenue",
+      color: "#48bb78",
+      data: [0, 0, 0, 0, 0, 0, 0],
+      labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      chartType: "bar",
+    },
+    {
+      title: "Customer Traffic",
+      color: "#4299e1",
+      data: [0, 0, 0, 0, 0, 0, 0],
+      labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      chartType: "bar",
+    },
+    {
+      title: "Order Distribution",
+      color: "#f6ad55",
+      chartType: "pie",
+      data: [
+        { label: "Invoices", value: 0, color: "#f6ad55" },
+        { label: "Quotations", value: 0, color: "#fbd38d" },
+        { label: "Purchases", value: 0, color: "#fffaf0" },
+      ],
+    },
+  ]);
+  // To store the list data for tables or details
+  const [leads, setLeads] = useState([]);
+  const [invoices, setInvoices] = useState([]);
+
   const getFormattedDate = (date) => date.toISOString().split("T")[0];
   const [filters, setFilters] = useState({
     start_date: getFormattedDate(new Date()),
@@ -73,12 +116,110 @@ const Dashboardmain = () => {
     http
       .post("/dashbord/filter", filters)
       .then((res) => {
-        console.log(res.data);
+        setCounters(res.data.counters);
+        setLeads(res.data.leads);
+        setInvoices(res.data.invoices);
       })
       .catch((err) => {
         console.log(err);
       });
   };
+  // Inside your Row for "Order Analytics"
+  const orderStats = [
+    {
+      title: "Leads",
+      count: counters.total_leads,
+      color: "#f6ad55",
+      bg: "#fffaf0",
+    },
+    {
+      title: "Quotations",
+      count: counters.total_quotations,
+      color: "#4299e1",
+      bg: "#ebf8ff",
+    },
+    {
+      title: "Invoices",
+      count: counters.total_invoices,
+      color: "#48bb78",
+      bg: "#f0fff4",
+    },
+    {
+      title: "Purchases",
+      count: counters.total_purchases,
+      color: "#b794f4",
+      bg: "#faf5ff",
+    },
+  ];
+
+  useEffect(() => {
+    // Create mapping for days where 0 = Sunday, 1 = Monday...
+    // We align this to your labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    // This means Monday is index 0 in the chart array, Sunday is index 6.
+    const revenueByDay = [0, 0, 0, 0, 0, 0, 0];
+    const leadsByDay = [0, 0, 0, 0, 0, 0, 0];
+
+    const getChartIndex = (date) => {
+      const day = date.getDay(); // 0 (Sun) to 6 (Sat)
+      return day === 0 ? 6 : day - 1; // Converts Sun to 6, Mon to 0, Tue to 1...
+    };
+
+    invoices.forEach((inv) => {
+      if (inv.master_bill_date) {
+        const [d, m, y] = inv.master_bill_date.split("/");
+        const date = new Date(`${y}-${m}-${d}`);
+        revenueByDay[getChartIndex(date)] += parseFloat(
+          inv.master_final_total || 0,
+        );
+      }
+    });
+
+    leads.forEach((lead) => {
+      if (lead.inquiry_date) {
+        const date = new Date(lead.inquiry_date);
+        leadsByDay[getChartIndex(date)] += 1;
+      }
+    });
+
+    const total =
+      counters.total_invoices +
+        counters.total_quotations +
+        counters.total_purchases || 1;
+    const getPercent = (val) => Math.round((val / total) * 100);
+
+    // Use a functional update to avoid chartData dependency loop
+    setChartData((prev) => [
+      { ...prev[0], data: leadsByDay },
+      { ...prev[1], data: revenueByDay },
+      { ...prev[2], data: [10, 20, 15, 30, 45, 20, 10] }, // Traffic placeholder
+      {
+        ...prev[3],
+        data: [
+          {
+            label: "Invoices",
+            value: getPercent(counters.total_invoices),
+            color: "#f6ad55",
+          },
+          {
+            label: "Quotations",
+            value: getPercent(counters.total_quotations),
+            color: "#4299e1",
+          },
+          {
+            label: "Purchases",
+            value: getPercent(counters.total_purchases),
+            color: "#b794f4",
+          },
+        ],
+      },
+    ]);
+  }, [
+    invoices,
+    leads,
+    counters.total_invoices,
+    counters.total_quotations,
+    counters.total_purchases,
+  ]);
   useEffect(() => {
     filterData();
   }, [filters]);
@@ -136,7 +277,7 @@ const Dashboardmain = () => {
             </div>
 
             {/* Dropdown Selectors */}
-            <Row className="justify-content-center g-3">
+            {/* <Row className="justify-content-center g-3">
               {[
                 { label: "Select Role", width: 260 },
                 { label: "Select Employee", width: 260 },
@@ -174,7 +315,7 @@ const Dashboardmain = () => {
                   </div>
                 </Col>
               ))}
-            </Row>
+            </Row> */}
           </CardBody>
         </Card>
 
@@ -189,82 +330,21 @@ const Dashboardmain = () => {
           </div>
 
           <Row className="g-4">
-            {[
-              {
-                title: "Pending",
-                count: "124",
-                color: "#f6ad55",
-                bg: "#fffaf0",
-              },
-              {
-                title: "Processing",
-                count: "45",
-                color: "#4299e1",
-                bg: "#ebf8ff",
-              },
-              {
-                title: "Shipped",
-                count: "89",
-                color: "#b794f4",
-                bg: "#faf5ff",
-              },
-              {
-                title: "Delivered",
-                count: "1,240",
-                color: "#48bb78",
-                bg: "#f0fff4",
-              },
-              {
-                title: "Cancelled",
-                count: "12",
-                color: "#f56565",
-                bg: "#fff5f5",
-              },
-              {
-                title: "On Hold",
-                count: "08",
-                color: "#ed64a6",
-                bg: "#fff5f7",
-              },
-              {
-                title: "Returns",
-                count: "03",
-                color: "#718096",
-                bg: "#f7fafc",
-              },
-              {
-                title: "Completed",
-                count: "2,100",
-                color: "#38b2ac",
-                bg: "#e6fffa",
-              },
-            ].map((item, idx) => (
-              <Col key={idx} xs={12} sm={6} lg={3}>
-                {" "}
+            {orderStats.map((item, idx) => (
+              <Col
+                key={idx}
+                xs={12}
+                sm={6}
+                lg={3}
+                style={{
+                  borderLeft: `2px solid ${item.color}`,
+                  borderRadius: "8px",
+                }}
+              >
                 <Card
-                  className="border-0 shadow-sm h-100 transition-all rounded-4"
-                  style={{
-                    cursor: "pointer",
-                    background: "white",
-                    borderLeft: `5px solid ${item.color}`,
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "translateY(-5px)";
-                    e.currentTarget.style.boxShadow =
-                      "0 10px 20px rgba(0,0,0,0.08)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow =
-                      "0 0.125rem 0.25rem rgba(0,0,0,0.075)";
-                  }}
+                  className="border-0 shadow-sm h-100 rounded-4"
+                  style={{ borderLeft: `5px solid ${item.color}` }}
                 >
-                  <div
-                    style={{
-                      height: "4px",
-                      background: "linear-gradient(90deg, #4b38b3, #6959cd)",
-                    }}
-                  />
                   <CardBody className="p-4 d-flex align-items-center">
                     <div
                       className="rounded-circle d-flex align-items-center justify-content-center me-3"
@@ -275,17 +355,18 @@ const Dashboardmain = () => {
                         color: item.color,
                       }}
                     >
-                      <i className="ri-stack-line fs-4"></i>{" "}
-                      {/* Replace with your icons */}
+                      <i className="ri-numbers-line fs-4"></i>
                     </div>
                     <div>
                       <div
                         className="text-uppercase fw-bold text-muted mb-1"
-                        style={{ fontSize: "11px", letterSpacing: "0.5px" }}
+                        style={{ fontSize: "11px" }}
                       >
                         {item.title}
                       </div>
-                      <h3 className="fw-bold mb-0">{item.count}</h3>
+                      <h3 className="fw-bold mb-0">
+                        {item?.count?.toLocaleString()}
+                      </h3>
                     </div>
                   </CardBody>
                 </Card>
@@ -309,56 +390,41 @@ const Dashboardmain = () => {
         </div>
 
         <Row className="g-4">
-          {[
-            {
-              title: "Lead Conversion",
-              color: "#4b38b3",
-              data: [40, 70, 55, 90, 65, 80, 50],
-              labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-              chartType: "bar",
-            },
-            {
-              title: "Daily Revenue",
-              color: "#48bb78",
-              data: [30, 45, 60, 25, 80, 95, 70],
-              labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-              chartType: "bar",
-            },
-            {
-              title: "Customer Traffic",
-              color: "#4299e1",
-              data: [85, 40, 30, 50, 70, 40, 90],
-              labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-              chartType: "bar",
-            },
-            {
-              title: "Employee Efficiency",
-              color: "#f6ad55", // Orange
-              data: [
-                { label: "High", value: 65, color: "#f6ad55" }, // Main Color
-                { label: "Medium", value: 25, color: "#fbd38d" }, // Lighter shade
-                { label: "Low", value: 10, color: "#fffaf0" }, // Very light shade
-              ],
-              total: 100, // For calculating the pie calculation
-              chartType: "pie",
-            },
-          ].map((graph, idx) => (
+          {chartData.map((graph, idx) => (
             <Col key={idx} lg={6} md={12}>
-              <Card className="border-0 shadow-sm rounded-4 overflow-hidden h-100 transition-all">
+              <Card className="border-0 shadow-sm rounded-4 overflow-hidden h-100 transition-all border-top-0">
+                {/* Premium Top Border Accent */}
+                <div
+                  style={{
+                    height: "4px",
+                    background: graph.color,
+                    opacity: 0.8,
+                  }}
+                />
+
                 <CardBody className="p-4">
                   <div className="d-flex justify-content-between align-items-center mb-4">
-                    <h5
-                      className="fw-bold m-0 text-dark"
-                      style={{ fontSize: "16px" }}
-                    >
-                      {graph.title}
-                    </h5>
+                    <div>
+                      <h5
+                        className="fw-bold m-0 text-dark"
+                        style={{ fontSize: "16px" }}
+                      >
+                        {graph.title}
+                      </h5>
+                      <small
+                        className="text-muted"
+                        style={{ fontSize: "11px" }}
+                      >
+                        Performance Analytics
+                      </small>
+                    </div>
                     <span
                       className="badge rounded-pill"
                       style={{
                         backgroundColor: `${graph.color}15`,
                         color: graph.color,
                         fontSize: "11px",
+                        padding: "6px 12px",
                       }}
                     >
                       {graph.chartType === "pie"
@@ -367,123 +433,130 @@ const Dashboardmain = () => {
                     </span>
                   </div>
 
-                  {/* --- Chart Area --- */}
+                  {/* --- Dynamic Chart Logic --- */}
                   {graph.chartType === "bar" ? (
-                    // --- Premium Bar Chart (Existing Style) ---
                     <div
-                      className="d-flex align-items-end justify-content-between px-2"
+                      className="d-flex align-items-end justify-content-between px-3"
                       style={{
                         height: "220px",
-                        background: "#fbfbfd",
+                        background:
+                          "linear-gradient(to bottom, #ffffff, #f8fafc)",
                         borderRadius: "16px",
-                        paddingBottom: "10px",
-                        position: "relative",
+                        paddingBottom: "15px",
+                        border: "1px solid #f1f5f9",
                       }}
                     >
-                      {/* (Bar chart code is same as before, truncated for brevity) */}
-                      {graph.data.map((value, i) => (
-                        <div
-                          key={i}
-                          className="text-center"
-                          style={{ width: "10%", zIndex: 1 }}
-                        >
+                      {graph.data.map((value, i) => {
+                        const max = Math.max(...graph.data) || 1;
+                        const percentage = (value / max) * 100;
+                        return (
                           <div
-                            className="transition-all"
-                            style={{
-                              height: `${value * 1.8}px`,
-                              backgroundColor: graph.color,
-                              borderRadius: "6px 6px 4px 4px",
-                              opacity: 0.85,
-                            }}
-                          />
-                          <div
-                            className="mt-2 text-muted fw-bold"
-                            style={{ fontSize: "10px" }}
+                            key={i}
+                            className="text-center"
+                            style={{ width: "10%" }}
                           >
-                            {graph.labels[i]}
+                            <div
+                              className="transition-all"
+                              title={`${graph.labels[i]}: ${value}`}
+                              style={{
+                                height: `${Math.max(percentage * 1.8, 5)}px`, // Minimum 5px height for visibility
+                                backgroundColor: graph.color,
+                                borderRadius: "6px 6px 2px 2px",
+                                opacity: 0.85,
+                                boxShadow: `0 4px 12px ${graph.color}30`,
+                              }}
+                            />
+                            <div
+                              className="mt-2 text-muted fw-bold"
+                              style={{ fontSize: "10px" }}
+                            >
+                              {graph.labels[i]}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : (
-                    // --- Premium Pie Chart (Pure JSX/CSS) ---
+                    /* --- PIE CHART SECTION --- */
                     <Row
-                      className="align-items-center"
-                      style={{
-                        height: "220px",
-                        background: "#fbfbfd",
-                        borderRadius: "16px",
-                      }}
+                      className="align-items-center justify-content-center"
+                      style={{ minHeight: "220px" }}
                     >
                       <Col xs={6} className="d-flex justify-content-center">
                         <div
                           style={{
-                            width: "160px",
-                            height: "160px",
+                            width: "150px",
+                            height: "150px",
                             borderRadius: "50%",
-                            // --- Radial Gradient creates the pie slices ---
                             background: `conic-gradient(
-                        ${graph.data[0].color} 0% ${graph.data[0].value}%, 
-                        ${graph.data[1].color} ${graph.data[0].value}% ${graph.data[0].value + graph.data[1].value}%, 
-                        ${graph.data[2].color} ${graph.data[0].value + graph.data[1].value}% 100%
-                      )`,
-                            boxShadow: "0 5px 15px rgba(0,0,0,0.05)",
-                            // To add a 'premium' center glow
+                      ${graph.data[0].color} 0% ${graph.data[0].value}%, 
+                      ${graph.data[1].color} ${graph.data[0].value}% ${graph.data[0].value + graph.data[1].value}%, 
+                      ${graph.data[2].color} ${graph.data[0].value + graph.data[1].value}% 100%
+                    )`,
+                            boxShadow: "0 10px 20px rgba(0,0,0,0.05)",
                             position: "relative",
                           }}
                         >
-                          {/* Optional center cut-out (Donut look) for more premium feel */}
                           <div
                             style={{
                               position: "absolute",
                               top: "50%",
                               left: "50%",
                               transform: "translate(-50%, -50%)",
-                              width: "70px",
-                              height: "70px",
+                              width: "80px",
+                              height: "80px",
                               borderRadius: "50%",
-                              backgroundColor: "#fbfbfd",
+                              backgroundColor: "white",
                               display: "flex",
+                              flexDirection: "column",
                               alignItems: "center",
                               justifyContent: "center",
-                              fontWeight: "bold",
-                              fontSize: "18px",
-                              color: "#333",
+                              boxShadow: "inset 0 2px 4px rgba(0,0,0,0.05)",
                             }}
                           >
-                            65%{" "}
-                            <span style={{ fontSize: "10px", color: "#777" }}>
-                              HIGH
+                            <span
+                              style={{ fontSize: "16px", fontWeight: "900" }}
+                            >
+                              {graph.data[0].value}%
+                            </span>
+                            <span
+                              style={{
+                                fontSize: "8px",
+                                color: "#94a3b8",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              TOP
                             </span>
                           </div>
                         </div>
                       </Col>
                       <Col xs={6}>
-                        {/* --- Legend --- */}
-                        <div className="d-flex flex-column gap-3">
+                        <div className="d-flex flex-column gap-2">
                           {graph.data.map((slice, i) => (
-                            <div key={i} className="d-flex align-items-center">
+                            <div
+                              key={i}
+                              className="d-flex align-items-center p-2 rounded-3 hover-bg-light"
+                            >
                               <div
-                                className="rounded-circle me-3"
+                                className="rounded-circle me-2"
                                 style={{
-                                  width: "12px",
-                                  height: "12px",
+                                  width: "10px",
+                                  height: "10px",
                                   backgroundColor: slice.color,
-                                  border: `2px solid #fff`,
-                                  boxShadow: "0 0 0 1px #e2e8f0",
                                 }}
                               />
-                              <div>
+                              <div style={{ lineHeight: "1.2" }}>
                                 <p
-                                  className="text-uppercase fw-bold m-0 text-muted"
-                                  style={{
-                                    fontSize: "10px",
-                                    letterSpacing: "1px",
-                                  }}
+                                  className="m-0 text-muted fw-bold"
+                                  style={{ fontSize: "10px" }}
                                 >
                                   {slice.label}
                                 </p>
-                                <h6 className="fw-extrabold m-0 text-dark">
+                                <h6
+                                  className="m-0 fw-bold"
+                                  style={{ fontSize: "13px" }}
+                                >
                                   {slice.value}%
                                 </h6>
                               </div>
@@ -494,17 +567,6 @@ const Dashboardmain = () => {
                     </Row>
                   )}
                 </CardBody>
-
-                {/* Premium Footer (Same Style as before) */}
-                <div className="bg-light px-4 py-3 border-top border-light d-flex align-items-center">
-                  {/* (Footer code is same as before) */}
-                  <button
-                    className="btn btn-sm btn-white ms-auto shadow-sm border text-muted fw-bold"
-                    style={{ fontSize: "11px" }}
-                  >
-                    VIEW DETAILS
-                  </button>
-                </div>
               </Card>
             </Col>
           ))}
