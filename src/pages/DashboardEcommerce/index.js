@@ -1,15 +1,16 @@
 import Select from "react-select";
 import React, { useState, useEffect, useCallback } from "react";
 import { Button, Card, CardBody, Col, Container, Row } from "reactstrap";
+import AuthUser from "../../helpers/Authuser";
 
 const Dashboardmain = () => {
   const getFormattedDate = (date) => date.toISOString().split("T")[0];
   const [filters, setFilters] = useState({
-    search: "",
-    startDate: getFormattedDate(new Date()),
-    endDate: getFormattedDate(new Date()),
-    priorityId: "",
-    activeFilterType: "today",
+    start_date: getFormattedDate(new Date()),
+    end_date: getFormattedDate(new Date()),
+    customer_id: "",
+    user_id: "",
+    activeFilterType: "today", // To track which quick filter is active
   });
   const dateQuickFilters = [
     { label: "Today", value: "today" },
@@ -21,6 +22,8 @@ const Dashboardmain = () => {
     { label: "This Year", value: "this_year" },
     { label: "Last Year", value: "last_year" },
   ];
+  console.log("filters", filters);
+
   const handleQuickFilter = (value) => {
     const now = new Date();
     let start = new Date();
@@ -60,11 +63,25 @@ const Dashboardmain = () => {
 
     setFilters((prev) => ({
       ...prev,
-      startDate: getFormattedDate(start),
-      endDate: getFormattedDate(end),
+      start_date: getFormattedDate(start),
+      end_date: getFormattedDate(end),
       activeFilterType: value,
     }));
   };
+  const { http } = AuthUser();
+  const filterData = () => {
+    http
+      .post("/dashbord/filter", filters)
+      .then((res) => {
+        console.log(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+  useEffect(() => {
+    filterData();
+  }, [filters]);
   return (
     <div
       className="page-content"
