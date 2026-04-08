@@ -211,17 +211,23 @@ const LabelPrint = (props) => {
     // label print style for printing
     const pageStyle = `
       @page { 
-        size: ${props.id ? "100mm 150mm" : "75mm 100mm"}; 
-        margin: 0; 
-      }
+  size: ${
+    props.id
+      ? "100mm 150mm"
+      : orientation === "vertical"
+        ? "75mm 100mm"
+        : "100mm 75mm"
+  }; 
+  margin: 0; 
+}
       body { 
         margin: 0; 
         padding: 0; 
         background: white !important;
       }
       .label-box { 
-        width: ${props.id ? "100mm" : "75mm"};                                                                                                                                                                                                                                                                                                                                             
-        height: ${props.id ? "150mm" : "100mm"};
+        width: ${props.id ? "100mm" : (orientation=='vertical'?"75mm":"100mm")};                                                                                                                                                                                                                                                                                                                                             
+        height: ${props.id ? "150mm" : (orientation=='vertical'?"100mm":"75mm")};
         padding: 10px;
         box-sizing: border-box;
         background: white;
@@ -291,8 +297,11 @@ const LabelPrint = (props) => {
         font-size: 14px;
       }
        .address-customer,.meta-customer{
-       margin-bottom: 6px;
+       margin-bottom: 4px;
        font-size: 13px;
+       word-break: break-word;
+       overflow-wrap: break-word;
+       inline-size: 100%;
        }
       
       .from-title {
@@ -317,7 +326,7 @@ const LabelPrint = (props) => {
         line-height: 1.2;
       }
         .from-details-customer {
-        font-size: 15px;
+        font-size: 14px;
         line-height: 1.2;
       }
       
@@ -966,8 +975,11 @@ const LabelPrint = (props) => {
         }
 
         .address-customer,.meta-customer{
-       margin-bottom: 6px;
+       margin-bottom: 4px;
        font-size: 13px;
+       word-break: break-word;
+       overflow-wrap: break-word;
+       inline-size: 100%;
        }
 
         .from-title {
@@ -992,7 +1004,7 @@ const LabelPrint = (props) => {
           line-height: 1.2;
         }
           .from-details-customer {
-        font-size: 15px;
+         font-size:${orientation == "landscape" ? "13px" : "15px"}
         line-height: 1.2;
       }
 
@@ -1139,9 +1151,11 @@ const LabelPrint = (props) => {
                               border: "1px solid black",
                             }}
                           >
-                            <b className="fs-5">Transport Type:{" "}</b>
-                            <div>{stripHtml(masterData.master_tracking_details) ||
-                              "N/A"}</div>
+                            <b className="fs-5">Transport Type: </b>
+                            <div>
+                              {stripHtml(masterData.master_tracking_details) ||
+                                "N/A"}
+                            </div>
                           </div>
 
                           {/* Order ID */}
@@ -1261,7 +1275,8 @@ const LabelPrint = (props) => {
                         >
                           NON-BANPL A/C No: <b>1000059729</b>
                         </div>
-                        <div style={{
+                        <div
+                          style={{
                             fontSize: "14px",
                             border: "2px solid #000",
                             textAlign: "center",
@@ -1269,7 +1284,8 @@ const LabelPrint = (props) => {
                             minHeight: "45px",
                             backgroundColor: "#fff",
                             paddingTop: "2px",
-                          }}>
+                          }}
+                        >
                           CONTRACT ID: <b>40098702</b>
                         </div>
                       </div>
