@@ -96,7 +96,9 @@ const QuoatationUpdate = (props) => {
       .get(`/purchase/invoice/${id}`)
       .then(function (response) {
         const masterData = response.data.Master[0];
+        console.log(masterData);
         const childData = response.data.Child;
+        console.log(childData);
         const customer = response.data.customer;
         // Format dates
         const formatDate = (inputDate) => {
@@ -144,6 +146,7 @@ const QuoatationUpdate = (props) => {
           ...masterData,
           purchase_notes: masterData.purchase_notes || "",
         });
+          
         setOtherCharge({
           ...selectOtherCharge,
           value: masterData.other_charge_id || "0",
@@ -612,6 +615,7 @@ const QuoatationUpdate = (props) => {
       price_online: item.price_online,
       price_distributor: item.price_distributor,
       purchase_id: item.purchase_id, // Include for updates
+      
     }));
 
     const masterData = {
@@ -677,7 +681,7 @@ const QuoatationUpdate = (props) => {
   const Onsubmit = () => {
     if (Data_View.length) {
       const finalData = prepareDataForAPI();
-      //console.log(finalData);
+      console.log(finalData);
       if (!finalData.master.master_address_id) {
         toast.warning("Please enter address before submitting");
         return; // stop further execution

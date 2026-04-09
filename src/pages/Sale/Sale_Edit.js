@@ -3,6 +3,7 @@ import invalidAudio from "../../assets/audio/error.ogg";
 import validAudio from "../../assets/audio/audio_sucess.mp3";
 import { AsyncTypeahead } from "react-bootstrap-typeahead";
 import "../purchase/autoscroll.css";
+import { FiEye, FiFile, FiFileText, FiX, FiUpload } from "react-icons/fi";
 import {
   Card,
   CardBody,
@@ -29,7 +30,7 @@ import ProductUpdate from "../Products/ProductUpdate";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import ScrollToBottom from "react-scroll-to-bottom";
 import SupplierAdd from "../Suppliers/SupplierAdd";
-import { API_URL } from "../../helpers/url_helper";
+import { API_URL,IMG_API_URL } from "../../helpers/url_helper";
 import UserAddModal from "../Users/UserAddModal";
 import ContactPerson from "../purchase/ContactPersons";
 import ShippingModal from "../purchase/ShippingModal";
@@ -37,6 +38,7 @@ import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 const Sale_Edit = (props) => {
+  const [preview, setPreview] = useState(null);
   const [shippingModal, setShippingModal] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState();
   const [customerDetails, setCustomers] = useState({});
@@ -72,7 +74,7 @@ const Sale_Edit = (props) => {
       year: "numeric",
     }),
   );
-  const [daysCount, setDaysCount] = useState(0); 
+  const [daysCount, setDaysCount] = useState(0);
   const [MasterArray, SetMasterArray] = useState({
     purchase_notes: "",
     purchase_start_date: startDate,
@@ -85,7 +87,6 @@ const Sale_Edit = (props) => {
       .then(function (response) {
         if (response.data) {
           setCustomers(response.data.customer);
-          
 
           SetData_View(
             response.data.Child.map((item) => ({
@@ -108,18 +109,17 @@ const Sale_Edit = (props) => {
 
           SetMasterArray(response.data.Master[0]);
           setOtherCharge({
-          value: response?.data?.Master[0]?.other_charge_id || "0",
-          label: response?.data?.Master[0]?.other_charges_name || "0",
-        });
+            value: response?.data?.Master[0]?.other_charge_id || "0",
+            label: response?.data?.Master[0]?.other_charges_name || "0",
+          });
         }
-        console.log(MasterArray);
-        console.log(Data_View);
+        
       })
       .catch(function (error) {
         console.log(error);
       });
   }, []);
- 
+
   useEffect(() => {
     http
       .get("/transport_types/list")
@@ -146,7 +146,7 @@ const Sale_Edit = (props) => {
   const [isProductLoading, setIsProductLoading] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
-  const { http } = AuthUser();
+  const { http,https } = AuthUser();
   const [BasicInformtion, SetBasicInformtion] = useState([]);
   const [BasiceINF, SetBasiceINF] = useState(1);
 
@@ -178,7 +178,7 @@ const Sale_Edit = (props) => {
       } else {
         setSelectedAddress(data[0]);
       }
-    }else {
+    } else {
       setSelectedAddress({}); // store whole object
 
       setShipping([]);
@@ -261,7 +261,7 @@ const Sale_Edit = (props) => {
   // Product search functionality
   const [searchList, SetSearchList] = useState([]);
   const [Data_product, SetData_product] = useState([]);
-  
+
   const [Count, SetCount] = useState(1);
   const searchInputRef = useRef(null);
 
@@ -383,117 +383,109 @@ const Sale_Edit = (props) => {
   };
 
   // store product
- const StoreDataPrice = (data) => {
- 
-  SetData_View(prev => {
-    const index = prev.findIndex(
-      item => item.product_id === data.product_id
-    );
+  const StoreDataPrice = (data) => {
+    SetData_View((prev) => {
+      const index = prev.findIndex(
+        (item) => item.product_id === data.product_id,
+      );
 
-    const list = [...prev];
+      const list = [...prev];
 
-    if (index !== -1) {
-      // ===== UPDATE EXISTING =====
-      const item = { ...list[index] };
+      if (index !== -1) {
+        // ===== UPDATE EXISTING =====
+        const item = { ...list[index] };
 
-      const qty = Number(item.qty || 0) + 1;
-      const price = Number(item.price_purchase || 0);
-      const disPre = Number(item.dis_pre || 0);
-      const tax = Number(item.tax_percentage || 0);
+        const qty = Number(item.qty || 0) + 1;
+        const price = Number(item.price_purchase || 0);
+        const disPre = Number(item.dis_pre || 0);
+        const tax = Number(item.tax_percentage || 0);
+
+        const disValue = (qty * price * disPre) / 100;
+        const basic = qty * price - disValue;
+        const gst = (basic * tax) / 100;
+        const subTotal = basic + gst;
+
+        item.qty = qty;
+        item.dis_value = disValue.toFixed(2);
+        item.basic_total = basic.toFixed(2);
+        item.gst_value = gst.toFixed(2);
+        item.sub_total = subTotal.toFixed(2);
+
+        list[index] = item;
+      } else {
+        // ===== ADD NEW =====
+        const qty = 1;
+        const price = Number(data.price_purchase || 0);
+        const tax = Number(data.tax_percentage || 0);
+
+        const basic = qty * price;
+        const gst = (basic * tax) / 100;
+        const subTotal = basic + gst;
+
+        list.push({
+          ...data,
+          qty,
+          dis_pre: 0,
+          dis_value: "0.00",
+          basic_total: basic.toFixed(2),
+          gst_value: gst.toFixed(2),
+          sub_total: subTotal.toFixed(2),
+        });
+      }
+
+      return list;
+    });
+
+    // sound
+    const audio = new Audio(validAudio);
+    audio.play();
+  };
+
+  // onchang value update
+  const ChangInput = (e, index, field, check) => {
+    //console.log("error called ")
+    SetData_View((prev) => {
+      const list = [...prev];
+      const product = { ...list[index] };
+
+      // ===== UPDATE VALUE =====
+      if (check === 1) {
+        product[field] = Number(product[field] || 0) + 1;
+      } else if (check === 2) {
+        if (field === "qty" && Number(product[field]) > 1) {
+          product[field] = Number(product[field]) - 1;
+        }
+      } else {
+        if (field === "qty") {
+          const val = Number(e.target.value);
+          if (!isNaN(val) && val >= 0) product[field] = val;
+        } else if (check === "pk") {
+          product[field] = Number(e);
+        } else {
+          product[field] = Number(e.target.value);
+        }
+      }
+
+      // ===== CALCULATIONS =====
+      const qty = Number(product.qty || 0);
+      const price = Number(product.price_purchase || 0);
+      const disPre = Number(product.dis_pre || 0);
+      const tax = Number(product.tax_percentage || 0);
 
       const disValue = (qty * price * disPre) / 100;
       const basic = qty * price - disValue;
       const gst = (basic * tax) / 100;
       const subTotal = basic + gst;
 
-      item.qty = qty;
-      item.dis_value = disValue.toFixed(2);
-      item.basic_total = basic.toFixed(2);
-      item.gst_value = gst.toFixed(2);
-      item.sub_total = subTotal.toFixed(2);
+      product.dis_value = disValue.toFixed(2);
+      product.basic_total = basic.toFixed(2);
+      product.gst_value = gst.toFixed(2);
+      product.sub_total = subTotal.toFixed(2);
 
-      list[index] = item;
-
-    } else {
-      // ===== ADD NEW =====
-      const qty = 1;
-      const price = Number(data.price_purchase || 0);
-      const tax = Number(data.tax_percentage || 0);
-
-      const basic = qty * price;
-      const gst = (basic * tax) / 100;
-      const subTotal = basic + gst;
-
-      list.push({
-        ...data,
-        qty,
-        dis_pre: 0,
-        dis_value: "0.00",
-        basic_total: basic.toFixed(2),
-        gst_value: gst.toFixed(2),
-        sub_total: subTotal.toFixed(2),
-      });
-    }
-
-    return list;
-  });
-
-  // sound
-  const audio = new Audio(validAudio);
-  audio.play();
-};
-
-
-  // onchang value update
- const ChangInput = (e, index, field, check) => {
-  //console.log("error called ")
-  SetData_View(prev => {
-    const list = [...prev];
-    const product = { ...list[index] };
-
-    // ===== UPDATE VALUE =====
-    if (check === 1) {
-      product[field] = Number(product[field] || 0) + 1;
-
-    } else if (check === 2) {
-      if (field === "qty" && Number(product[field]) > 1) {
-        product[field] = Number(product[field]) - 1;
-      }
-
-    } else {
-      if (field === "qty") {
-        const val = Number(e.target.value);
-        if (!isNaN(val) && val >= 0) product[field] = val;
-
-      } else if (check === "pk") {
-        product[field] = Number(e);
-
-      } else {
-        product[field] = Number(e.target.value);
-      }
-    }
-
-    // ===== CALCULATIONS =====
-    const qty = Number(product.qty || 0);
-    const price = Number(product.price_purchase || 0);
-    const disPre = Number(product.dis_pre || 0);
-    const tax = Number(product.tax_percentage || 0);
-
-    const disValue = (qty * price * disPre) / 100;
-    const basic = qty * price - disValue;
-    const gst = (basic * tax) / 100;
-    const subTotal = basic + gst;
-
-    product.dis_value = disValue.toFixed(2);
-    product.basic_total = basic.toFixed(2);
-    product.gst_value = gst.toFixed(2);
-    product.sub_total = subTotal.toFixed(2);
-
-    list[index] = product;
-    return list;
-  });
-};
-
+      list[index] = product;
+      return list;
+    });
+  };
 
   const Deleted = (index_number) => {
     SetData_View(Data_View.filter((product, index) => index !== index_number));
@@ -513,7 +505,7 @@ const Sale_Edit = (props) => {
 
   useEffect(() => {
     if (!Data_View?.length) return;
-  
+
     const totals = Data_View.reduce(
       (acc, item) => {
         const price = Number(item[selectPriceOption?.value] || 0);
@@ -523,7 +515,7 @@ const Sale_Edit = (props) => {
         const weight = Number(item.product_weight || 0);
         const subTotal = Number(item.sub_total || 0);
         const basicTotal = Number(item.basic_total || 0);
-  
+
         acc.basic += basicTotal;
         acc.qty += qty;
         acc.purchase += price * qty;
@@ -531,7 +523,7 @@ const Sale_Edit = (props) => {
         acc.gst += (price * qty * tax) / 100;
         acc.net += subTotal;
         acc.weight += qty * weight;
-  
+
         return acc;
       },
       {
@@ -542,9 +534,9 @@ const Sale_Edit = (props) => {
         gst: 0,
         net: 0,
         weight: 0,
-      }
+      },
     );
-  
+
     setTotalBasic(totals.basic.toFixed(2));
     setTotalQty(totals.qty);
     setTotal_purchse(totals.purchase.toFixed(2));
@@ -552,18 +544,17 @@ const Sale_Edit = (props) => {
     setTotal_GST(totals.gst.toFixed(2));
     setTotal_Net(totals.net.toFixed(2));
     setTotalWeight(totals.weight.toFixed(2));
-  
   }, [Data_View, selectPriceOption]);
-  
+
   useEffect(() => {
     const start = new Date(startDate);
     const end = new Date(endDate);
-  
+
     const diff = isNaN(end - start) ? 0 : (end - start) / (1000 * 3600 * 24);
-  
+
     setDaysCount(diff);
-  
-    SetMasterArray(prev => ({
+
+    SetMasterArray((prev) => ({
       ...prev,
       purchase_due_days: diff,
       purchase_end_date: endDate,
@@ -576,7 +567,6 @@ const Sale_Edit = (props) => {
       purchase_invoice_no: "",
       purchase_payment_term: purchase_payment_terms,
     }));
-  
   }, [
     startDate,
     endDate,
@@ -593,14 +583,13 @@ const Sale_Edit = (props) => {
     // Prepare master data
     const masterData = {
       ...MasterArray,
-      master_user_id:customerDetails.user_id,
+      master_user_id: customerDetails.user_id,
       shipping_id: selectedAddress?.shipping_id,
       master_address_id: selectedAddress?.shipping_id,
       selectPriceOption: selectPriceOption.value,
       other_charge_id: selectOtherCharge.value,
       purchase_payment_term: purchase_payment_terms,
       purchase_created_by_id: 1,
-       
     };
 
     // Prepare product data in the required format
@@ -614,12 +603,14 @@ const Sale_Edit = (props) => {
       dis_pre: item.dis_pre,
       pos_weight: item.product_weight,
       dis_value: item.dis_value,
-      basic_total: item.basic_total||0,
+      basic_total: item.basic_total || 0,
       tax_percentage: item.tax_percentage,
-      gst_value: item.gst_value||0,
-      sub_total: item.sub_total||0,
+      gst_value: item.gst_value || 0,
+      sub_total: item.sub_total || 0,
       price_online: item.price_online,
       price_distributor: item.price_distributor,
+      pos_attachment:item.pos_attachment,
+      pos_product_notes:item.pos_product_notes
     }));
 
     return {
@@ -658,7 +649,7 @@ const Sale_Edit = (props) => {
       const finalData = prepareDataForAPI();
       console.log(finalData);
 
-      http
+      https
         .post("/update/invoice", finalData)
         .then(function (response) {
           redireaction("/invoice");
@@ -689,6 +680,7 @@ const Sale_Edit = (props) => {
         item: customerDetails,
       }
     : null;
+     
 
   return (
     <div className="page-content">
@@ -886,29 +878,29 @@ const Sale_Edit = (props) => {
                                       setSelectedAddress(selectedOption.item); // store selected shipping_id
                                     }}
                                     value={
-                                    shipping
-                                      .map((item) => ({
-                                        value: item.shipping_id,
-                                        label: `${item.address_line1}, ${item.city} - ${item.pincode} - ${item.addressType}`,
-                                      }))
-                                      .find(
-                                        (opt) =>
-                                          opt.value ==  
-                                          selectedAddress?.shipping_id,
-                                      ) ||
-                                    shipping
-                                      .map((item) => ({
-                                        value: item.shipping_id,
-                                        label: `${item.address_line1}, ${item.city} - ${item.pincode} - ${item.addressType}`,
-                                      }))
-                                      .find(
-                                        (opt) =>
-                                          shipping.find(
-                                            (s) => s.defaultAddress == 1,
-                                          )?.shipping_id === opt.value,
-                                      ) ||
-                                    null
-                                  }
+                                      shipping
+                                        .map((item) => ({
+                                          value: item.shipping_id,
+                                          label: `${item.address_line1}, ${item.city} - ${item.pincode} - ${item.addressType}`,
+                                        }))
+                                        .find(
+                                          (opt) =>
+                                            opt.value ==
+                                            selectedAddress?.shipping_id,
+                                        ) ||
+                                      shipping
+                                        .map((item) => ({
+                                          value: item.shipping_id,
+                                          label: `${item.address_line1}, ${item.city} - ${item.pincode} - ${item.addressType}`,
+                                        }))
+                                        .find(
+                                          (opt) =>
+                                            shipping.find(
+                                              (s) => s.defaultAddress == 1,
+                                            )?.shipping_id === opt.value,
+                                        ) ||
+                                      null
+                                    }
                                     placeholder="Select Shipping Address"
                                   />
                                 </div>
@@ -1262,6 +1254,8 @@ const Sale_Edit = (props) => {
                                   <th>No.</th>
                                   <th>Category</th>
                                   <th>Item Name</th>
+                                  <th>Add Note</th>
+                                  <th>Attachments</th>
                                   <th>Qty</th>
                                   <th>Rate</th>
                                   <th>Taxable</th>
@@ -1285,6 +1279,72 @@ const Sale_Edit = (props) => {
                                       title={item.product_english_name}
                                     >
                                       {item.product_english_name}
+                                    </td>
+                                    <td
+                                      style={{
+                                        maxWidth: "150px",
+                                        whiteSpace: "normal",
+                                        wordBreak: "break-word",
+                                      }}
+                                    >
+                                      <input
+                                        type="text"
+                                        value={item.pos_product_notes || ""}
+                                        onChange={(e) => {
+                                          ChangInput(e, index, "note");
+                                        }}
+                                        className="form-control"
+                                        placeholder={
+                                          "Add " +
+                                          item.product_english_name +
+                                          " Notes"
+                                        }
+                                      />{" "}
+                                    </td>
+                                    <td>
+                                      {item.pos_attachment ? (
+                                        <>
+                                          <button
+                                            type="button"
+                                            className="btn btn-sm btn-info me-2"
+                                            onClick={() =>
+                                              setPreview(
+                                                `${IMG_API_URL}/poattachments/${item.pos_attachment}`,
+                                              )
+                                            }
+                                          >
+                                            <FiEye /> Preview
+                                          </button>
+
+                                          <label className="btn btn-sm btn-warning mb-0">
+                                            <FiUpload /> Change File
+                                            <input
+                                              type="file"
+                                              accept="image/*,.pdf,.doc,.docx"
+                                              className="form-control w-100"
+                                              hidden
+                                              onChange={(e) => {
+                                                Data_View[index].pos_attachment =
+                                                  e.target.files[0];
+                                              }}
+                                            />
+                                          </label>
+                                        </>
+                                      ) : (
+                                        <label className="btn btn-sm btn-secondary mb-0">
+                                          <FiUpload /> Upload File
+                                          <input
+                                            type="file"
+                                            accept="image/*,.pdf,.doc,.docx"
+                                            className="form-control w-100"
+                                            hidden
+                                            onChange={(e) => {
+                                              Data_View[index].pos_attachment =
+                                                e.target.files[0];
+                                            }}
+                                          />
+                                        </label>
+                                      )}
                                     </td>
 
                                     <td>
@@ -1409,7 +1469,7 @@ const Sale_Edit = (props) => {
                       <div className="w-75 d-flex">
                         <div className="w-50">
                           <label> Transport Types</label>
-                          <Select    
+                          <Select
                             options={transportDetails.map((item) => ({
                               label: `${item.transport_types_type} / ₹${item.transport_types_charge}`,
                               value: item.transport_types_id,
@@ -1451,10 +1511,11 @@ const Sale_Edit = (props) => {
                       </Label>
                       <CKEditor
                         editor={ClassicEditor}
+                        data={MasterArray.master_notes || ""}
                         onChange={(e, editor) => {
                           SetMasterArray({
                             ...MasterArray,
-                            purchase_notes: editor.getData(),
+                            master_notes: editor.getData(),
                           });
                         }}
                         placeholder="Notes"
@@ -1578,6 +1639,39 @@ const Sale_Edit = (props) => {
             </Button>
           </ModalFooter>
         </Modal>
+        {preview && (
+          <div
+            className="modal fade show d-block"
+            tabIndex="-1"
+            role="dialog"
+            onClick={() => setPreview(null)}
+          >
+            <div className="modal-dialog modal-lg" role="document">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Attachment Preview</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setPreview(null)}
+                  ></button>
+                </div>
+                <div className="modal-body text-center">
+                  {preview.endsWith(".pdf") ? (
+                    <iframe
+                      src={preview}
+                      width="100%"
+                      height="500px"
+                      title="Preview"
+                    ></iframe>
+                  ) : (
+                    <img src={preview} alt="Preview" className="img-fluid" />
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         {modalStates === true ? (
           <ProductAdd
             modalStates={modalStates}

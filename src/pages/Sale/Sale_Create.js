@@ -3,6 +3,7 @@ import invalidAudio from "../../assets/audio/error.ogg";
 import validAudio from "../../assets/audio/audio_sucess.mp3";
 import { AsyncTypeahead } from "react-bootstrap-typeahead";
 import "../purchase/autoscroll.css";
+import { FiEye, FiFile, FiFileText, FiX, FiUpload } from "react-icons/fi";
 import {
   Card,
   CardBody,
@@ -29,7 +30,7 @@ import ProductUpdate from "../Products/ProductUpdate";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import ScrollToBottom from "react-scroll-to-bottom";
 import SupplierAdd from "../Suppliers/SupplierAdd";
-import { API_URL } from "../../helpers/url_helper";
+import { API_URL,IMG_API_URL } from "../../helpers/url_helper";
 import UserAddModal from "../Users/UserAddModal";
 import ContactPerson from "../purchase/ContactPersons";
 import ShippingModal from "../purchase/ShippingModal";
@@ -37,6 +38,7 @@ import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 const Sale_Create = (props) => {
+  const [preview, setPreview] = useState(null);
   const [shippingModal, setShippingModal] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState();
   const [customerDetails, setCustomers] = useState({});
@@ -75,7 +77,7 @@ const Sale_Create = (props) => {
   const [daysCount, setDaysCount] = useState(0);
   const [counts, SetCounts] = useState(0);
   const [MasterArray, SetMasterArray] = useState({
-    purchase_notes: "",
+    master_notes: "",
     purchase_start_date: startDate,
   });
   const [transportDetails, setTransportDetails] = useState([]);
@@ -84,7 +86,7 @@ const Sale_Create = (props) => {
       .get("/transport_types/list")
       .then((res) => {
         setTransportDetails(res.data);
-      })
+      })  
       .catch((err) => {
         console.log(err);
       });
@@ -105,11 +107,11 @@ const Sale_Create = (props) => {
   const [isProductLoading, setIsProductLoading] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
-  const { http } = AuthUser();
+ const { http, https } = AuthUser();
   const [BasicInformtion, SetBasicInformtion] = useState([]);
   const [BasiceINF, SetBasiceINF] = useState(1);
 
- useEffect(() => {
+  useEffect(() => {
     document.title = "Saisupplier Admin | Quotation Create";
 
     const getLead = async () => {
@@ -163,7 +165,7 @@ const Sale_Create = (props) => {
       .catch((error) => {
         console.error("Purchase Info Error:", error);
       });
-  }, [lead_id, manageCategory])
+  }, [lead_id, manageCategory]);
 
   const [shippingCount, setShippingCount] = useState(1);
   const getAddressDetails = async (user_id) => {
@@ -594,6 +596,8 @@ const Sale_Create = (props) => {
       sub_total: item.sub_total,
       price_online: item.price_online,
       price_distributor: item.price_distributor,
+      pos_attachment:item.pos_attachment,
+      pos_product_notes:item.pos_product_notes
     }));
 
     return {
@@ -635,8 +639,9 @@ const Sale_Create = (props) => {
         return; // stop further execution
       }
       SetDisabed(true);
+      console.log(finalData);
 
-      http
+      https
         .post("/create/invoice", finalData)
         .then(function (response) {
           redireaction("/invoice");
@@ -730,7 +735,7 @@ const Sale_Create = (props) => {
                               <div className="form-icon right rounded d-flex bg-primary align-items-center">
                                 <div className="w-100">
                                   <Select
-                                  isDisabled={lead_id ? true : false}
+                                    isDisabled={lead_id ? true : false}
                                     id="contactnumberInput"
                                     className="fw-bold"
                                     value={selectValue}
@@ -1241,6 +1246,8 @@ const Sale_Create = (props) => {
                                   <th>No.</th>
                                   <th>Category</th>
                                   <th>Item Name</th>
+                                  <th>Add Note</th>
+                                  <th>Attachments</th>
                                   <th>Qty</th>
                                   <th>Rate</th>
                                   <th>Taxable</th>
@@ -1264,6 +1271,73 @@ const Sale_Create = (props) => {
                                       }}
                                     >
                                       {item.product_english_name}
+                                    </td>
+                                    <td
+                                      style={{
+                                        maxWidth: "150px",
+                                        whiteSpace: "normal",
+                                        wordBreak: "break-word",
+                                      }}
+                                    >
+                                      <input
+                                        type="text"
+                                        value={item.pos_product_notes}
+                                        onChange={(e) => {
+                                          Data_View[index].pos_product_notes =
+                                            e.target.value;
+                                        }}
+                                        className="form-control"
+                                        placeholder={
+                                          "Add " +
+                                          item.product_english_name +
+                                          " Notes"
+                                        }
+                                      />{" "}
+                                    </td>
+                                    <td>
+                                      {item.pos_attachment ? (
+                                        <>
+                                          <button
+                                            type="button"
+                                            className="btn btn-sm btn-info me-2"
+                                            onClick={() =>
+                                              setPreview(
+                                                `${IMG_API_URL}/poattachments/${item.pos_attachment}`,
+                                              )
+                                            }
+                                          >
+                                            <FiEye /> Preview
+                                          </button>
+
+                                          <label className="btn btn-sm btn-warning mb-0">
+                                            <FiUpload /> Change File
+                                            <input
+                                              type="file"
+                                              accept="image/*,.pdf,.doc,.docx"
+                                              className="form-control w-100"
+                                              hidden
+                                              onChange={(e) => {
+                                                Data_View[index].pos_attachment =
+                                                  e.target.files[0];
+                                              }}
+                                            />
+                                          </label>
+                                        </>
+                                      ) : (
+                                        <label className="btn btn-sm btn-secondary mb-0">
+                                          <FiUpload /> Upload File
+                                          <input
+                                            type="file"
+                                            accept="image/*,.pdf,.doc,.docx"
+                                            className="form-control w-100"
+                                            hidden
+                                            onChange={(e) => {
+                                              Data_View[index].pos_attachment =
+                                                e.target.files[0];
+                                            }}
+                                          />
+                                        </label>
+                                      )}
                                     </td>
                                     <td>
                                       <div
@@ -1432,7 +1506,7 @@ const Sale_Create = (props) => {
                         onChange={(e, editor) => {
                           SetMasterArray({
                             ...MasterArray,
-                            purchase_notes: editor.getData(),
+                            master_notes: editor.getData(),
                           });
                         }}
                         placeholder="Notes"
@@ -1556,6 +1630,39 @@ const Sale_Create = (props) => {
             </Button>
           </ModalFooter>
         </Modal>
+        {preview && (
+          <div
+            className="modal fade show d-block"
+            tabIndex="-1"
+            role="dialog"
+            onClick={() => setPreview(null)}
+          >
+            <div className="modal-dialog modal-lg" role="document">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Attachment Preview</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setPreview(null)}
+                  ></button>
+                </div>
+                <div className="modal-body text-center">
+                  {preview.endsWith(".pdf") ? (
+                    <iframe
+                      src={preview}
+                      width="100%"
+                      height="500px"
+                      title="Preview"
+                    ></iframe>
+                  ) : (
+                    <img src={preview} alt="Preview" className="img-fluid" />
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         {modalStates === true ? (
           <ProductAdd
             modalStates={modalStates}
