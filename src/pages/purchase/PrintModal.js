@@ -596,7 +596,7 @@ const PrintModal = (props) => {
                       );
 
                       const gstPercent = items[0].tax_percentage || 0;
-                      const isMH = Master_data?.master_state === "Maharashtra";
+                      const isMH = Master_data?.state == "Maharashtra";
 
                       const sgstPercent = isMH ? gstPercent / 2 : 0;
                       const cgstPercent = isMH ? gstPercent / 2 : 0;
@@ -678,7 +678,7 @@ const PrintModal = (props) => {
                           const gstPercent = item.tax_percentage || 0;
                           return (
                             sum +
-                            (Master_data?.master_state === "Maharashtra"
+                            (Master_data?.state == "Maharashtra"
                               ? (taxable * (gstPercent / 2)) / 100
                               : 0)
                           );
@@ -694,7 +694,7 @@ const PrintModal = (props) => {
                           const gstPercent = item.tax_percentage || 0;
                           return (
                             sum +
-                            (Master_data?.master_state === "Maharashtra"
+                            (Master_data?.state == "Maharashtra"
                               ? (taxable * (gstPercent / 2)) / 100
                               : 0)
                           );
@@ -710,7 +710,7 @@ const PrintModal = (props) => {
                           const gstPercent = item.tax_percentage || 0;
                           return (
                             sum +
-                            (Master_data?.master_state !== "Maharashtra"
+                            (Master_data?.state != "Maharashtra"
                               ? (taxable * gstPercent) / 100
                               : 0)
                           );
@@ -748,15 +748,15 @@ const PrintModal = (props) => {
 
                   // Split GST into SGST + CGST (half-half) for intra-state (Maharashtra)
                   const sgst =
-                    Master_data?.master_state === "Maharashtra"
+                    Master_data?.state == "Maharashtra"
                       ? totalGST / 2
                       : 0;
                   const cgst =
-                    Master_data?.master_state === "Maharashtra"
+                    Master_data?.state == "Maharashtra"
                       ? totalGST / 2
                       : 0;
                   const igst =
-                    Master_data?.master_state !== "Maharashtra" ? totalGST : 0;
+                    Master_data?.state != "Maharashtra" ? totalGST : 0;
 
                   const grandTotal = totalBeforeTax + sgst + cgst + igst;
 
