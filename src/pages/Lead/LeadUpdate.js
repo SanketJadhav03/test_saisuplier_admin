@@ -1103,12 +1103,6 @@ const LeadUpdate = (props) => {
                                       <div className="d-flex justify-content-around">
                                         <span
                                           className="text-danger d-inline-block remove-item-btn cursor-pointer"
-                                          onClick={() => EditUpdate(index)}
-                                        >
-                                          <i className="ri-edit-line fs-18 text-primary"></i>
-                                        </span>
-                                        <span
-                                          className="text-danger d-inline-block remove-item-btn cursor-pointer"
                                           onClick={() => Deleted(index)}
                                         >
                                           <i className="ri-delete-bin-5-fill fs-16"></i>
