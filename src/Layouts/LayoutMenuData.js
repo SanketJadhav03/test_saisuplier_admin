@@ -39,7 +39,7 @@ const Navdata = () => {
     }
   }
   const permissionsList = useSelector(
-    (state) => state.permissionsSlice.permissionsList
+    (state) => state.permissionsSlice.permissionsList,
   );
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -105,10 +105,17 @@ const Navdata = () => {
         updateIconSidebar(e);
       },
     },
-     {
+    {
       id: "SETTINGS",
       label: "Leads",
       icon: "bx bx-target-lock",
+      link: "/leads-list",
+      stateVariables: isLead,
+    },
+    {
+      id: "SETTINGS",
+      label: "CRM Settings",
+      icon: "bx bx-slider-alt",
       link: "/#",
       click: function (e) {
         e.preventDefault();
@@ -118,13 +125,6 @@ const Navdata = () => {
       },
       stateVariables: isLead,
       subItems: [
-      
-        {
-          id: "Leads",
-          label: "Leads",
-          link: "/leads-list",
-          parentId: "apps",
-        },
         {
           id: "Source",
           label: "Source",
@@ -244,7 +244,9 @@ const Navdata = () => {
       stateVariables: isInvoice,
       subItems: [
         ...(permission.find(
-          (p) => p.permission_category === "ORDERTRACKING" && p.permission_path === "1"
+          (p) =>
+            p.permission_category === "ORDERTRACKING" &&
+            p.permission_path === "1",
         )
           ? [
               {
@@ -257,7 +259,9 @@ const Navdata = () => {
           : []),
 
         ...(permission.find(
-          (p) => p.permission_category === "ORDERTRACKING" && p.permission_path === "2"
+          (p) =>
+            p.permission_category === "ORDERTRACKING" &&
+            p.permission_path === "2",
         )
           ? [
               {
@@ -270,7 +274,9 @@ const Navdata = () => {
           : []),
 
         ...(permission.find(
-          (p) => p.permission_category === "ORDERTRACKING" && p.permission_path === "3"
+          (p) =>
+            p.permission_category === "ORDERTRACKING" &&
+            p.permission_path === "3",
         )
           ? [
               {
@@ -283,7 +289,9 @@ const Navdata = () => {
           : []),
 
         ...(permission.find(
-          (p) => p.permission_category === "ORDERTRACKING" && p.permission_path === "4"
+          (p) =>
+            p.permission_category === "ORDERTRACKING" &&
+            p.permission_path === "4",
         )
           ? [
               {
@@ -296,7 +304,9 @@ const Navdata = () => {
           : []),
 
         ...(permission.find(
-          (p) => p.permission_category === "ORDERTRACKING" && p.permission_path === "5"
+          (p) =>
+            p.permission_category === "ORDERTRACKING" &&
+            p.permission_path === "5",
         )
           ? [
               {
@@ -309,7 +319,9 @@ const Navdata = () => {
           : []),
 
         ...(permission.find(
-          (p) => p.permission_category === "ORDERTRACKING" && p.permission_path === "6"
+          (p) =>
+            p.permission_category === "ORDERTRACKING" &&
+            p.permission_path === "6",
         )
           ? [
               {
@@ -322,7 +334,9 @@ const Navdata = () => {
           : []),
 
         ...(permission.find(
-          (p) => p.permission_category === "ORDERTRACKING" && p.permission_path === "7"
+          (p) =>
+            p.permission_category === "ORDERTRACKING" &&
+            p.permission_path === "7",
         )
           ? [
               {
@@ -495,7 +509,7 @@ const Navdata = () => {
         ...(permission.find(
           (permission) =>
             permission.permission_category === "TEMPLATE" &&
-            permission.permission_path === "1"
+            permission.permission_path === "1",
         )
           ? [
               {
@@ -509,7 +523,7 @@ const Navdata = () => {
         ...(permission.find(
           (permission) =>
             permission.permission_category === "TEMPLATE" &&
-            permission.permission_path === "2"
+            permission.permission_path === "2",
         )
           ? [
               {
@@ -522,7 +536,7 @@ const Navdata = () => {
           : []),
       ],
     },
-   
+
     {
       id: "SETTINGS",
       label: "Settings",
@@ -539,7 +553,7 @@ const Navdata = () => {
         ...(permission.find(
           (permission) =>
             permission.permission_category === "SETTINGS" &&
-            permission.permission_path === "1"
+            permission.permission_path === "1",
         )
           ? [
               {
@@ -553,7 +567,7 @@ const Navdata = () => {
         ...(permission.find(
           (permission) =>
             permission.permission_category === "SETTINGS" &&
-            permission.permission_path === "2"
+            permission.permission_path === "2",
         )
           ? [
               {
@@ -567,7 +581,7 @@ const Navdata = () => {
         ...(permission.find(
           (permission) =>
             permission.permission_category === "SETTINGS" &&
-            permission.permission_path === "3"
+            permission.permission_path === "3",
         )
           ? [
               {
@@ -582,7 +596,7 @@ const Navdata = () => {
         ...(permission.find(
           (permission) =>
             permission.permission_category === "SETTINGS" &&
-            permission.permission_path === "4"
+            permission.permission_path === "4",
         )
           ? [
               {
@@ -596,7 +610,7 @@ const Navdata = () => {
         ...(permission.find(
           (permission) =>
             permission.permission_category === "SETTINGS" &&
-            permission.permission_path === "5"
+            permission.permission_path === "5",
         )
           ? [
               {
@@ -610,7 +624,7 @@ const Navdata = () => {
         ...(permission.find(
           (permission) =>
             permission.permission_category === "SETTINGS" &&
-            permission.permission_path === "6"
+            permission.permission_path === "6",
         )
           ? [
               {
@@ -625,7 +639,7 @@ const Navdata = () => {
         ...(permission.find(
           (permission) =>
             permission.permission_category === "SETTINGS" &&
-            permission.permission_path === "7"
+            permission.permission_path === "7",
         )
           ? [
               {
@@ -639,7 +653,7 @@ const Navdata = () => {
         ...(permission.find(
           (permission) =>
             permission.permission_category === "SETTINGS" &&
-            permission.permission_path === "8"
+            permission.permission_path === "8",
         )
           ? [
               {
@@ -653,7 +667,7 @@ const Navdata = () => {
         ...(permission.find(
           (permission) =>
             permission.permission_category === "SETTINGS" &&
-            permission.permission_path === "9"
+            permission.permission_path === "9",
         )
           ? [
               {
@@ -667,7 +681,7 @@ const Navdata = () => {
         ...(permission.find(
           (permission) =>
             permission.permission_category === "SETTINGS" &&
-            permission.permission_path === "11"
+            permission.permission_path === "11",
         )
           ? [
               {
@@ -681,7 +695,7 @@ const Navdata = () => {
         ...(permission.find(
           (permission) =>
             permission.permission_category === "SETTINGS" &&
-            permission.permission_path === "12"
+            permission.permission_path === "12",
         )
           ? [
               {
@@ -695,7 +709,7 @@ const Navdata = () => {
         ...(permission.find(
           (permission) =>
             permission.permission_category === "SETTINGS" &&
-            permission.permission_path === "13"
+            permission.permission_path === "13",
         )
           ? [
               {
@@ -709,7 +723,7 @@ const Navdata = () => {
         ...(permission.find(
           (permission) =>
             permission.permission_category === "SETTINGS" &&
-            permission.permission_path === "14"
+            permission.permission_path === "14",
         )
           ? [
               {
@@ -745,7 +759,7 @@ const Navdata = () => {
         ...(permission.find(
           (permission) =>
             permission.permission_category === "PAYMENT-RECEIPT" &&
-            permission.permission_path === "1"
+            permission.permission_path === "1",
         )
           ? [
               {
@@ -765,7 +779,7 @@ const Navdata = () => {
         ...(permission.find(
           (permission) =>
             permission.permission_category === "PAYMENT-RECEIPT" &&
-            permission.permission_path === "2"
+            permission.permission_path === "2",
         )
           ? [
               {
@@ -930,7 +944,7 @@ const Navdata = () => {
         ...(permission.find(
           (permission) =>
             permission.permission_category === "USER-MANAGEMENT" &&
-            permission.permission_path === "1"
+            permission.permission_path === "1",
         )
           ? [
               {
@@ -944,7 +958,7 @@ const Navdata = () => {
         ...(permission.find(
           (permission) =>
             permission.permission_category === "USER-MANAGEMENT" &&
-            permission.permission_path === "2"
+            permission.permission_path === "2",
         )
           ? [
               {
@@ -963,7 +977,7 @@ const Navdata = () => {
   const filteredMenuItems = menuItemsList.filter((menuItem) => {
     // Check if any permission in the permission array matches the menuItem.id
     return permission.some(
-      (dataItem) => menuItem.id === dataItem.permission_category
+      (dataItem) => menuItem.id === dataItem.permission_category,
     );
   });
 

@@ -37,7 +37,7 @@ const LeadAdd = (props) => {
   const [priorities, setPriorities] = useState([]);
   const [references, setReferences] = useState([]);
   const [customerDetails, setCustomers] = useState({});
-    const { http,user} = AuthUser();
+  const { http, user } = AuthUser();
   const { stages_id } = useParams();
   // Helper to format Date objects to YYYY-MM-DD
   const getFormattedDate = (date) => {
@@ -59,7 +59,7 @@ const LeadAdd = (props) => {
     followup_date: getFormattedDate(new Date()),
     priority_id: 1,
     assignto_id: 1,
-    stage_id: stages_id?stages_id:1,
+    stage_id: stages_id ? stages_id : 1,
     source_id: 1,
     referenceby_id: 1,
     feedback: "",
@@ -69,7 +69,7 @@ const LeadAdd = (props) => {
     label: "Sale Price",
   });
   // 2. STAGE_ID SYNC (Added Number check and functional update)
- 
+
   const redireaction = useNavigate();
   const [customerModal, setCustomerModal] = useState(false);
   const [startDate, setStartDate] = useState(
@@ -119,7 +119,6 @@ const LeadAdd = (props) => {
   const [isCategoryLoading, setIsCategoryLoading] = useState(false);
   const [isProductLoading, setIsProductLoading] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
-
 
   const [BasicInformtion, SetBasicInformtion] = useState([]);
   const [BasiceINF, SetBasiceINF] = useState(1);
@@ -999,7 +998,7 @@ const LeadAdd = (props) => {
                                   <th>Category</th>
                                   <th>Item Name</th>
                                   <th>Qty</th>
-                                  
+                                  <th>Action</th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -1052,7 +1051,16 @@ const LeadAdd = (props) => {
                                         </button>
                                       </div>
                                     </td>
-                                    
+                                    <td>
+                                      <div className="d-flex justify-content-around">
+                                        <span
+                                          className="text-danger d-inline-block remove-item-btn cursor-pointer"
+                                          onClick={() => Deleted(index)}
+                                        >
+                                          <i className="ri-delete-bin-5-fill fs-16"></i>
+                                        </span>
+                                      </div>
+                                    </td>
                                   </tr>
                                 ))}
                               </tbody>

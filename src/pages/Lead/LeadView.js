@@ -427,7 +427,12 @@ const LeadProView = () => {
 
                                 <div>
                                   <div className="mt-3">
-                                    <button className="btn btn-soft-primary w-100 btn-sm d-flex align-items-center justify-content-center gap-2">
+                                    <button
+                                      onClick={() => {
+                                        navigate(`/follow-up/${lead.lead_id}`);
+                                      }}
+                                      className="btn btn-soft-primary w-100 btn-sm d-flex align-items-center justify-content-center gap-2"
+                                    >
                                       <i className="ri-external-link-line"></i>
                                       <span>Follow Up</span>
                                     </button>
