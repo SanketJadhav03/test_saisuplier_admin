@@ -1,20 +1,35 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
-import { Card, Col, Input, Label, Modal, ModalBody, ModalHeader, Row, Spinner } from "reactstrap";
+import {
+  Card,
+  Col,
+  Input,
+  Label,
+  Modal,
+  ModalBody,
+  ModalHeader,
+  Row,
+  Spinner,
+} from "reactstrap";
+import Flatpickr from "react-flatpickr";
+import "flatpickr/dist/themes/material_blue.css";
 import AuthUser from "../../helpers/Authuser";
-
+import Select from "react-select";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 function FollowUpAdd(props) {
-    const { modalStates, setModalStates, lead_id } = props;
+  const { modalStates, setModalStates, lead_id, leadData } = props;
   const [modal, setModal] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const { http, user } = AuthUser();
-    
+  const [employees, setEmployees] = useState([]);
   // Form State
   const [formData, setFormData] = useState({
     followup_user_id: user.user?.user_id || 1,
-    followup_customer_id: "",
+    followup_customer_id: leadData?.customer_id || "",
     followup_next_date: "",
-    followup_assignto_id: "",
+    followup_assignto_id: leadData?.assigned_employee_id || "",
     followup_description: "",
     followup_lead_id: lead_id || "",
   });
@@ -92,53 +107,132 @@ function FollowUpAdd(props) {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [toggle]);
+  useEffect(() => {
+    try {
+      http
+        .get("/user/list")
+        .then((res) => {
+          setEmployees(res.data?.users || []);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
   return (
     <Modal isOpen={modalStates} toggle={setModalStates} centered>
       <ModalHeader toggle={setModalStates}>Add New Follow Up</ModalHeader>
       <ModalBody>
-        <Card className="border card-border-primary p-3 shadow-sm">
+        <Card className="border border-primary p-3 shadow">
           <Row>
             {/* Next Date */}
             <Col md={12} className="mb-3">
               <Label className="form-label fw-bold">
                 Next Follow Up Date <span className="text-danger">*</span>
               </Label>
-              <Input
+              <Flatpickr
                 name="followup_next_date"
-                type="date"
-                innerRef={dateInputRef}
-                className="form-control fw-bold"
+                value={formData.followup_next_date}
+                className={`form-control fw-bold ${errors.followup_next_date ? "is-invalid" : ""}`}
                 style={
                   errors.followup_next_date
                     ? { borderColor: "red", borderStyle: "groove" }
                     : {}
                 }
-                onChange={handleChange}
+                options={{
+                  dateFormat: "Y-m-d",
+                  minDate: "today", // Prevents picking dates in the past
+                  altInput: true,
+                  altFormat: "F j, Y",
+                }}
+                onChange={([date]) => {
+                  // Bridge to your handleChange or manual state update
+                  handleChange({
+                    target: {
+                      name: "followup_next_date",
+                      value: date, // Flatpickr returns a Date object
+                    },
+                  });
+                }}
+                placeholder="Select follow up date"
               />
+              {errors.followup_next_date && (
+                <small className="text-danger">This field is required</small>
+              )}
             </Col>
 
             {/* Assign To */}
             <Col md={12} className="mb-3">
               <Label className="form-label fw-bold">Assign To (Staff ID)</Label>
-              <Input
-                name="followup_assignto_id"
-                type="number"
-                placeholder="Enter Staff ID"
-                className="form-control"
-                onChange={handleChange}
+              <Select
+                value={
+                  employees
+                    .filter(
+                      (emp) => emp.user_id == formData.followup_assignto_id,
+                    )
+                    .map((emp) => ({
+                      label: emp.full_name,
+                      value: emp.user_id,
+                    }))[0] || null
+                }
+                options={employees.map((employee) => ({
+                  label: employee.full_name,
+                  value: employee.user_id,
+                }))}
+                onChange={(e) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    followup_assignto_id: e.value,
+                  }));
+                }}
               />
             </Col>
 
             {/* Notes */}
             <Col md={12} className="mb-3">
               <Label className="form-label fw-bold">Description / Notes</Label>
-              <Input
-                name="followup_description"
-                type="textarea"
-                rows="3"
-                placeholder="Details of conversation..."
-                className="form-control"
-                onChange={handleChange}
+              I
+              <CKEditor
+                editor={ClassicEditor}
+                data={formData.followup_description || ""} // Your state value
+                onReady={(editor) => {
+                  // Set a minimum height to match your previous rows="3"
+                  editor.editing.view.change((writer) => {
+                    writer.setStyle(
+                      "min-height",
+                      "120px",
+                      editor.editing.view.document.getRoot(),
+                    );
+                  });
+                }}
+                onChange={(event, editor) => {
+                  const data = editor.getData();
+
+                  // Manually trigger your existing handleChange
+                  handleChange({
+                    target: {
+                      name: "followup_description",
+                      value: data,
+                    },
+                  });
+                }}
+                config={{
+                  placeholder: "Details of conversation...",
+                  toolbar: [
+                    "heading",
+                    "|",
+                    "bold",
+                    "italic",
+                    "link",
+                    "bulletedList",
+                    "numberedList",
+                    "|",
+                    "undo",
+                    "redo",
+                  ],
+                }}
               />
             </Col>
           </Row>

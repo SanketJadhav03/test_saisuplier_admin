@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   Card,
   CardBody,
@@ -15,19 +15,25 @@ import {
 import FollowUpAdd from "./FollowUpAdd";
 import AuthUser from "../../helpers/Authuser";
 import moment from "moment";
-
+import { toast } from "react-toastify";
+import Flatpickr from "react-flatpickr";
+import "flatpickr/dist/themes/material_blue.css";
+import FollowUpUpdate from "./FollowUpUpdate";
 function FollowUpList() {
   const [leadData, setLeadData] = useState({});
+  const [followUp, setFollowUp] = useState({});
   const { lead_id } = useParams();
   const { http } = AuthUser();
   const [modalState, setModalState] = useState(false);
+  const [updateModalState, setUpdateModalState] = useState(false);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
     start_date: moment().format("YYYY-MM-DD"),
     end_date: moment().format("YYYY-MM-DD"),
+    option: "TODAY",
   });
-
+  const navigate = useNavigate();
   const fetchFollowups = async () => {
     setLoading(true);
     try {
@@ -71,9 +77,31 @@ function FollowUpList() {
     setFilters({
       start_date: moment(start).format("YYYY-MM-DD"),
       end_date: moment(end).format("YYYY-MM-DD"),
+      option: type,
     });
   };
-
+  const handleEdit = (item) => {
+    setFollowUp(item);
+    setUpdateModalState(true);
+  };
+  const handleDelete = (id) => {
+    if (window.confirm("Are you sure you want to delete this follow-up?")) {
+      http
+        .delete(`/followup/delete/${id}`)
+        .then((response) => {
+          if (response.data.status == 1) {
+            toast.success(response.data.message);
+            fetchFollowups();
+          } else {
+            toast.warn(response.data.message);
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+          toast.error("Failed to delete follow-up");
+        });
+    }
+  };
   return (
     <div
       className="page-content"
@@ -81,7 +109,7 @@ function FollowUpList() {
     >
       <div className="container-fluid">
         {/* HEADER AREA */}
-        <div className="d-flex align-items-center justify-content-between mb-4 no-print">
+        <div className="d-flex align-items-center justify-content-between mb-3 no-print">
           <div>
             <h4 className="mb-1 fw-bold text-dark">Follow-up Activity</h4>
             <p className="text-muted mb-0">
@@ -98,13 +126,20 @@ function FollowUpList() {
             >
               <i className="ri-printer-fill fs-18"></i>
             </Button>
+            <div>
+              <Link
+                to={`/lead-details/${lead_id}`}
+                className="btn shadow btn-info"
+              >
+                <i className="ri-eye-line align-bottom me-1"></i> View Lead
+              </Link>
+            </div>
             <Button
               color="primary"
               className="shadow-primary px-4"
               onClick={() => setModalState(true)}
             >
-              <i className="ri-add-line align-bottom me-1"></i> Add New
-              Follow-up
+              <i className="ri-add-line align-bottom me-1"></i> Add FollowUp
             </Button>
           </div>
         </div>
@@ -114,64 +149,92 @@ function FollowUpList() {
             <div className="d-flex flex-wrap align-items-center justify-content-between gap-2">
               {/* Pill Filters */}
               <div className="d-flex gap-1">
-                {["TODAY", "YESTERDAY", "THIS_WEEK", "THIS_MONTH", "ALL"].map(
-                  (f) => (
-                    <button
-                      key={f}
-                      onClick={() => handleQuickFilter(f)}
-                      className={`btn btn-sm rounded-pill px-3 fw-bold border-0 ${
-                        filters.start_date == moment().format("YYYY-MM-DD") 
-                        &&
-                        f == "TODAY"
-                          ? "btn-primary shadow-sm"
-                          : "btn-light text-muted"
-                      }`}
-                      style={{ fontSize: "11px" }}
-                    >
-                      {f.replace("_", " ")}
-                    </button>
-                  ),
-                )}
+                {[
+                  "TODAY",
+                  "YESTERDAY",
+                  "THIS_WEEK",
+                  "THIS_MONTH",
+                  "LAST_MONTH",
+                  "ALL",
+                ].map((f) => (
+                  <button
+                    key={f}
+                    onClick={() => handleQuickFilter(f)}
+                    className={`btn btn-sm rounded-pill px-3 fw-bold border-0 ${
+                      f == filters.option
+                        ? "btn-primary shadow-sm"
+                        : "btn-light text-muted"
+                    }`}
+                    style={{ fontSize: "11px" }}
+                  >
+                    {f.replace("_", " ")}
+                  </button>
+                ))}
               </div>
 
               {/* Manual Date Selection */}
               <div className="d-flex align-items-center gap-2">
-                <div className="d-flex align-items-center bg-light rounded-pill px-2 py-1">
-                  <Input
-                    type="date"
-                    size="sm"
-                    className="border-0 bg-transparent shadow-none"
-                    style={{ width: "130px", fontSize: "12px" }}
+                <div className="d-flex align-items-center bg-light rounded-pill px-3 py-1">
+                  <Flatpickr
                     value={filters.start_date}
-                    onChange={(e) =>
-                      setFilters({ ...filters, start_date: e.target.value })
-                    }
-                  />
-                  <span className="text-muted mx-1">/</span>
-                  <Input
-                    type="date"
-                    size="sm"
+                    onChange={([date]) => {
+                      // Flatpickr returns an array of Date objects
+                      setFilters({ ...filters, start_date: date });
+                    }}
+                    options={{
+                      dateFormat: "Y-m-d",
+                      altInput: true,
+                      altFormat: "F j, Y", // More readable format (e.g., Jan 1, 2024)
+                    }}
                     className="border-0 bg-transparent shadow-none"
-                    style={{ width: "130px", fontSize: "12px" }}
+                    style={{
+                      width: "110px",
+                      fontSize: "12px",
+                      cursor: "pointer",
+                    }}
+                  />
+
+                  <span className="text-muted mx-2">to</span>
+
+                  <Flatpickr
                     value={filters.end_date}
-                    onChange={(e) =>
-                      setFilters({ ...filters, end_date: e.target.value })
-                    }
+                    onChange={([date]) => {
+                      setFilters({ ...filters, end_date: date });
+                    }}
+                    options={{
+                      dateFormat: "Y-m-d",
+                      altInput: true,
+                      altFormat: "F j, Y",
+                      minDate: filters.start_date, // Prevent selecting end date before start date
+                    }}
+                    className="border-0 bg-transparent shadow-none"
+                    style={{
+                      width: "110px",
+                      fontSize: "12px",
+                      cursor: "pointer",
+                    }}
                   />
                 </div>
+                <button
+                  className="btn btn-secondary rounded-pill px-3 fw-bold"
+                  onClick={() => navigate(-1)}
+                >
+                  <i className="ri-arrow-left-line align-bottom me-1"></i>
+                  Back
+                </button>
               </div>
             </div>
           </CardBody>
         </Card>
         {/* TOP STATS CARDS */}
-        <Row className="mb-3 g-3">
+        <Row className="g-1  ">
           {/* Main Customer Profile */}
           <Col xl={4} md={6}>
-            <Card className="border-0 shadow-sm h-100">
+            <Card className="border-0 shadow-sm ">
               <CardBody className="p-3">
                 <div className="d-flex align-items-center">
                   <div className="avatar-sm flex-shrink-0">
-                    <div className="avatar-title bg-primary  rounded-circle fs-17 fw-bold">
+                    <div className="avatar-title bg-primary  rounded-circle fs-14 fw-bold">
                       {leadData?.customer_name?.charAt(0) || "L"}
                     </div>
                   </div>
@@ -184,11 +247,7 @@ function FollowUpList() {
                       {leadData?.customer_city}, {leadData?.customer_state}
                     </p>
                   </div>
-                  <Badge
-                    color="soft-info"
-                    pill
-                    className="fs-10 text-uppercase"
-                  >
+                  <Badge color="info" pill className="fs-10 text-uppercase">
                     {leadData?.source_name}
                   </Badge>
                 </div>
@@ -198,7 +257,7 @@ function FollowUpList() {
 
           {/* Status & Priority Card */}
           <Col xl={3} md={6}>
-            <Card className="border-0 shadow-sm h-100">
+            <Card className="border-0 shadow-sm ">
               <CardBody className="p-3">
                 <div className="d-flex justify-content-between align-items-center">
                   <div>
@@ -233,24 +292,24 @@ function FollowUpList() {
 
           {/* Assignment Card */}
           <Col xl={5} md={12}>
-            <Card className="border-0 shadow-sm h-100">
+            <Card className="border-0 shadow-sm ">
               <CardBody className="p-3">
                 <Row className="align-items-center">
                   <Col xs={6} className="border-end">
+                    <p className="text-muted mb-1 fs-11 text-uppercase">
+                      Created By
+                    </p>
+                    <div className="text-muted fs-13 text-truncate">
+                      {leadData?.created_employee_name}
+                    </div>
+                  </Col>
+                  <Col xs={6} className="">
                     <p className="text-muted mb-1 fs-11 text-uppercase">
                       Assigned To
                     </p>
                     <div className="fw-bold fs-13 text-truncate">
                       <i className="ri-user-follow-line text-success me-1"></i>
                       {leadData?.assigned_employee_name || "Unassigned"}
-                    </div>
-                  </Col>
-                  <Col xs={6} className="ps-3">
-                    <p className="text-muted mb-1 fs-11 text-uppercase">
-                      Created By
-                    </p>
-                    <div className="text-muted fs-13 text-truncate">
-                      {leadData?.created_employee_name}
                     </div>
                   </Col>
                 </Row>
@@ -261,7 +320,7 @@ function FollowUpList() {
 
         {/* MAIN DATA CARD */}
         <Card className="border-0 shadow-sm">
-          <CardHeader className="bg-white py-3 border-bottom-dashed">
+          <CardHeader className=" pb-3 border-bottom-dashed">
             <h6 className="card-title mb-0">
               <i className="ri-list-settings-line align-middle me-1 text-primary"></i>{" "}
               Engagement Logs
@@ -275,12 +334,11 @@ function FollowUpList() {
                     <th className="ps-4" style={{ width: "80px" }}>
                       ID
                     </th>
-                    <th style={{ width: "150px" }}>Date & Timing</th>
+                    <th style={{ width: "150px" }}>Follow Up Date</th>
+                    <th style={{ width: "180px" }}>Follow Up Taken By</th>
+                    <th style={{ width: "180px" }}>Follow Up Assigned To</th>
                     <th>Notes & Interaction Summary</th>
-                    <th style={{ width: "180px" }}>Staff Involved</th>
-                    <th className="text-center" style={{ width: "120px" }}>
-                      Verification
-                    </th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -294,38 +352,67 @@ function FollowUpList() {
                     data.map((item, idx) => (
                       <tr key={idx} className="cursor-pointer">
                         <td className="ps-4 fw-medium text-primary">
-                          #{item.followup_id}
+                          #{idx + 1}
                         </td>
                         <td>
-                          <div className="fw-bold">{item.formatted_date}</div>
+                          <div className="fw-bold">
+                          {item.formatted_date
+                              ? new Date(
+                                  item.formatted_date,
+                                ).toLocaleDateString("en-GB", {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                })
+                              : "Not scheduled"}{" "}
+                          </div>
                           <small className="text-muted">
                             <i className="ri-time-line me-1"></i>Next:{" "}
-                            {item.followup_next_date}
+                            {item.followup_next_date
+                              ? new Date(
+                                  item.followup_next_date,
+                                ).toLocaleDateString("en-GB", {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                })
+                              : "Not scheduled"}{" "}
                           </small>
-                        </td>
-
-                        <td className="text-wrap" style={{ minWidth: "250px" }}>
-                          <p
-                            className="mb-0 text-muted"
-                            style={{ lineHeight: "1.4" }}
-                          >
-                            {item.followup_description ||
-                              "Detailed notes not provided for this interaction."}
-                          </p>
                         </td>
                         <td>
                           <div className="d-flex align-items-center">
                             <div className="avatar-xs flex-shrink-0 me-2">
                               <span className="avatar-title bg-primary text-white rounded-circle fw-bold small">
-                                {item.assigned_to_name?.charAt(0) || "1"}
+                                {item.created_by_name?.charAt(0) || "U"}
                               </span>
                             </div>
                             <div>
                               <div className="fw-medium small">
-                                {item.assigned_to_name}
+                                {item.created_by_name || ""}
                               </div>
                               <Badge
-                                color="soft-info"
+                                color="info"
+                                className="text-uppercase"
+                                style={{ fontSize: "9px" }}
+                              >
+                                {item.created_by_role}
+                              </Badge>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="d-flex align-items-center">
+                            <div className="avatar-xs flex-shrink-0 me-2">
+                              <span className="avatar-title bg-primary text-white rounded-circle fw-bold small">
+                                {item.assigned_to_name?.charAt(0) || "U"}
+                              </span>
+                            </div>
+                            <div>
+                              <div className="fw-medium small">
+                                {item.assigned_to_name || ""}
+                              </div>
+                              <Badge
+                                color="info"
                                 className="text-uppercase"
                                 style={{ fontSize: "9px" }}
                               >
@@ -334,10 +421,34 @@ function FollowUpList() {
                             </div>
                           </div>
                         </td>
-                        <td className="text-center">
-                          <Badge color="soft-success" pill className="px-3">
-                            Validated
-                          </Badge>
+                        <td className="text-wrap" style={{ minWidth: "250px" }}>
+                          <div
+                            dangerouslySetInnerHTML={{
+                              __html:
+                                item.followup_description ||
+                                "Detailed notes not provided for this interaction.",
+                            }}
+                            className="mb-0 text-muted"
+                            style={{ lineHeight: "1.4" }}
+                          />
+                        </td>
+                        <td>
+                          <div className="d-flex gap-2">
+                            <Button
+                              color="primary"
+                              size="sm"
+                              onClick={() => handleEdit(item)}
+                            >
+                              <i className="ri-edit-line"></i>
+                            </Button>
+                            <Button
+                              color="danger"
+                              size="sm"
+                              onClick={() => handleDelete(item.followup_id)}
+                            >
+                              <i className="ri-delete-bin-line"></i>
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -370,6 +481,17 @@ function FollowUpList() {
           modalStates={modalState}
           setModalStates={() => setModalState(false)}
           lead_id={lead_id}
+          leadData={leadData}
+          checkchang={fetchFollowups}
+        />
+      )}
+      {updateModalState && (
+        <FollowUpUpdate
+          modalStates={updateModalState}
+          setModalStates={() => setUpdateModalState(false)}
+          lead_id={lead_id}
+          leadData={leadData}
+          followUp={followUp}
           checkchang={fetchFollowups}
         />
       )}

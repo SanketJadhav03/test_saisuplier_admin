@@ -177,7 +177,7 @@ const LeadDetailView = () => {
                     <Calendar size={16} />
                   </div>
                 </div>
-                <div className="flex-grow-1 ">
+                <Link to={`/follow-up/${leadData.lead_id}`} className="flex-grow-1 ">
                   <div className="d-flex align-items-center gap-2">
                     <p className="text-muted mb-1">Next Follow-up</p>
                     {leadData.followup_date && (
@@ -203,7 +203,7 @@ const LeadDetailView = () => {
                         )
                       : "Not scheduled"}
                   </h6>
-                </div>
+                </Link>
               </div>
             </CardBody>
           </Card>
@@ -293,9 +293,9 @@ const LeadDetailView = () => {
             <CardHeader className="align-items-center d-flex flex-column flex-sm-row gap-2">
               <h4 className="card-title mb-0 flex-grow-1">Sales Lifecycle</h4>
               <div className="flex-shrink-0">
-                <Badge color="info" className="badge-border">
-                  Process Tracking
-                </Badge>
+                <Link to={"/leads-list"} className="btn btn-info">
+                  <i className="ri-eye-line"></i> All Leads
+                </Link>
               </div>
             </CardHeader>
             <CardBody>
@@ -645,7 +645,7 @@ const LeadDetailView = () => {
             </CardHeader>
             <CardBody>
               <div className="table-responsive table-card">
-                <Table className="align-middle text-center table-nowrap mb-0">
+                <Table className="align-middle text- table-nowrap mb-0">
                   <thead className="table-light text-muted">
                     <tr>
                       <th scope="col">Product Name</th>
