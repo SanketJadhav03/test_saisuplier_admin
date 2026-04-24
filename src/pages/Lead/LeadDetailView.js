@@ -292,9 +292,10 @@ const LeadDetailView = () => {
           <Card>
             <CardHeader className="align-items-center d-flex flex-column flex-sm-row gap-2">
               <h4 className="card-title mb-0 flex-grow-1">Sales Lifecycle</h4>
-              <div className="flex-shrink-0">
-                <Link to={"/leads-list"} className="btn btn-info">
-                  <i className="ri-eye-line"></i> All Leads
+              <div className="d-flex justify-content-center align-items-center gap-2">
+                <Link to={"/leads-list"} className="btn btn-info align-items-center d-flex gap-1">
+                  All Leads
+                   <i className="ri-external-link-line"></i>
                 </Link>
               </div>
             </CardHeader>
