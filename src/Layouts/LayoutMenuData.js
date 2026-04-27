@@ -106,53 +106,14 @@ const Navdata = () => {
       },
     },
     {
-      id: "SETTINGS",
+      id: "LEADS",
       label: "Leads",
       icon: "bx bx-target-lock",
       link: "/leads-list",
       stateVariables: isLead,
     },
     {
-      id: "SETTINGS",
-      label: "CRM Settings",
-      icon: "bx bx-slider-alt",
-      link: "/#",
-      click: function (e) {
-        e.preventDefault();
-        setIsLead(!isLead);
-        setIscurrentState("leads");
-        updateIconSidebar(e);
-      },
-      stateVariables: isLead,
-      subItems: [
-        {
-          id: "Source",
-          label: "Source",
-          link: "/source-list",
-          parentId: "apps",
-        },
-        {
-          id: "Reference",
-          label: "Reference",
-          link: "/reference-list",
-          parentId: "apps",
-        },
-        {
-          id: "Priotity",
-          label: "Priotity",
-          link: "/priority-list",
-          parentId: "apps",
-        },
-        {
-          id: "Stages",
-          label: "Stages",
-          link: "/stages-list",
-          parentId: "apps",
-        },
-      ],
-    },
-    {
-      id: "DASHBOARD",
+      id: "CALLLOGS",
       label: "Call Logs",
       icon: "mdi mdi-cart",
       link: "/call-logs",
@@ -536,7 +497,45 @@ const Navdata = () => {
           : []),
       ],
     },
-
+    {
+      id: "CRMSETTINGS",
+      label: "CRM Settings",
+      icon: "bx bx-slider-alt",
+      link: "/#",
+      click: function (e) {
+        e.preventDefault();
+        setIsLead(!isLead);
+        setIscurrentState("leads");
+        updateIconSidebar(e);
+      },
+      stateVariables: isLead,
+      subItems: [
+        {
+          id: "Source",
+          label: "Source",
+          link: "/source-list",
+          parentId: "apps",
+        },
+        {
+          id: "Reference",
+          label: "Reference",
+          link: "/reference-list",
+          parentId: "apps",
+        },
+        {
+          id: "Priotity",
+          label: "Priotity",
+          link: "/priority-list",
+          parentId: "apps",
+        },
+        {
+          id: "Stages",
+          label: "Stages",
+          link: "/stages-list",
+          parentId: "apps",
+        },
+      ],
+    },
     {
       id: "SETTINGS",
       label: "Settings",
