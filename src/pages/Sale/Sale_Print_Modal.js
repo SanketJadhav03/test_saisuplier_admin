@@ -503,9 +503,9 @@ const Sale_Print_Modal = (props) => {
                         <br />
                       </>
                     )}
-                    {customer?.user_email && (
+                    {customer?.master_email && (
                       <>
-                        Mail: {customer?.user_email}
+                        Mail: {customer?.master_email}
                         <br />
                       </>
                     )}

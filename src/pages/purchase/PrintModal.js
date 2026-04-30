@@ -335,9 +335,9 @@ const PrintModal = (props) => {
                   <br />
                 </>
               )}
-              {customer.user_email && (
+              {customer.master_email && (
                 <>
-                  Mail: {customer.user_email}
+                  Mail: {customer.master_email}
                   <br />
                 </>
               )}
@@ -1048,7 +1048,16 @@ const PrintModal = (props) => {
             </div>
           </div>
         </div>
+        <div style={{
+          textAlign:"right",
+          fontSize:10,
+          fontStyle:"italic",
+          paddingRight:"10px"
+        }}>
+          
+          <i> {Master_data.full_name && `${props.status == 1 ? 'Purchase Order' : 'Quotation'} Created By ${Master_data.full_name}`}</i>
 
+        </div>
         <div className="hstack gap-2 justify-content-center my-2">
           <button
             type="button"
