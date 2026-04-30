@@ -789,7 +789,7 @@ const Sale_Print_Modal = (props) => {
                     </tr>
                   );
                 })}
-
+         
                 {/* Final Total Row */}
                 {props.status != "1" && (
                   <tr>
