@@ -39,17 +39,17 @@ const Sale_List_rejected = () => {
   const [counts, Setcounts] = useState(1);
   const [modal_standard, setmodal_standard] = useState(false);
   const [invoiceDetails] = useState(
-    JSON.parse(sessionStorage.getItem("authUser")).invoiceDetails.intial_latter
+    JSON.parse(sessionStorage.getItem("authUser")).invoiceDetails.intial_latter,
   );
   const [modalOpen, setModalOpen] = useState(false);
-    const [selectedPayment, setSelectedPayment] = useState(null);
-  
-    const toggleModal = () => setModalOpen(!modalOpen);
-  
-    const handlePreview = (payment) => {
-      setSelectedPayment(payment);
-      setModalOpen(true);
-    };
+  const [selectedPayment, setSelectedPayment] = useState(null);
+
+  const toggleModal = () => setModalOpen(!modalOpen);
+
+  const handlePreview = (payment) => {
+    setSelectedPayment(payment);
+    setModalOpen(true);
+  };
   const [SelectedSaleID, setSelectedSaleID] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [modal_large, setmodal_large] = useState(false);
@@ -96,7 +96,7 @@ const Sale_List_rejected = () => {
     { label: "This Year", value: "this_year" },
     { label: "Last Year", value: "last_year" },
   ];
-   const handleDateFilter = (type) => {
+  const handleDateFilter = (type) => {
     let startDate = null;
     let endDate = null;
 
@@ -170,7 +170,7 @@ const Sale_List_rejected = () => {
     // { value: '4', label: 'Dispatch' },
     { value: "5", label: "Rejected" },
     // { value: '6', label: 'Delivered' },
-  ]; 
+  ];
 
   useEffect(() => {
     http
@@ -214,7 +214,7 @@ const Sale_List_rejected = () => {
         Order_Number: `${selectedStatusOrder.master_invoice_no}`,
         transport_details: trackingDescription,
       },
-      selectedStatusOrder.user_email
+      selectedStatusOrder.user_email,
     );
   };
 
@@ -584,159 +584,157 @@ const Sale_List_rejected = () => {
                       </thead>
                       <tbody>
                         {[
-                            ...new Map(
-                              (Data || [])
-                                .filter((item) => {
-                                  const query =
-                                    searchQuery?.toLowerCase() || "";
-                                  return (
-                                    item.user_name
-                                      ?.toLowerCase()
-                                      .includes(query) ||
-                                    item.master_name
-                                      ?.toLowerCase()
-                                      .includes(query) ||
-                                    item.user_unique_id
-                                      ?.toLowerCase()
-                                      .includes(query) ||
-                                    item.master_ifsc
-                                      ?.toLowerCase()
-                                      .includes(query) ||
-                                    item.user_mobile
-                                      ?.toString()
-                                      .includes(query) ||
-                                    item.master_mobile
-                                      ?.toString()
-                                      .includes(query) ||
-                                    item.user_email
-                                      ?.toLowerCase()
-                                      .includes(query)
-                                  );
-                                })
-                                .map((item) => [item.master_invoice_no, item]), // ✅ dedupe by user_id
-                            ).values(),
-                          ]
-                            .filter((temp) =>temp.master_bill_status == 5).map((item, index) => (
-                          <tr key={index}>
-                            <td>{index + 1}</td>
-                            <td>{item.master_invoice_no}</td>
-                            <td>
-                              {item.purchase_type == 2 ? "Sample" : "Regular"}
-                            </td>
-                            <td style={{ maxWidth: "120px" }}>
-                              <div
-                                style={{
-                                  whiteSpace: "normal",
-                                  wordBreak: "break-word",
-                                }}
-                              >
-                                {item.user_type == 1
-                                  ? item.user_name
-                                  : item.master_name}
-                                {item.user_type == 3
-                                  ? ` - ${item.master_branch_name}`
-                                  : " "}
-                                {item.user_type == 3
-                                  ? ` - ${item.master_branch_code}`
-                                  : " "}
-                              </div>
-                            </td>
-                            <td>{item.master_bill_date}</td>
-                            <td>{item.master_qty}</td>
-                             <td>
-                                  &#8377;{" "}
-                                  {(parseFloat(
+                          ...new Map(
+                            (Data || [])
+                              .filter((item) => {
+                                const query = searchQuery?.toLowerCase() || "";
+                                return (
+                                  item.user_name
+                                    ?.toLowerCase()
+                                    .includes(query) ||
+                                  item.master_name
+                                    ?.toLowerCase()
+                                    .includes(query) ||
+                                  item.user_unique_id
+                                    ?.toLowerCase()
+                                    .includes(query) ||
+                                  item.master_ifsc
+                                    ?.toLowerCase()
+                                    .includes(query) ||
+                                  item.user_mobile
+                                    ?.toString()
+                                    .includes(query) ||
+                                  item.master_mobile
+                                    ?.toString()
+                                    .includes(query) ||
+                                  item.user_email?.toLowerCase().includes(query)
+                                );
+                              })
+                              .map((item) => [item.master_invoice_no, item]), // ✅ dedupe by user_id
+                          ).values(),
+                        ]
+                          .filter((temp) => temp.master_bill_status == 5)
+                          .map((item, index) => (
+                            <tr key={index}>
+                              <td>{index + 1}</td>
+                              <td>{item.master_invoice_no}</td>
+                              <td>
+                                {item.master_user_id ? "Admin" : "Online"}
+                              </td>
+                              <td style={{ maxWidth: "120px" }}>
+                                <div
+                                  style={{
+                                    whiteSpace: "normal",
+                                    wordBreak: "break-word",
+                                  }}
+                                >
+                                  {item.user_type == 1
+                                    ? item.user_name
+                                    : item.master_name}
+                                  {item.user_type == 3
+                                    ? ` - ${item.master_branch_name}`
+                                    : " "}
+                                  {item.user_type == 3
+                                    ? ` - ${item.master_branch_code}`
+                                    : " "}
+                                </div>
+                              </td>
+                              <td>{item.master_bill_date}</td>
+                              <td>{item.master_qty}</td>
+                              <td>
+                                &#8377;{" "}
+                                {(
+                                  parseFloat(
                                     (
                                       parseFloat(item.gstTotal) +
                                       parseFloat(item.master_total_bill_amt)
-                                    )?.toFixed(2)
+                                    )?.toFixed(2),
                                   ) +
-                                    parseFloat(item.other_charge_amount) +
-                                    parseFloat(
-                                      item.transport_types_total_charge
-                                    ))?.toFixed(2)}
-                                </td>
+                                  parseFloat(item.other_charge_amount) +
+                                  parseFloat(item.transport_types_total_charge)
+                                )?.toFixed(2)}
+                              </td>
 
-                                <td>
-                                  {item.payment_id == "2" ? (
-                                    <div
-                                      onClick={() => {
-                                        handlePreview(item);
-                                      }}
-                                      className="d-flex align-items-center justify-content-center gap-2 btn btn-sm btn-outline-info"
-                                    >
-                                      {item.payment_type}
-                                      <i className="ri-file-info-line fs-16 align-bottom me-1"></i>
-                                    </div>
-                                  ) : (
-                                    item.payment_type
-                                  )}
-                                </td>
-                            <td>
-                              <button
-                                className="btn btn-outline-info btn-sm d-flex align-items-center"
-                                onClick={() => {
-                                  setSelectedStatusOrder(item);
-                                  setTrackingModalOpen(true);
-                                  setTrackingDescription(
-                                    item.master_tracking_details
-                                  );
-                                }}
-                              >
-                                {item.master_tracking_details ? (
-                                  <i className="ri-eye-fill me-2 fs-16"></i>
+                              <td>
+                                {item.payment_id == "2" ? (
+                                  <div
+                                    onClick={() => {
+                                      handlePreview(item);
+                                    }}
+                                    className="d-flex align-items-center justify-content-center gap-2 btn btn-sm btn-outline-info"
+                                  >
+                                    {item.payment_type}
+                                    <i className="ri-file-info-line fs-16 align-bottom me-1"></i>
+                                  </div>
                                 ) : (
-                                  <i className="ri-add-fill me-2 fs-16"></i>
+                                  item.payment_type
                                 )}
-                                Tracking
-                              </button>
-                            </td>
-                            <td style={{ minWidth: 150 }}>
-                              <Select
-                                onChange={(selectedOption) =>
-                                  handleStatusUpdate(item, selectedOption)
-                                }
-                                options={statusOptions}
-                                value={statusOptions.find(
-                                  (opt) =>
-                                    opt.value ==
-                                    item.master_bill_status.toString()
-                                )}
-                                isSearchable={true}
-                                menuPortalTarget={document.body} // 👈 Render dropdown in body
-                                styles={{
-                                  menuPortal: (base) => ({
-                                    ...base,
-                                    zIndex: 9999,
-                                  }), // 👈 Ensure it's on top
-                                }}
-                              />
-                            </td>
-                            <td>
-                              <div className="d-flex gap-2 justify-content-center">
-                                <Button
-                                  color="light"
-                                  size="sm"
+                              </td>
+                              <td>
+                                <button
+                                  className="btn btn-outline-info btn-sm d-flex align-items-center"
                                   onClick={() => {
-                                    setSelectedSaleID(item.master_id);
-                                    setIsOpen(true);
+                                    setSelectedStatusOrder(item);
+                                    setTrackingModalOpen(true);
+                                    setTrackingDescription(
+                                      item.master_tracking_details,
+                                    );
                                   }}
-                                  className="btn-icon text-primary"
                                 >
-                                  <i className="ri-price-tag-3-line"></i>
-                                </Button>
-                                <Button
-                                  color="light"
-                                  size="sm"
-                                  onClick={() => View_invoce(item.master_id)}
-                                  className="btn-icon text-primary"
-                                >
-                                  <i className="ri-printer-line"></i>
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
+                                  {item.master_tracking_details ? (
+                                    <i className="ri-eye-fill me-2 fs-16"></i>
+                                  ) : (
+                                    <i className="ri-add-fill me-2 fs-16"></i>
+                                  )}
+                                  Tracking
+                                </button>
+                              </td>
+                              <td style={{ minWidth: 150 }}>
+                                <Select
+                                  onChange={(selectedOption) =>
+                                    handleStatusUpdate(item, selectedOption)
+                                  }
+                                  options={statusOptions}
+                                  value={statusOptions.find(
+                                    (opt) =>
+                                      opt.value ==
+                                      item.master_bill_status.toString(),
+                                  )}
+                                  isSearchable={true}
+                                  menuPortalTarget={document.body} // 👈 Render dropdown in body
+                                  styles={{
+                                    menuPortal: (base) => ({
+                                      ...base,
+                                      zIndex: 9999,
+                                    }), // 👈 Ensure it's on top
+                                  }}
+                                />
+                              </td>
+                              <td>
+                                <div className="d-flex gap-2 justify-content-center">
+                                  <Button
+                                    color="light"
+                                    size="sm"
+                                    onClick={() => {
+                                      setSelectedSaleID(item.master_id);
+                                      setIsOpen(true);
+                                    }}
+                                    className="btn-icon text-primary"
+                                  >
+                                    <i className="ri-price-tag-3-line"></i>
+                                  </Button>
+                                  <Button
+                                    color="light"
+                                    size="sm"
+                                    onClick={() => View_invoce(item.master_id)}
+                                    className="btn-icon text-primary"
+                                  >
+                                    <i className="ri-printer-line"></i>
+                                  </Button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
                       </tbody>
                     </table>
                   </InfiniteScroll>
@@ -868,12 +866,12 @@ const Sale_List_rejected = () => {
         />
       )}
       {modalOpen && (
-              <PaymentPreviewModal
-                isOpen={modalOpen}
-                toggle={toggleModal}
-                payment={selectedPayment}
-              />
-            )}
+        <PaymentPreviewModal
+          isOpen={modalOpen}
+          toggle={toggleModal}
+          payment={selectedPayment}
+        />
+      )}
     </div>
   );
 };

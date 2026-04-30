@@ -630,7 +630,9 @@ const Sale_List_delivered = () => {
                               <td>{index + 1}</td>
                               <td>{item.master_invoice_no}</td>
                               <td>
-                                {item.purchase_type == 2 ? "Sample" : "Regular"}
+                                 {item.master_user_id 
+                                    ? "Admin"
+                                    : "Online"}
                               </td>
                               <td style={{ maxWidth: "120px" }}>
                                 <div

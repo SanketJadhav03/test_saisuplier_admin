@@ -164,6 +164,7 @@ const UserList = () => {
                         <th>Email</th>
                         <th>Mobile</th>
                         <th>User Type</th>
+                        <th>User Created </th>
                         <th>Action</th>
                       </tr>
                     </thead>
@@ -245,6 +246,19 @@ const UserList = () => {
                                 2: "Vendor",
                                 3: "Bank",
                               }[user.user_type] || " Unknown "}
+                            </td>
+                            <td>
+                              {new Date(user.created_at).toLocaleString(
+                                "en-IN",
+                                {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  hour12: true,
+                                },
+                              )}
                             </td>
                             <td className="text-center">
                               <ul className="list-inline d-flex justify-content-center align-items-center gap-2 mb-0">
@@ -388,7 +402,6 @@ const UserList = () => {
                   />
                 )}
               </CardBody>
-              
             </Card>
           </Col>
         </Row>
