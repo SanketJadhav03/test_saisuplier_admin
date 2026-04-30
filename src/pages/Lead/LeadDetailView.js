@@ -31,6 +31,7 @@ const LeadDetailView = () => {
   const [leadData, setLeadData] = useState(null);
   const [allStages, setAllStages] = useState([]); // New state for dynamic stages
   const [loading, setLoading] = useState(true);
+  const [followUpData, setFollowUpData] = useState([]);
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -39,10 +40,12 @@ const LeadDetailView = () => {
         // Fetch both Lead and All Stages in parallel
         const [leadRes, stagesRes] = await Promise.all([
           http.get(`/lead/view/${id}`),
-          http.get(`/stages/list`), // Assuming this is your endpoint to get tbl_stages
+          http.get(`/stages/list`),
         ]);
 
         if (leadRes.data.success) setLeadData(leadRes.data.data);
+        if (leadRes.data.success)
+          setFollowUpData(leadRes.data?.followups || []);
 
         if (stagesRes.data.success) setAllStages(stagesRes.data.data);
       } catch (error) {
@@ -177,7 +180,10 @@ const LeadDetailView = () => {
                     <Calendar size={16} />
                   </div>
                 </div>
-                <Link to={`/follow-up/${leadData.lead_id}`} className="flex-grow-1 ">
+                <Link
+                  to={`/follow-up/${leadData.lead_id}`}
+                  className="flex-grow-1 "
+                >
                   <div className="d-flex align-items-center gap-2">
                     <p className="text-muted mb-1">Next Follow-up</p>
                     {leadData.followup_date && (
@@ -205,6 +211,42 @@ const LeadDetailView = () => {
                   </h6>
                 </Link>
               </div>
+            </CardBody>
+          </Card>
+          <Card>
+            <CardHeader>
+              <h5 className="card-title mb-0">FollowUp Details</h5>
+            </CardHeader>
+            <CardBody>
+              {followUpData &&
+                followUpData.map((followUp, index) => (
+                  <div key={index} className="d-flex align-items-center mb-3">
+                    <div className="flex-shrink-0 avatar-xs me-3">
+                      <div className="avatar-title bg-light text-primary rounded-circle">
+                        <Calendar size={16} />
+                      </div>
+                    </div>
+                    <div className="flex-grow-1">
+                      <p className="text-muted mb-1">
+                        Follow-up on{" "}
+                        {new Date(followUp.followup_date).toLocaleDateString()}
+                      </p>
+                      <span
+                        dangerouslySetInnerHTML={{
+                          __html:
+                            followUp.followup_description ||
+                            "No notes provided.",
+                        }}
+                        className="mb-0"
+                      ></span>
+                    </div>
+                  </div>
+                ))}
+              {(!followUpData || followUpData.length == 0) && (
+                <p className="text-muted mb-0">
+                  No follow-up details available.
+                </p>
+              )}
             </CardBody>
           </Card>
           {/* <Card>
@@ -293,9 +335,12 @@ const LeadDetailView = () => {
             <CardHeader className="align-items-center d-flex flex-column flex-sm-row gap-2">
               <h4 className="card-title mb-0 flex-grow-1">Sales Lifecycle</h4>
               <div className="d-flex justify-content-center align-items-center gap-2">
-                <Link to={"/leads-list"} className="btn btn-info align-items-center d-flex gap-1">
+                <Link
+                  to={"/leads-list"}
+                  className="btn btn-info align-items-center d-flex gap-1"
+                >
                   All Leads
-                   <i className="ri-external-link-line"></i>
+                  <i className="ri-external-link-line"></i>
                 </Link>
               </div>
             </CardHeader>
@@ -384,7 +429,7 @@ const LeadDetailView = () => {
                     </div>
                     <h6 className="fs-13 mb-1">Invoice</h6>
                     {leadData.lead_invoice_id ? (
-                       <Link
+                      <Link
                         to={
                           !leadData.lead_invoice_id
                             ? `/quotation-edit/${leadData.lead_quotation_id}`

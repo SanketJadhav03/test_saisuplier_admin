@@ -541,7 +541,7 @@ const QuotationCreate = (props) => {
     Total_Net,
     purchase_payment_terms,
   ]);
-
+const {user} = AuthUser();
   const prepareDataForAPI = () => {
     // Prepare master data
     const masterData = {
@@ -551,7 +551,7 @@ const QuotationCreate = (props) => {
       selectPriceOption: selectPriceOption.value,
       purchase_payment_term: purchase_payment_terms,
       other_charge_id: selectOtherCharge.value,
-      purchase_created_by_id: 1,
+      purchase_created_by_id: user.user.user_id,
     };
 
     // Prepare product data in the required format

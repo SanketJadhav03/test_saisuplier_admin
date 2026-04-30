@@ -566,17 +566,19 @@ const Sale_Create = (props) => {
     Total_Net,
     purchase_payment_terms,
   ]);
+  const {user} = AuthUser(); 
 
   const prepareDataForAPI = () => {
     // Prepare master data
     const masterData = {
       ...MasterArray,
+      master_user_id: user.user.user_id,
       shipping_id: selectedAddress?.shipping_id,
       master_address_id: selectedAddress?.shipping_id,
       selectPriceOption: selectPriceOption.value,
       other_charge_id: selectOtherCharge.value,
       purchase_payment_term: purchase_payment_terms,
-      purchase_created_by_id: 1,
+      purchase_created_by_id: user ? user.user.user_id : null,
     };
 
     // Prepare product data in the required format

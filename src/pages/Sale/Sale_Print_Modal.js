@@ -773,7 +773,7 @@ const Sale_Print_Modal = (props) => {
                       </td>
 
                       {/* Rate */}
-                      <td style={tdStyle}>₹{" "}{rate?.toFixed(2)}</td>
+                      <td style={tdStyle}>₹ {rate?.toFixed(2)}</td>
 
                       {/* Taxable Value */}
                       <td style={tdStyle}>{taxableValue?.toFixed(2)}</td>
@@ -785,7 +785,7 @@ const Sale_Print_Modal = (props) => {
                       <td style={tdStyle}>{gstValue?.toFixed(2)}</td>
 
                       {/* Total */}
-                      <td style={tdStyle}>₹{" "}{total?.toFixed(2)}</td>
+                      <td style={tdStyle}>₹ {total?.toFixed(2)}</td>
                     </tr>
                   );
                 })}
@@ -829,7 +829,8 @@ const Sale_Print_Modal = (props) => {
                         )
                         .toFixed(2)}
                     </td>
-                    <td style={tdStyle}>₹{" "} 
+                    <td style={tdStyle}>
+                      ₹{" "}
                       {childData
                         .reduce((sum, item) => {
                           const rate = parseFloat(getPrice(item));
@@ -1273,9 +1274,10 @@ const Sale_Print_Modal = (props) => {
                 }}
               >
                 <span style={{ fontWeight: "bold", fontSize: 14 }}>
-                  Total Payable Amount  
+                  Total Payable Amount
                 </span>
-                <span style={{ fontWeight: "bold", fontSize: 14 }}>₹{" "} 
+                <span style={{ fontWeight: "bold", fontSize: 14 }}>
+                  ₹{" "}
                   {(
                     parseFloat(
                       childData
@@ -1350,7 +1352,8 @@ const Sale_Print_Modal = (props) => {
                 </div>
                 <div
                   style={{ fontWeight: "bold", fontSize: 17, color: "#0b5394" }}
-                >₹{" "} 
+                >
+                  ₹{" "}
                   {(
                     parseFloat(
                       childData
@@ -1435,6 +1438,17 @@ const Sale_Print_Modal = (props) => {
                 </div>
               </div>
             </div>
+          </div>
+          <div
+            style={{
+              textAlign: "right",
+              fontSize: 10,
+            }}
+          >
+            <i>
+              {masterData.full_name &&
+                `Invoice Created By ${masterData.full_name}`}
+            </i>
           </div>
         </div>
       </ModalBody>
