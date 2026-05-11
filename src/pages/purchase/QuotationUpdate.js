@@ -36,6 +36,7 @@ import { FiEye, FiFile, FiFileText, FiX, FiUpload } from "react-icons/fi";
 import ContactPerson from "./ContactPersons";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import { User } from "lucide-react";
 
 const QuoatationUpdate = (props) => {
   const [preview, setPreview] = useState(null); // holds the file URL
@@ -146,7 +147,7 @@ const QuoatationUpdate = (props) => {
           ...masterData,
           purchase_notes: masterData.purchase_notes || "",
         });
-          
+
         setOtherCharge({
           ...selectOtherCharge,
           value: masterData.other_charge_id || "0",
@@ -615,7 +616,6 @@ const QuoatationUpdate = (props) => {
       price_online: item.price_online,
       price_distributor: item.price_distributor,
       purchase_id: item.purchase_id, // Include for updates
-      
     }));
 
     const masterData = {
@@ -664,10 +664,10 @@ const QuoatationUpdate = (props) => {
       setContact_persons([]);
     }
   }, [contactCount, customerDetails]);
-
+  const { user } = AuthUser();
   const sendQuoatation = (purchase_id) => {
     http
-      .get(`/send/quotation/${purchase_id}`)
+      .post(`/send/quotation/${purchase_id}`, { user_id: user.user.user_id })
       .then((res) => {
         // sendMail("send_quotation",{
         //   Name: customerDetails.user_name,
@@ -739,7 +739,6 @@ const QuoatationUpdate = (props) => {
                       <h4 className="mb-1 fw-bold">
                         {props.status == 2 ? (
                           <>
-                          
                             <FiFileText size={20} /> Generate Quotation
                           </>
                         ) : (

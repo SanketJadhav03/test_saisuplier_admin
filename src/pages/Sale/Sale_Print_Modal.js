@@ -19,6 +19,7 @@ const Sale_Print_Modal = (props) => {
           setCustomer(response.data.customer);
           setBusinessData(response.data.Business[0]);
           setMasterData(response.data.Master[0]);
+          
         }
       })
       .catch(function (error) {
@@ -110,7 +111,7 @@ const Sale_Print_Modal = (props) => {
     }
     return result + " Only";
   }
-
+console.log(masterData);
   const getPrice = (item) => {
     switch (masterData.selectPriceOption) {
       case "price_sales":
@@ -383,7 +384,7 @@ const Sale_Print_Modal = (props) => {
               >
                 <div
                   dangerouslySetInnerHTML={{
-                    __html: businessData.business_billing_address || "",
+                    __html: businessData?.business_billing_address || "",
                   }}
                 ></div>
               </div>
@@ -760,6 +761,9 @@ const Sale_Print_Modal = (props) => {
                       {/* Product Name */}
                       <td style={tdStyle}>
                         {item.product_english_name || "-"}
+                         <div style={{ fontSize: "10px", color: "#6c757d" }}>
+                          <strong>Note:</strong> {item.pos_product_notes || "-"}
+                        </div>
                       </td>
 
                       {/* HSN Code */}
@@ -1384,7 +1388,7 @@ const Sale_Print_Modal = (props) => {
               <strong>Terms & Conditions: </strong>
               <div
                 dangerouslySetInnerHTML={{
-                  __html: businessData.business_terms_conditions,
+                  __html: businessData?.business_terms_conditions,
                 }}
               ></div>
             </div>

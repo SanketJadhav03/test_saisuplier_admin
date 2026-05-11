@@ -219,6 +219,7 @@ const ProductUpdate = (props) => {
     if (multipleImg && Array.isArray(multipleImg)) {
       multipleImg.forEach((img) => {
         formData.append("product_multiple_image", img);
+        console.log(img);
       });
     }
     formData.append(
@@ -247,6 +248,7 @@ const ProductUpdate = (props) => {
         http
           .put("/products/update", mainProductArray)
           .then(function (response) {
+            console.log(formData);
             https
               .post("/products/update-images", formData)
               .then((res) => {

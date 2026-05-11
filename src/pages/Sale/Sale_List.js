@@ -842,9 +842,7 @@ const Sale_List = () => {
                                 <td>{index + 1}</td>
                                 <td>{item.master_invoice_no}</td>
                                 <td>
-                                  {item.master_user_id 
-                                    ? "Admin"
-                                    : "Online"}
+                                  {item.created_user_name || "Customer"}
                                 </td>
                                 <td style={{ maxWidth: "120px" }}>
                                   <div

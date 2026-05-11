@@ -692,9 +692,7 @@ const PurchaseList = () => {
                                 </td>
 
                                 <td>
-                                  {item.purchase_created_by_id == 1
-                                    ? "Admin"
-                                    : "User"}
+                                  {item.created_user_name || "Customer"}
                                 </td>
                                 <td>{item.purchase_total_qty}</td>
                                 {/* <td>{item.payment_term_type}</td> */}
