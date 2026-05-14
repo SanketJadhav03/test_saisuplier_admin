@@ -148,6 +148,26 @@ const ProductUpdate = (props) => {
     const updatedProductList = [...ProductMulti];
     const updatedProduct = { ...updatedProductList[index] };
     updatedProduct[field] = value;
+     if (field === "price_purchase") {
+    const cost = parseFloat(value);
+
+    if (!isNaN(cost)) {
+      // Selling Price: Purchase Price + 49%
+      updatedProduct["price_sales"] = (cost * 1.49).toFixed(2);
+      
+      // Wholesaler Price: Purchase Price + 30%
+      updatedProduct["price_wholesaler"] = (cost * 1.30).toFixed(2);
+      
+      // Distributor Price: Purchase Price + 35%
+      updatedProduct["price_distributor"] = (cost * 1.35).toFixed(2);
+      updatedProduct["price_mrp"] = (cost + 10).toFixed(2);
+    } else {
+      // Clear values if input is empty or invalid
+      updatedProduct["price_sales"] = "";
+      updatedProduct["price_wholesaler"] = "";
+      updatedProduct["price_distributor"] = "";
+    }
+  }
 
     if (field === "price_purchase" || field === "price_opening_qty") {
       const price_purchase = parseFloat(updatedProduct["price_purchase"]);
