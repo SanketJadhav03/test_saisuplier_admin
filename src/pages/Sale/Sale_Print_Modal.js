@@ -1378,6 +1378,23 @@ console.log(masterData);
               </div>
             </div>
             <div
+            style={{
+              border: "1px solid #999",
+              padding: 5,
+              marginTop: 2,
+              borderRadius: 4,
+              fontWeight: "bold",
+            }}
+          >
+            <strong style={{ color: "#0b5394" }}>Note:</strong>
+            <br />
+            <div
+              dangerouslySetInnerHTML={{
+                __html: masterData.master_notes || "",
+              }}
+            ></div>
+          </div>
+            <div
               style={{
                 borderTop: "1px solid #000000ff",
                 padding: 10,
