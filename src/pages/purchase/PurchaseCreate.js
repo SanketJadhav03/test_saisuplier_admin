@@ -100,27 +100,26 @@ const QuotationCreate = (props) => {
     document.title = "Saisupplier Admin | Purchase Create";
 
     const getLead = async () => {
-    if (!lead_id) return;
-    
-    try {
-      const res = await http.get(`/lead/view/${lead_id}`);
-      const leadData = res.data.data;
+      if (!lead_id) return;
 
-      // Update basic info
-      SetMasterArray((prev) => ({
-        ...prev,
-        purchase_customer_id: leadData.customer_id,
-      }));
-      setCustomers(leadData);
+      try {
+        const res = await http.get(`/lead/view/${lead_id}`);
+        const leadData = res.data.data;
 
-      // Update the products array (This triggers the useMemo below)
-      // We use the spread operator [...] to ensure a new reference
-      SetData_View([...(leadData.products || [])]);
-      
-    } catch (err) {
-      console.error("Lead Error:", err);
-    }
-  };
+        // Update basic info
+        SetMasterArray((prev) => ({
+          ...prev,
+          purchase_customer_id: leadData.customer_id,
+        }));
+        setCustomers(leadData);
+
+        // Update the products array (This triggers the useMemo below)
+        // We use the spread operator [...] to ensure a new reference
+        SetData_View([...(leadData.products || [])]);
+      } catch (err) {
+        console.error("Lead Error:", err);
+      }
+    };
 
     http
       .get("/purchase/information")
@@ -150,7 +149,7 @@ const QuotationCreate = (props) => {
       })
       .catch((error) => {
         console.error("Purchase Info Error:", error);
-      })
+      });
   }, [lead_id, manageCategory]); // Removed BasiceINF to prevent infinite loops
   const [shippingCount, setShippingCount] = useState(1);
   const getAddressDetails = async (user_id) => {
@@ -250,7 +249,7 @@ const QuotationCreate = (props) => {
   // Product search functionality
   const [searchList, SetSearchList] = useState([]);
   const [Data_product, SetData_product] = useState([]);
-  
+
   const [Count, SetCount] = useState(1);
   const searchInputRef = useRef(null);
 
@@ -541,7 +540,7 @@ const QuotationCreate = (props) => {
     Total_Net,
     purchase_payment_terms,
   ]);
-const {user} = AuthUser();
+  const { user } = AuthUser();
   const prepareDataForAPI = () => {
     // Prepare master data
     const masterData = {
@@ -578,7 +577,7 @@ const {user} = AuthUser();
     return {
       master: masterData,
       prodcut: productData,
-      lead_id:lead_id
+      lead_id: lead_id,
     };
   };
   const [contact_persons, setContact_persons] = useState([]);
@@ -604,14 +603,14 @@ const {user} = AuthUser();
     }
   }, [contactCount, customerDetails]);
 
-  const Onsubmit =async () => {
+  const Onsubmit = async () => {
     if (Data_View.length) {
       const finalData = await prepareDataForAPI();
       if (!finalData.master.master_address_id) {
         toast.warning("Please enter address before submitting");
         return; // stop further execution
       }
-      
+
       SetDisabed(true);
       https
         .post("/purchase/store", finalData)
@@ -1065,7 +1064,7 @@ const {user} = AuthUser();
                           for="lastnameInput"
                           className="form-label fw-bold"
                         >
-                          Product Name 
+                          Product Name
                         </Label>
                         <div className="form-icon right">
                           <div className="input-group">
@@ -1094,9 +1093,24 @@ const {user} = AuthUser();
                               }}
                               onFocus={handleInputFocus}
                               renderMenuItemChildren={(option) => (
-                                <div>
-                                  <span>{option.product_english_name}</span>
-                                  <div className="text-muted small">
+                                <div
+                                  style={{
+                                    whiteSpace: "normal",
+                                    wordBreak: "break-word",
+                                  }}
+                                >
+                                  <span
+                                    style={{
+                                      fontWeight: "500",
+                                      display: "block",
+                                    }}
+                                  >
+                                    {option.product_english_name}
+                                  </span>
+                                  <div
+                                    className="text-muted small"
+                                    style={{ whiteSpace: "normal" }}
+                                  >
                                     Barcode: {option.price_barcode} | MRP: ₹
                                     {option.price_mrp}
                                   </div>
