@@ -1116,9 +1116,24 @@ const {user} = AuthUser();
                               }}
                               onFocus={handleInputFocus}
                               renderMenuItemChildren={(option) => (
-                                <div>
-                                  <span>{option.product_english_name}</span>
-                                  <div className="text-muted small">
+                                <div
+                                  style={{
+                                    whiteSpace: "normal",
+                                    wordBreak: "break-word",
+                                  }}
+                                >
+                                  <span
+                                    style={{
+                                      fontWeight: "500",
+                                      display: "block",
+                                    }}
+                                  >
+                                    {option.product_english_name}
+                                  </span>
+                                  <div
+                                    className="text-muted small"
+                                    style={{ whiteSpace: "normal" }}
+                                  >
                                     Barcode: {option.price_barcode} | MRP: ₹
                                     {option.price_mrp}
                                   </div>
