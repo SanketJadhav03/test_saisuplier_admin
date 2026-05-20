@@ -90,6 +90,8 @@ const Sale_List_new = () => {
     // { value: '3', label: 'Packing' },
     // { value: '4', label: 'Dispatch' },
     { value: "5", label: "Rejected" },
+    { value: "7", label: "Cancel" },
+    
     // { value: '6', label: 'Delivered' },
   ];
   

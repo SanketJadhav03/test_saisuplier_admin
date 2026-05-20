@@ -172,6 +172,7 @@ const Sale_List = () => {
     { value: "4", label: "Dispatch" },
     { value: "5", label: "Rejected" },
     { value: "6", label: "Delivered" },
+    { value: "7", label: "Cancel" },
   ];
   useEffect(() => {
     document.title = "Saisupplier Admin | Sales List";
@@ -841,9 +842,7 @@ const Sale_List = () => {
                               <tr key={index}>
                                 <td>{index + 1}</td>
                                 <td>{item.master_invoice_no}</td>
-                                <td>
-                                  {item.created_user_name || "Customer"}
-                                </td>
+                                <td>{item.created_user_name || "Customer"}</td>
                                 <td style={{ maxWidth: "120px" }}>
                                   <div
                                     style={{
@@ -929,7 +928,8 @@ const Sale_List = () => {
                                     permission.permission_path === "3",
                                 ) && (
                                   <td style={{ minWidth: 150 }}>
-                                    {item.master_bill_status != 6 ? (
+                                    {item.master_bill_status != 6 &&
+                                    item.master_bill_status != 7 ? (
                                       <Select
                                         onChange={(selectedOption) => {
                                           if (selectedOption.value == 4) {
@@ -943,15 +943,31 @@ const Sale_List = () => {
                                             );
                                           }
                                         }}
-                                        options={statusOptions.filter((opt) =>
-                                          item.master_bill_status == 4
-                                            ? opt.value >=
+                                        options={statusOptions.filter((opt) => {
+                                          if (item.master_bill_status == 4) {
+                                            return (
+                                              opt.value >=
                                               item.master_bill_status
-                                            : opt.value >=
+                                            );
+                                          } else {
+                                            // If current status is 1, allow current status, next status (2), OR cancelled (7)
+                                            if (item.master_bill_status == 1) {
+                                              return (
+                                                opt.value == 1 ||
+                                                opt.value == 2 ||
+                                                opt.value == 7
+                                              );
+                                            }
+
+                                            // For statuses 2 and 3, keep the original step-by-step logic
+                                            return (
+                                              opt.value >=
                                                 item.master_bill_status &&
                                               opt.value <=
-                                                item.master_bill_status + 1,
-                                        )}
+                                                item.master_bill_status + 1
+                                            );
+                                          }
+                                        })}
                                         value={statusOptions.find(
                                           (opt) =>
                                             opt.value ==
@@ -966,11 +982,19 @@ const Sale_List = () => {
                                           }), // 👈 Ensure it's on top
                                         }}
                                       />
-                                    ) : (
+                                    ) : item.master_bill_status == 6 ? (
                                       <div className=" d-flex justify-content-center align-items-center">
                                         <span className="w-auto d-flex justify-content-between align-items-center btn btn-sm btn-success">
                                           {" "}
                                           Order Has Been Delivered
+                                          <i className="ri-check-line"></i>
+                                        </span>
+                                      </div>
+                                    ) : (
+                                      <div className=" d-flex justify-content-center align-items-center">
+                                        <span className="w-auto d-flex justify-content-between align-items-center btn btn-sm btn-danger">
+                                          {" "}
+                                          Order Has Been Cancel
                                           <i className="ri-check-line"></i>
                                         </span>
                                       </div>
