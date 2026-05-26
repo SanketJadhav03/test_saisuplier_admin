@@ -595,7 +595,13 @@ const Sale_List = () => {
                                         .includes(query) ||
                                       item.user_email
                                         ?.toLowerCase()
-                                        .includes(query)
+                                        .includes(query) ||
+                                    item.master_pincode
+                                      ?.toLowerCase()
+                                      .includes(query) ||
+                                    item.master_branch_name
+                                      ?.toLowerCase()
+                                      .includes(query)
                                     );
                                   })
                                   .map((item) => [
@@ -613,6 +619,7 @@ const Sale_List = () => {
                         </h3>
                       </div>
                     </div>
+                    {console.log(Data)}
                     <div className="col-8 btn-group flex-wrap gap-2">
                       {filters.map((item) => (
                         <button
@@ -637,10 +644,10 @@ const Sale_List = () => {
                       <div className="fw-bold mb- ">Search Area</div>
                       <input
                         type="search"
-                        placeholder="Search by Name / Unique Id / Mobile Number / Email / Ifsc Code"
+                        placeholder="Search by Name / Unique Id / Mobile Number / Email / Ifsc Code / Branch Name / Pincode"
                         className="form-control w-100 fw-bold rounded"
                         onChange={(e) => {
-                          const query = e.target.value?.toLowerCase();
+                          const query = e.target.value?.trim().toLowerCase();
                           setSearchQuery(query); // store search query in state
                         }}
                       />
@@ -826,6 +833,12 @@ const Sale_List = () => {
                                       ?.toString()
                                       .includes(query) ||
                                     item.user_email
+                                      ?.toLowerCase()
+                                      .includes(query) ||
+                                    item.master_pincode
+                                      ?.toLowerCase()
+                                      .includes(query) ||
+                                    item.master_branch_name
                                       ?.toLowerCase()
                                       .includes(query)
                                   );

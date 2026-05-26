@@ -385,12 +385,12 @@ const QuotationList = () => {
                     <div className="col-5">
                       <div className="fw-bold">
                         Serach by Name / Mobile Number / Email / Ifsc Code /
-                        Branch Code
+                        Branch Code/ Branch Name / Pincode
                       </div>
                       <input
                         className="form-control"
                         type="search"
-                        placeholder="Search by Name / Mobile Number / Email / Ifsc Code / Branch Code"
+                        placeholder="Search by Name / Mobile Number / Email / Ifsc Code / Branch Code / Branch Name / Pincode"
                         onChange={(e) => {
                           const query = e.target.value?.toLowerCase();
                           setSearchQuery(query); // store search query in state
@@ -671,6 +671,7 @@ const QuotationList = () => {
                           <th>Action</th>
                         </tr>
                       </thead>
+                      {console.log(Data)}
                       {permission.find(
                         (permission) =>
                           permission.permission_category === "QUOTATION" &&
@@ -708,6 +709,12 @@ const QuotationList = () => {
                                       .toLowerCase()
                                       .includes(query) ||
                                     item.user_email
+                                      ?.toLowerCase()
+                                      .includes(query) ||
+                                    item.master_pincode
+                                      ?.toLowerCase()
+                                      .includes(query) ||
+                                    item.master_branch_name
                                       ?.toLowerCase()
                                       .includes(query)
                                   );
@@ -828,8 +835,8 @@ const QuotationList = () => {
                                       className="btn btn-outline-dark btn-sm d-flex align-items-center gap-2 shadow"
                                       onClick={() => {
                                         setRejectedReason(item);
-                                        
-                                       // console.log(item.purchase_rejected_reason);
+
+                                        // console.log(item.purchase_rejected_reason);
                                         setRejectedModal(true);
                                       }}
                                     >
@@ -837,10 +844,7 @@ const QuotationList = () => {
                                       Objection
                                     </button>
                                   ) : item.purchase_status == "3" ? (
-                                    <button
-                                      className="btn btn-success btn-sm d-flex align-items-center gap-2 shadow"
-                                       
-                                    >
+                                    <button className="btn btn-success btn-sm d-flex align-items-center gap-2 shadow">
                                       <i className="mdi mdi-check fs-5"></i>
                                       Invoice Generated
                                     </button>

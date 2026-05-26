@@ -313,12 +313,12 @@ const PurchaseList = () => {
                     <div className="col-5">
                       <div className="fw-bold">
                         Serach by Name / Mobile Number / Email / Ifsc Code /
-                        Branch Code
+                        Branch Code/ Branch Name / Pincode
                       </div>
                       <input
                         className="form-control"
                         type="search"
-                        placeholder="Search by Name / Mobile Number / Email / Ifsc Code / Branch Code"
+                        placeholder="Search by Name / Mobile Number / Email / Ifsc Code / Branch Code/ Branch Name / Pincode"
                         onChange={(e) => {
                           const query = e.target.value?.toLowerCase();
                           setSearchQuery(query); // store search query in state
@@ -635,6 +635,12 @@ const PurchaseList = () => {
                                       .toLowerCase()
                                       .includes(query) ||
                                     item.user_email
+                                      ?.toLowerCase()
+                                      .includes(query) ||
+                                    item.master_pincode
+                                      ?.toLowerCase()
+                                      .includes(query) ||
+                                    item.master_branch_name
                                       ?.toLowerCase()
                                       .includes(query)
                                   );

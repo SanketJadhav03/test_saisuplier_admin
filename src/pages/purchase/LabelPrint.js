@@ -226,8 +226,8 @@ const LabelPrint = (props) => {
         background: white !important;
       }
       .label-box { 
-        width: ${props.id ? "100mm" : (orientation=='vertical'?"75mm":"100mm")};                                                                                                                                                                                                                                                                                                                                             
-        height: ${props.id ? "150mm" : (orientation=='vertical'?"100mm":"75mm")};
+        width: ${props.id ? "100mm" : orientation == "vertical" ? "75mm" : "100mm"};                                                                                                                                                                                                                                                                                                                                             
+        height: ${props.id ? "150mm" : orientation == "vertical" ? "100mm" : "75mm"};
         padding: 10px;
         box-sizing: border-box;
         background: white;
@@ -1149,6 +1149,8 @@ const LabelPrint = (props) => {
                               minWidth: "150px",
                               minHeight: "70px",
                               border: "1px solid black",
+                              overflowWrap: "break-word",
+                              whiteSpace: "normal", 
                             }}
                           >
                             <b className="fs-5">Transport Type: </b>
