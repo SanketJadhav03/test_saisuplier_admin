@@ -29,6 +29,12 @@ const PaymentPreviewModal = ({ isOpen, toggle, payment }) => {
         {payment.transaction_order_id || "-"}
       </td>
     </tr>
+    <tr>
+      <th>UTR No</th>
+      <td className="text-break">
+        {payment.transaction_utr_no || "-"}
+      </td>
+    </tr>
      <tr>
       <th>Date</th>
       <td>
