@@ -42,7 +42,6 @@ const UserEditModal = (props) => {
 
   // user types
   const userTypeOptions = [
-    { value: 1, label: "Customer" },
     { value: 2, label: "Vendor" },
     { value: 3, label: "Bank" },
   ];

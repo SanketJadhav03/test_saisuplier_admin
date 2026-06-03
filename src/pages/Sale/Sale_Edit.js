@@ -86,6 +86,7 @@ const Sale_Edit = (props) => {
       .get(`/sale/invoice/${id}`)
       .then(function (response) {
         if (response.data) {
+          console.log(response.data)
           setCustomers(response.data.customer);
 
           SetData_View(

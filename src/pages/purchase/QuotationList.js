@@ -41,7 +41,7 @@ const QuotationList = () => {
   function tog_large() {
     setmodal_large(!modal_large);
   }
-  const [activeFilter, setActiveFilter] = useState("today");
+  const [activeFilter, setActiveFilter] = useState("this_month");
   const formatDate = (date) => date.toLocaleDateString("en-GB"); // DD/MM/YYYY
   const filters = [
     { label: "Today", value: "today" },
@@ -276,7 +276,7 @@ const QuotationList = () => {
       });
   };
   useEffect(() => {
-    Filter_data();
+    handleDateFilter("this_month");
   }, [Filter_Data.start_date, Filter_Data.end_date]);
 
   const [SearchQuery, setSearchQuery] = useState("");
@@ -357,7 +357,57 @@ const QuotationList = () => {
                       <div className="col-12 text-center">
                         <div className="col-sm">
                           <h3 className="text-center fw-bold mb-0">
-                            Quotation List
+                            Quotation List ({" "}
+                            {
+                              [
+                                ...new Map(
+                                  (Data || [])
+                                    .filter((item) => {
+                                      const query =
+                                        SearchQuery?.toLowerCase() || "";
+                                      return (
+                                        item.master_name
+                                          ?.toLowerCase()
+                                          .includes(query) ||
+                                        item.user_name
+                                          ?.toLowerCase()
+                                          .includes(query) ||
+                                        item.purchase_invoice_no
+                                          ?.toLowerCase()
+                                          .includes(query) ||
+                                        item.user_unique_id
+                                          ?.toLowerCase()
+                                          .includes(query) ||
+                                        item.master_ifsc
+                                          ?.toLowerCase()
+                                          .includes(query) ||
+                                        item.user_mobile
+                                          ?.toString()
+                                          .toLowerCase()
+                                          .includes(query) ||
+                                        item.master_mobile
+                                          ?.toString()
+                                          .toLowerCase()
+                                          .includes(query) ||
+                                        item.user_email
+                                          ?.toLowerCase()
+                                          .includes(query) ||
+                                        item.master_pincode
+                                          ?.toLowerCase()
+                                          .includes(query) ||
+                                        item.master_branch_name
+                                          ?.toLowerCase()
+                                          .includes(query)
+                                      );
+                                    })
+                                    .map((item) => [
+                                      item.purchase_invoice_no,
+                                      item,
+                                    ]),
+                                ).values(),
+                              ]?.length
+                            }{" "}
+                            )
                           </h3>
                         </div>
                       </div>
@@ -379,6 +429,126 @@ const QuotationList = () => {
                     </div>
                   </Row>
                 </div>
+
+                <Row className="g-4 mt-2">
+                  <Col lg={4}>
+                    <Card className="h-100 border-0 shadow-sm rounded-4">
+                      <CardBody className="p-4">
+                        <div className="d-flex align-items-center">
+                          <div
+                            className="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center"
+                            style={{ width: "60px", height: "60px" }}
+                          >
+                            <i className="ri-user-line fs-3 text-primary"></i>
+                          </div>
+
+                          <div className="ms-3">
+                            <h4 className="mb-1 fw-semibold">
+                              ({" "}
+                              {
+                                [
+                                  ...new Map(
+                                    (Data || [])
+                                      .filter((item) => {                                          
+                                        return item.purchase_status == "2";
+                                      })
+                                      .map((item) => [
+                                        item.purchase_invoice_no,
+                                        item,
+                                      ]),
+                                  ).values(),
+                                ]?.length
+                              }{" "}
+                              )
+                            </h4>
+                            <p className="text-muted mb-0">
+                              Quotation Received
+                            </p>
+                          </div>
+                        </div>
+                      </CardBody>
+                    </Card>
+                  </Col>
+
+                  <Col lg={4}>
+                    <Card className="h-100 border-0 shadow-sm rounded-4">
+                      <CardBody className="p-4">
+                        <div className="d-flex align-items-center">
+                          <div
+                            className="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center"
+                            style={{ width: "60px", height: "60px" }}
+                          >
+                            <i className="ri-bar-chart-line fs-3 text-success"></i>
+                          </div>
+
+                          <div className="ms-3">
+                            <h4 className="mb-1 fw-semibold">
+                              ({" "}
+                              {
+                                [
+                                  ...new Map(
+                                    (Data || [])
+                                      .filter((item) => {
+                                        const query =
+                                          SearchQuery?.toLowerCase() || "";
+                                        return item.purchase_status == "3";
+                                      })
+                                      .map((item) => [
+                                        item.purchase_invoice_no,
+                                        item,
+                                      ]),
+                                  ).values(),
+                                ]?.length
+                              }{" "}
+                              )
+                            </h4>
+                            <p className="text-muted mb-0">Invoice Generated</p>
+                          </div>
+                        </div>
+                      </CardBody>
+                    </Card>
+                  </Col>
+                  <Col lg={4}>
+                    <Card className="h-100 border-0 shadow-sm rounded-4">
+                      <CardBody className="p-4">
+                        <div className="d-flex align-items-center">
+                          <div
+                            className="rounded-circle bg-danger bg-opacity-10 d-flex align-items-center justify-content-center"
+                            style={{ width: "60px", height: "60px" }}
+                          >
+                            <i className="ri-close-circle-line fs-3 text-danger"></i>
+                          </div>
+
+                          <div className="ms-3">
+                            <h4 className="mb-1 fw-bold">
+                              ({" "}
+                              {
+                                [
+                                  ...new Map(
+                                    (Data || [])
+                                      .filter((item) => {
+                                        const query =
+                                          SearchQuery?.toLowerCase() || "";
+                                        return item.purchase_status == "5";
+                                      })
+                                      .map((item) => [
+                                        item.purchase_invoice_no,
+                                        item,
+                                      ]),
+                                  ).values(),
+                                ]?.length
+                              }{" "}
+                              )
+                            </h4>
+                            <p className="text-muted mb-0">
+                              Rejected Quotation
+                            </p>
+                          </div>
+                        </div>
+                      </CardBody>
+                    </Card>
+                  </Col>
+                </Row>
 
                 <Row className="align-items-center mt-1 gy-3">
                   <div className="col-sm-auto row w-100 mt-3">

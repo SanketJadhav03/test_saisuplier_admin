@@ -72,7 +72,7 @@ const Sale_List = () => {
     end_date: `${day}/${month}/${year}`,
     payment_method: "",
   });
-  const [activeFilter, setActiveFilter] = useState("today");
+  const [activeFilter, setActiveFilter] = useState("this_month");
   const formatDate = (date) => date.toLocaleDateString("en-GB"); // DD/MM/YYYY
   const filters = [
     { label: "Today", value: "today" },
@@ -619,7 +619,7 @@ const Sale_List = () => {
                         </h3>
                       </div>
                     </div>
-                    {console.log(Data)}
+                     
                     <div className="col-8 btn-group flex-wrap gap-2">
                       {filters.map((item) => (
                         <button
