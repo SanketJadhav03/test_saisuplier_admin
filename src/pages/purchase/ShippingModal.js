@@ -7,6 +7,7 @@ import Select from "react-select";
 import { toast } from "react-toastify";
 import CustomInput from "../Unit/Input";
 import { motion } from "framer-motion";
+import { API_URL } from "../../helpers/url_helper";
 
 const ShippingModal = (props) => {
   const [modal, setModal] = useState(false);
@@ -47,7 +48,7 @@ const ShippingModal = (props) => {
   });
   useEffect(() => {
     if (currentAddress.pincode?.length === 6) {
-      fetch(`https://api.postalpincode.in/pincode/${currentAddress.pincode}`)
+      fetch(`${API_URL}/pincode/${currentAddress.pincode}`)
         .then((res) => res.json())
         .then((data) => {
           if (data[0].Status === "Success") {

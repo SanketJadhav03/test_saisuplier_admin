@@ -18,6 +18,7 @@ import AuthUser from "../../helpers/Authuser";
 import { toast } from "react-toastify";
 import DeleteModal from "../../Components/Common/DeleteModal";
 import ContactPerson from "./ContactPerson";
+import { API_URL } from "../../helpers/url_helper";
 
 /**
  * UserEditModal
@@ -131,7 +132,7 @@ const UserEditModal = (props) => {
       pincodeTimerRef.current = setTimeout(async () => {
         try {
           const res = await fetch(
-            `https://api.postalpincode.in/pincode/${pincode}`
+            `${API_URL}/pincode/${pincode}`
           );
           const data = await res.json();
           if (data?.[0]?.Status === "Success") {

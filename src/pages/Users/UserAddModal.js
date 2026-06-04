@@ -15,7 +15,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Select from "react-select";
 import AuthUser from "../../helpers/Authuser";
 import { toast } from "react-toastify";
-import { sendMail, sendWhatsApp } from "../../helpers/url_helper";
+import { API_URL, sendMail, sendWhatsApp } from "../../helpers/url_helper";
 
 const UserAddModal = (props) => {
   const { http } = AuthUser();
@@ -113,7 +113,7 @@ const UserAddModal = (props) => {
 
   useEffect(() => {
     if (UserData.master_pincode?.length === 6) {
-      fetch(`https://api.postalpincode.in/pincode/${UserData.master_pincode}`)
+      fetch(`${API_URL}/pincode/${UserData.master_pincode}`)
         .then((res) => res.json())
         .then((data) => {
           if (data[0].Status === "Success") {
