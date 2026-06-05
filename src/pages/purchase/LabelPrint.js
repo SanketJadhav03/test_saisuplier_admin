@@ -17,7 +17,7 @@ const LabelPrint = (props) => {
   const [shippingCount, setShippingCount] = useState(1);
   const [shippingModal, setShippingModal] = useState(false);
   const [selectedAddressOption, setSelectedAddressOption] = useState(null);
-
+  const [updateShippng, setUpdateShipping] = useState(false);
   useEffect(() => {
     if (!props.isOpen) return;
 
@@ -406,503 +406,6 @@ const LabelPrint = (props) => {
   };
 
   return (
-    //     <>
-    //       <style>
-    //         {`
-    //         .label-page {
-    //           display: flex;
-    //           justify-content: center;
-    //           align-items: center;
-    //           background: #f5f5f5;
-    //           min-height: 400px;
-    //           padding: 20px;
-
-    //         }
-
-    //         .label-box {
-    //           background: white;
-    //           padding: 7px;
-    //           box-sizing: border-box;
-    //           font-family: Arial, sans-serif;
-    //           display: flex;
-    //           flex-direction: column;
-    //           justify-content: space-between;
-    //           font-size: 12px;
-    //           line-height: 1.2;
-    //           border:2px black solid;
-    //           box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    //         }
-
-    //         .label-vertical {
-    //           width: 75mm;
-    //           height: 100mm;
-    //         }
-
-    //         .label-landscape {
-    //           width: 100mm;
-    //           height: 75mm;
-    //         }
-
-    //         .hrline {
-    //     width: 100%;
-    //  margin: 0 !important;
-    //   padding: 0 !important;
-    //   border: none;
-    //   border-top: 2px solid #ccc; /* optional */
-
-    //   }
-    //         .to {
-    //           font-size: 11px;
-    //           margin-bottom: 4px;
-    //           font-weight: bold;
-    //         }
-
-    //         .bank-name {
-    //           font-weight: 800;
-    //           font-size: 16px;
-    //           text-transform: uppercase;
-    //           line-height: 1;
-    //           margin-bottom: 6px;
-    //         }
-
-    //         .address, .meta {
-    //           margin-bottom: 3px;
-    //           font-size: 10px;
-    //         }
-
-    //         .from-title {
-    //           margin-top: 8px;
-    //           font-weight: bold;
-    //           font-size: 11px;
-    //         }
-
-    //         .from-company {
-    //           font-weight: bold;
-    //           font-size: 11px;
-    //           margin-bottom: 3px;
-    //         }
-
-    //         .from-details {
-    //           font-size: 10px;
-    //           line-height: 1.2;
-    //         }
-
-    //         .print-controls {
-    //           display: flex;
-    //           justify-content: center;
-    //           align-items: center;
-    //           gap: 10px;
-    //           flex-wrap: wrap;
-    //         }
-
-    //         /* Flex utilities */
-    //         .flex-row {
-    //           display: flex;
-    //         }
-
-    //         .flex-gap-1 {
-    //           gap: 4px;
-    //         }
-
-    //         .flex-gap-2 {
-    //           gap: 15px;
-    //         }
-
-    //         .margin-end-2 {
-    //           margin-right: 8px;
-    //         }
-
-    //         .margin-start-2 {
-    //           margin-left: 8px;
-    //         }
-
-    //         @media print {
-    //           .modal-backdrop, .modal, .modal-header, .modal-footer,
-    //           .modal-dialog, .modal-content, .modal-body {
-    //             display: none !important;
-    //           }
-    //           body, html {
-    //             background: white !important;
-    //             margin: 0 !important;
-    //             padding: 0 !important;
-    //           }
-
-    //         }
-    //         `}
-    //       </style>
-
-    //       <Modal isOpen={props.isOpen} toggle={props.toggle} size="lg" centered>
-    //         <ModalHeader toggle={props.toggle}>
-    //           {props.id ? (
-    //             <div className="fw-semibold fs-4 text-dark"> Print Label</div>
-    //           ) : (
-    //             <div
-    //               className="d-flex justify-content-between align-items-center w-100 p-3 rounded shadow-sm bg-light"
-    //               style={{ gap: "12px", width: "100%" }}
-    //             >
-    //               {/* Title */}
-    //               <div className="fw-semibold fs-4 text-dark"> Print Label</div>
-
-    //               {/* Select Box */}
-    //               <div
-    //                 style={{ minWidth: "260px", maxWidth: "350px", width: "100%" }}
-    //               >
-    //                 <Select
-    //                   options={addresses.map((item) => ({
-    //                     item: item,
-    //                     value: item.shipping_id,
-    //                     label: `${item?.address_line1 || ""}, ${item.city} - ${item?.pincode || ""} - ${item.addressType}`,
-    //                   }))}
-    //                   placeholder="Select Shipping Address..."
-    //                   onChange={(option) => {
-    //                     setUsers(option.item);
-    //                   }}
-    //                   styles={{
-    //                     control: (base) => ({
-    //                       ...base,
-    //                       minHeight: "38px",
-    //                       borderRadius: "8px",
-    //                       boxShadow: "none",
-    //                     }),
-    //                     menu: (base) => ({
-    //                       ...base,
-    //                       zIndex: 9999,
-    //                     }),
-    //                   }}
-    //                 />
-    //               </div>
-    //             </div>
-    //           )}
-    //         </ModalHeader>
-
-    //         <ModalBody>
-    //           {props.id ? (
-    //             <div className="label-page">
-    //               <div id="label-print-area">
-    //                 <div
-    //                   className={`label-box ${
-    //                     orientation === "vertical"
-    //                       ? "label-vertical"
-    //                       : "label-landscape"
-    //                   }`}
-    //                 >
-    //                   {masterData.master_payment_mode_id == 1 && (
-    //                     <>
-    //                       <div
-    //                         style={{
-    //                           display: "flex",
-    //                           justifyContent: "space-between",
-    //                           alignItems: "flex-start",
-    //                           gap: "2px",
-    //                           width: "100%",
-    //                         }}
-    //                       >
-    //                         {/* LEFT SIDE */}
-    //                         <div
-    //                           style={{ display: "flex", flexDirection: "column" }}
-    //                         >
-    //                           {/* Transport */}
-    //                           <div
-    //                             id="transportbox"
-    //                             style={{
-    //                               marginBottom: "5px",
-    //                               fontWeight: "bold",
-    //                               fontSize: "14px",
-    //                               textAlign: "center",
-    //                             }}
-    //                           >
-    //                             Transport Type:{" "}
-    //                             {masterData.transport_types_type || "N/A"}
-    //                           </div>
-
-    //                           {/* Order ID */}
-    //                           <div
-    //                             style={{
-    //                               border: "1px solid #000",
-    //                               padding: "2px 4px",
-    //                               display: "inline-block",
-    //                               backgroundColor: "#fff",
-    //                               whiteSpace: "nowrap",
-    //                               marginTop: "4px",
-    //                               textAlign: "center",
-    //                             }}
-    //                           >
-    //                             <div
-    //                               style={{
-    //                                 fontWeight: "bold",
-    //                                 fontSize: "12px",
-    //                               }}
-    //                             >
-    //                               Order ID:{" "}
-    //                               {"" + masterData.master_invoice_no || ""}
-    //                             </div>
-    //                           </div>
-    //                           <div className="mt-2" style={{ fontSize: "13px" }}>
-    //                             NON-BANPL A/C No: <b>1000059729</b>
-    //                           </div>
-    //                         </div>
-
-    //                         {/* RIGHT SIDE */}
-    //                         <div
-    //                           style={{
-    //                             display: "flex",
-    //                             flexDirection: "column",
-    //                             alignItems: "center",
-    //                             gap: "4px",
-    //                           }}
-    //                         >
-    //                           {/* COD BOX */}
-    //                           <div
-    //                             style={
-    //                               orientation === "landscape"
-    //                                 ? {
-    //                                     border: "2px solid #000",
-    //                                     textAlign: "center",
-    //                                     minWidth: "110px",
-    //                                     minHeight: "60px",
-    //                                     backgroundColor: "#fff",
-    //                                     padding: "2px",
-    //                                   }
-    //                                 : {
-    //                                     border: "2px solid #000",
-    //                                     textAlign: "center",
-    //                                     minWidth: "70px",
-    //                                     minHeight: "40px",
-    //                                     backgroundColor: "#fff",
-    //                                     //paddingTop: "10px",
-    //                                   }
-    //                             }
-    //                           >
-    //                             <div
-    //                               style={{
-    //                                 textAlign: "center",
-    //                                 fontWeight: "bold",
-    //                                 fontSize: "13px",
-    //                                 //marginBottom: "3px",
-    //                               }}
-    //                             >
-    //                               COD{" "}
-    //                             </div>
-    //                             <div
-    //                               style={{ fontSize: "15px", fontWeight: "bold" }}
-    //                             >
-    //                               {" "}
-    //                               ₹{" "}
-    //                               {(
-    //                                 parseFloat(
-    //                                   childData
-    //                                     .reduce((sum, item) => {
-    //                                       const rate = getPrice(item);
-    //                                       const qty = item.pos_qty || 0;
-    //                                       const taxableValue = rate * qty;
-    //                                       const gstPercent =
-    //                                         item.tax_percentage || 0;
-    //                                       const gstValue =
-    //                                         (taxableValue * gstPercent) / 100;
-    //                                       return sum + taxableValue + gstValue;
-    //                                     }, 0)
-    //                                     .toFixed(2),
-    //                                 ) +
-    //                                 parseFloat(masterData.other_charge_amount) +
-    //                                 parseFloat(
-    //                                   masterData?.transport_types_total_charge || 0,
-    //                                 )
-    //                               )?.toFixed(2)}{" "}
-    //                             </div>
-    //                           </div>
-
-    //                           {/* BANK / CONTRACT INFO */}
-    //                           <div
-    //                             style={{
-    //                               fontSize: "10px",
-    //                               textAlign: "center",
-    //                               lineHeight: "1.2",
-    //                               marginTop: "2px",
-    //                             }}
-    //                           >
-    //                             <div style={{ fontSize: "13px" }}>
-    //                               CONTRACT ID: <b>40098702</b>
-    //                             </div>
-    //                           </div>
-    //                         </div>
-    //                       </div>
-
-    //                       {/* Divider */}
-    //                       <div className="hrline"></div>
-    //                     </>
-    //                   )}
-
-    //                   <div>
-    //                     <div className="to">To,</div>
-    //                     <div className="bank-name">
-    //                       {customer?.user_type == 1
-    //                         ? customer?.user_name
-    //                         : customer?.master_name}
-    //                       {customer?.master_branch_name
-    //                         ? ` - ${customer.master_branch_name}`
-    //                         : ""}
-    //                       {customer?.master_branch_code
-    //                         ? ` - ${customer.master_branch_code}`
-    //                         : ""}
-    //                     </div>
-
-    //                     <div className="address">
-    //                       {masterData.master_address1 && (
-    //                         <>
-    //                           {masterData.master_address1}
-    //                           <br />
-    //                           {masterData.master_taluka &&
-    //                             `Tq. ${masterData.master_taluka}`}
-    //                           {masterData.master_district &&
-    //                             ` Dist. ${masterData.master_district}`}
-    //                           {masterData.master_city &&
-    //                             `, ${masterData.master_city}`}
-    //                           {masterData.master_state &&
-    //                             `, ${masterData.master_state}`}
-    //                         </>
-    //                       )}
-    //                     </div>
-    //                     {orientation === "landscape" ? (
-    //                       <div className="d-flex">
-    //                         <div className="meta">
-    //                           <b>PIN Code:</b> {masterData.master_pincode || "N/A"}
-    //                         </div>
-    //                         <div className="meta">
-    //                           <b>Phone:</b> {customer.user_mobile}
-    //                           {customer.master_mobile &&
-    //                             `, ${customer.master_mobile}`}
-    //                         </div>
-    //                         <div className="meta">
-    //                           <b>E-Mail:</b> {customer.user_email || "N/A"}
-    //                         </div>
-    //                       </div>
-    //                     ) : (
-    //                       <div>
-    //                         <div className="meta">
-    //                           <b>PIN Code:</b> {masterData.master_pincode || "N/A"}
-    //                         </div>
-    //                         <div className="meta">
-    //                           <b>Phone:</b> {customer.user_mobile}
-    //                           {customer.master_mobile &&
-    //                             `, ${customer.master_mobile}`}
-    //                         </div>
-    //                         <div className="meta">
-    //                           <b>E-Mail:</b> {customer.user_email || "N/A"}
-    //                         </div>
-    //                       </div>
-    //                     )}
-    //                   </div>
-
-    //                   <div>
-    //                     <div className="to">From,</div>
-    //                     <div className="from-company">Sai Suppliers (25-26)</div>
-    //                     <div className="from-details">
-    //                       265 Kasba Peth Shankar Market Road, Phaltan Tal Satara
-    //                       415523 <br />
-    //                       Contact : 9226439223 <br />
-    //                     </div>
-    //                   </div>
-    //                 </div>
-    //               </div>
-    //             </div>
-    //           ) : (
-    //             <div className="label-page">
-    //               <div id="label-print-area">
-    //                 <div
-    //                   className={`label-box ${
-    //                     orientation === "vertical"
-    //                       ? "label-vertical"
-    //                       : "label-landscape"
-    //                   }`}
-    //                 >
-    //                   <div>
-    //                     <div className="to">To,</div>
-    //                     <div className="bank-name">
-    //                       {customer?.user_type == 1
-    //                         ? customer?.user_name
-    //                         : customer?.master_name}
-    //                       {customer?.master_branch_name
-    //                         ? ` - ${customer.master_branch_name}`
-    //                         : ""}
-    //                       {customer?.master_branch_code
-    //                         ? ` - ${customer.master_branch_code}`
-    //                         : ""}
-    //                     </div>
-
-    //                     <div className="address">
-    //                       {users?.address_line1 || "" && (
-    //                         <>
-    //                           {users?.address_line1 || ""}
-    //                           <br />
-    //                           {users.taluka && `Tq. ${users.taluka}`}
-    //                           {users.district && ` Dist. ${users.district}`}
-    //                           {users.city && `, ${users.city}`}
-    //                           {users.state && `, ${users.state}`}
-    //                         </>
-    //                       )}
-    //                     </div>
-
-    //                     <div className="meta">
-    //                       <b>PIN Code:</b> {users?.pincode || "" || "N/A"}
-    //                     </div>
-    //                     <div className="meta">
-    //                       <b>Phone:</b> {customer.user_mobile}
-    //                       {customer.master_mobile && `, ${customer.master_mobile}`}
-    //                     </div>
-    //                     <div className="meta">
-    //                       <b>E-Mail:</b> {customer.user_email || "N/A"}
-    //                     </div>
-    //                   </div>
-
-    //                   <div>
-    //                     <div className="to">From,</div>
-    //                     <div className="from-company">Sai Suppliers (25-26)</div>
-    //                     <div className="from-details">
-    //                       265 Kasba Peth Shankar Market Road, Phaltan Tal Satara
-    //                       415523 <br />
-    //                       Contact : 9226439223 <br />
-    //                     </div>
-    //                   </div>
-    //                 </div>
-    //               </div>
-    //             </div>
-    //           )}
-    //         </ModalBody>
-
-    //         <ModalFooter>
-    //           <div className="print-controls">
-    //             <div className="orientation-buttons">
-    //               <button
-    //                 type="button"
-    //                 className={`btn btn-sm margin-end-2  ${
-    //                   orientation === "vertical"
-    //                     ? "btn-success"
-    //                     : "btn-outline-success"
-    //                 }`}
-    //                 onClick={() => setOrientation("vertical")}
-    //               >
-    //                 Vertical
-    //               </button>
-    //               <button
-    //                 type="button"
-    //                 className={`btn btn-sm ${
-    //                   orientation === "landscape"
-    //                     ? "btn-success"
-    //                     : "btn-outline-success"
-    //                 }`}
-    //                 onClick={() => setOrientation("landscape")}
-    //               >
-    //                 Landscape
-    //               </button>
-    //             </div>
-
-    //             <Button color="primary" className="ms-2" onClick={handlePrint}>
-    //               <i className="ri-printer-line"></i> Print Label
-    //             </Button>
-    //           </div>
-    //         </ModalFooter>
-    //       </Modal>
-    //     </>
     <>
       <style>
         {`
@@ -1079,6 +582,7 @@ const LabelPrint = (props) => {
                   placeholder="Select Shipping Address..."
                   onChange={(option) => {
                     setUsers(option.item);
+                    setSelectedAddressOption(option); // Updates the drop
                   }}
                   styles={{
                     control: (base) => ({
@@ -1094,6 +598,20 @@ const LabelPrint = (props) => {
                   }}
                 />
               </div>
+              <button
+                type="button"
+                style={{
+                  padding: "1px 7px",
+                  fontSize: "15px",
+                }}
+                id="create-btn"
+                onClick={() => {
+                  setUpdateShipping(true);
+                }}
+                className="btn btn-success btn-sm"
+              >
+                <i className="mdi mdi-pen"></i>
+              </button>
               <button
                 type="button"
                 style={{
@@ -1150,7 +668,7 @@ const LabelPrint = (props) => {
                               minHeight: "70px",
                               border: "1px solid black",
                               overflowWrap: "break-word",
-                              whiteSpace: "normal", 
+                              whiteSpace: "normal",
                             }}
                           >
                             <b className="fs-5">Transport Type: </b>
@@ -1479,6 +997,19 @@ const LabelPrint = (props) => {
             setShippingCount(shippingCount + 1);
             setShippingModal(false);
           }}
+          purchase_customer_ids={props?.user?.user_id}
+        />
+      ) : (
+        ""
+      )}
+      {updateShippng == true ? (
+        <ShippingModal
+          modalStates={updateShippng}
+          setModalStates={() => {
+            setShippingCount(shippingCount + 1);
+            setUpdateShipping(false);
+          }}
+          edit_data={users}
           purchase_customer_ids={props?.user?.user_id}
         />
       ) : (

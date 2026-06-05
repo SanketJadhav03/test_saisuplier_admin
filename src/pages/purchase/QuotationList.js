@@ -53,7 +53,49 @@ const QuotationList = () => {
     { label: "This Year", value: "this_year" },
     { label: "Last Year", value: "last_year" },
   ];
+
+  // infinity
+  const [Pages, SetPages] = useState(1);
+  const [NoMore, SetNoMore] = useState(true);
+  useEffect(() => {
+    document.title = "Saisupplier Admin | Quotation List";
+  }, [counts]);
+  const fetchData = () => {
+    if (NoMore) {
+      Setcounts(counts + 1);
+    }
+  };
+  //   Delete Aleart
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [ID, SetID] = useState();
+  const onClickDelete = (data) => {
+    SetID(data);
+    setDeleteModal(true);
+  };
+
+  // view invoice ditails
+  const [Child_data, Set_Child_data] = useState([]);
+  const [Master_data, Set_Master_data] = useState([]);
+  const [Business, Set_Business] = useState([]);
+  const [SelectedPoID, setSelectedPoID] = useState(0);
+  const View_invoce = (id) => {
+    setSelectedPoID(id);
+    http
+      .get(`/purchase/invoice/${id}`)
+      .then(function (response) {
+        Set_Child_data(response.data.Child);
+        Set_Business(response.data.Business[0]);
+        Set_Master_data(response.data.Master);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    setmodal_large(!false);
+  };
   const handleDateFilter = (type) => {
+    sessionStorage.setItem("purchase_filter", type);
+
+    setActiveFilter(type);
     let startDate = null;
     let endDate = null;
 
@@ -117,44 +159,6 @@ const QuotationList = () => {
       start_date: formatDate(startDate),
       end_date: formatDate(endDate),
     });
-  };
-  // infinity
-  const [Pages, SetPages] = useState(1);
-  const [NoMore, SetNoMore] = useState(true);
-  useEffect(() => {
-    document.title = "Saisupplier Admin | Quotation List";
-  }, [counts]);
-  const fetchData = () => {
-    if (NoMore) {
-      Setcounts(counts + 1);
-    }
-  };
-  //   Delete Aleart
-  const [deleteModal, setDeleteModal] = useState(false);
-  const [ID, SetID] = useState();
-  const onClickDelete = (data) => {
-    SetID(data);
-    setDeleteModal(true);
-  };
-
-  // view invoice ditails
-  const [Child_data, Set_Child_data] = useState([]);
-  const [Master_data, Set_Master_data] = useState([]);
-  const [Business, Set_Business] = useState([]);
-  const [SelectedPoID, setSelectedPoID] = useState(0);
-  const View_invoce = (id) => {
-    setSelectedPoID(id);
-    http
-      .get(`/purchase/invoice/${id}`)
-      .then(function (response) {
-        Set_Child_data(response.data.Child);
-        Set_Business(response.data.Business[0]);
-        Set_Master_data(response.data.Master);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
-    setmodal_large(!false);
   };
 
   const handlePrint = () => {
@@ -223,7 +227,7 @@ const QuotationList = () => {
       .catch(function (error) {
         console.log(error);
       });
-    Filter_data();
+    handleDateFilter("this_month");
   }, [count + 1]);
   const handleDeleteOrder = (data) => {
     if (data._reactName == "onClick") {
@@ -276,7 +280,7 @@ const QuotationList = () => {
       });
   };
   useEffect(() => {
-    handleDateFilter("this_month");
+    Filter_data();
   }, [Filter_Data.start_date, Filter_Data.end_date]);
 
   const [SearchQuery, setSearchQuery] = useState("");
@@ -449,7 +453,7 @@ const QuotationList = () => {
                                 [
                                   ...new Map(
                                     (Data || [])
-                                      .filter((item) => {                                          
+                                      .filter((item) => {
                                         return item.purchase_status == "2";
                                       })
                                       .map((item) => [

@@ -19,7 +19,6 @@ const Sale_Print_Modal = (props) => {
           setCustomer(response.data.customer);
           setBusinessData(response.data.Business[0]);
           setMasterData(response.data.Master[0]);
-          
         }
       })
       .catch(function (error) {
@@ -111,7 +110,7 @@ const Sale_Print_Modal = (props) => {
     }
     return result + " Only";
   }
-console.log(masterData);
+  console.log(masterData);
   const getPrice = (item) => {
     switch (masterData.selectPriceOption) {
       case "price_sales":
@@ -761,7 +760,7 @@ console.log(masterData);
                       {/* Product Name */}
                       <td style={tdStyle}>
                         {item.product_english_name || "-"}
-                         <div style={{ fontSize: "10px", color: "#6c757d" }}>
+                        <div style={{ fontSize: "10px", color: "#6c757d" }}>
                           <strong>Note:</strong> {item.pos_product_notes || "-"}
                         </div>
                       </td>
@@ -793,7 +792,7 @@ console.log(masterData);
                     </tr>
                   );
                 })}
-         
+
                 {/* Final Total Row */}
                 {props.status != "1" && (
                   <tr>
@@ -1378,22 +1377,22 @@ console.log(masterData);
               </div>
             </div>
             <div
-            style={{
-              border: "1px solid #999",
-              padding: 5,
-              marginTop: 2,
-              borderRadius: 4,
-              fontWeight: "bold",
-            }}
-          >
-            <strong style={{ color: "#0b5394" }}>Note:</strong>
-            <br />
-            <div
-              dangerouslySetInnerHTML={{
-                __html: masterData.master_notes || "",
+              style={{
+                border: "1px solid #999",
+                padding: 5,
+                marginTop: 2,
+                borderRadius: 4,
+                fontWeight: "bold",
               }}
-            ></div>
-          </div>
+            >
+              <strong style={{ color: "#0b5394" }}>Note:</strong>
+              <br />
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: masterData.master_notes || "",
+                }}
+              ></div>
+            </div>
             <div
               style={{
                 borderTop: "1px solid #000000ff",
@@ -1467,8 +1466,9 @@ console.log(masterData);
             }}
           >
             <i>
-              {masterData.full_name &&
-                `Invoice Created By ${masterData.full_name}`}
+              {masterData?.full_name
+                ? `Invoice Created By ${masterData.full_name}`
+                :  `Invoice Created By Customer ${customer.user_name}`}
             </i>
           </div>
         </div>

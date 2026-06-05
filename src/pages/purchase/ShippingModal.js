@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import CustomInput from "../Unit/Input";
 import { motion } from "framer-motion";
 import { API_URL } from "../../helpers/url_helper";
+import { Users } from "lucide-react";
 
 const ShippingModal = (props) => {
   const [modal, setModal] = useState(false);
@@ -46,6 +47,15 @@ const ShippingModal = (props) => {
     defaultAddress: false,
     country: "India", // default
   });
+  useEffect(() => {
+    if (props.edit_data?.user_id) {
+      setCurrentAddress({
+        ...props.edit_data,
+        addressLine1: props.edit_data?.address_line1,
+        addressLine2: props.edit_data?.address_line2,
+      });
+    }
+  }, [props.edit_data]);
   useEffect(() => {
     if (currentAddress.pincode?.length === 6) {
       fetch(`${API_URL}/pincode/${currentAddress.pincode}`)
@@ -111,21 +121,7 @@ const ShippingModal = (props) => {
     }));
   };
   const resetForm = () => {
-    setCurrentAddress({
-      pincode: "",
-      state: "",
-      district: "",
-      taluka: "",
-      city: "",
-      cities: [],
-      addressLine1: "",
-      addressLine2: "",
-      addressType: "home",
-      defaultAddress: false,
-      country: "India",
-    });
-    setErrors({});
-    setMsg("");
+    props.setModalStates(false);
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -137,8 +133,16 @@ const ShippingModal = (props) => {
     }
 
     try {
+      let res;
       setIsSubmitting(true);
-      const res = await http.post("/addresses", currentAddress);
+      if (props.edit_data) {
+        res = await http.put(
+          `/addresses/${currentAddress.shipping_id}`,
+          currentAddress,
+        );
+      } else {
+        res = await http.post("/addresses", currentAddress);
+      }
       props.setModalStates(!props.modalStates);
       toast.success("Address saved successfully!");
       resetForm();
@@ -154,7 +158,7 @@ const ShippingModal = (props) => {
     <div>
       <Modal id="showModal" isOpen={modal} size="lg" toggle={toggle} centered>
         <ModalHeader className="bg-light p-3" toggle={toggle}>
-          Add Shipping Address
+          {props.edit_data ? "Update " : "Add "} Shipping Address
         </ModalHeader>
         <span className="tablelist-form">
           <ModalBody>
@@ -402,6 +406,8 @@ const ShippingModal = (props) => {
                         </svg>
                         Saving...
                       </>
+                    ) : props.edit_data ? (
+                      "Update Address"
                     ) : (
                       "Save Address"
                     )}
