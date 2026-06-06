@@ -488,7 +488,7 @@ const PurchaseList = () => {
                         type="search"
                         placeholder="Search by Name / Mobile Number / Email / Ifsc Code / Branch Code/ Branch Name / Pincode"
                         onChange={(e) => {
-                          const query = e.target.value?.toLowerCase();
+                          const query = e.target.value.trim()?.toLowerCase();
                           setSearchQuery(query); // store search query in state
                         }}
                       />
