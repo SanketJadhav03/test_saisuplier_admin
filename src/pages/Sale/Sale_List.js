@@ -716,7 +716,7 @@ end_date: `${new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).ge
         <label className="form-label mb-1" style={{ fontSize: "0.75rem", opacity: 0 }}>x</label>
         <Link
           to="/sale-create"
-          className="btn btn-dark fw-semibold px-4 d-flex align-items-center gap-1"
+          className="btn btn-success fw-semibold px-4 d-flex align-items-center gap-1"
         >
           <i className="ri-add-line fs-5"></i> Add Invoice
         </Link>
