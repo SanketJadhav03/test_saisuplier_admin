@@ -428,7 +428,24 @@ const Sale_List_rejected = () => {
                   <div className="col-4">
                     <div className="col-12">
                       <h3 className="text-center fw-bold mb-0">
-                        Rejected-order
+                        Rejected-order({" "}
+                          {
+                            [
+                              ...new Map(
+                                (Data || [])
+                                  .filter((item) => {
+                                   return (
+                                      item.master_bill_status == 5
+                                    );
+                                  })
+                                  .map((item) => [
+                                    item.master_invoice_no,
+                                    item,
+                                  ]), // ✅ dedupe by user_id
+                              ).values(),
+                            ]?.length
+                          }{" "}
+                          )
                       </h3>
                     </div>
                   </div>
