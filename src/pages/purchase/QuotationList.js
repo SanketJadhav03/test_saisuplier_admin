@@ -966,7 +966,7 @@ const QuotationList = () => {
                                       (isNaN(other) ? 0 : other) +
                                       (isNaN(weightAmount) ? 0 : weightAmount);
 
-                                    return total.toFixed(2);
+                                    return Math.ceil(total);
                                   })()}
                                 </td>
                                 <td style={{ maxWidth: "140px" }}>

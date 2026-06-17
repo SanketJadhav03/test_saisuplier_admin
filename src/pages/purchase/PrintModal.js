@@ -140,6 +140,7 @@ const PrintModal = (props) => {
             "send_quotation",
             {
               Name: customer.user_name,
+              Amount:Math.ceil(totalAmount),
               pdf: reader.result,
             },
             customer.user_email,
@@ -178,6 +179,20 @@ const PrintModal = (props) => {
         return 0;
     }
   };
+  const totalAmount =
+    parseFloat(
+      Child_data.reduce((sum, item) => {
+        const rate = getPrice(item);
+        const qty = item.purchase_qty || 0;
+        const taxableValue = rate * qty;
+        const gstPercent = item.tax_percentage || 0;
+        const gstValue = (taxableValue * gstPercent) / 100;
+
+        return sum + taxableValue + gstValue;
+      }, 0).toFixed(2),
+    ) +
+    (parseFloat(Master_data.other_charge_amount) || 0) +
+    (parseFloat(Master_data.transport_types_total_charge) || 0);
   const summary = Child_data.reduce(
     (acc, item) => {
       const weight = parseFloat(item.purchase_weight) || 0;
@@ -470,10 +485,7 @@ const PrintModal = (props) => {
                       {props.status == 2 && (
                         <>
                           {/* Rate */}
-                          <td style={tdStyle}>
-                            ₹ {rate}
-                             
-                          </td>
+                          <td style={tdStyle}>₹ {rate}</td>
 
                           {/* Taxable Value */}
                           <td style={tdStyle}>{taxableValue}</td>
@@ -494,7 +506,7 @@ const PrintModal = (props) => {
                     <td colSpan={5} style={{ ...tdStyle }}>
                       Total
                     </td>
-                    <td style={tdStyle}> 
+                    <td style={tdStyle}>
                       {Child_data.reduce(
                         (sum, item) =>
                           sum + getPrice(item) * (item.purchase_qty || 0),
@@ -513,7 +525,8 @@ const PrintModal = (props) => {
                         0,
                       ).toFixed(2)}
                     </td>
-                    <td style={tdStyle}>₹{" "} 
+                    <td style={tdStyle}>
+                      ₹{" "}
                       {Child_data.reduce((sum, item) => {
                         const rate = getPrice(item);
                         const qty = item.purchase_qty || 0;
@@ -748,13 +761,9 @@ const PrintModal = (props) => {
 
                   // Split GST into SGST + CGST (half-half) for intra-state (Maharashtra)
                   const sgst =
-                    Master_data?.state == "Maharashtra"
-                      ? totalGST / 2
-                      : 0;
+                    Master_data?.state == "Maharashtra" ? totalGST / 2 : 0;
                   const cgst =
-                    Master_data?.state == "Maharashtra"
-                      ? totalGST / 2
-                      : 0;
+                    Master_data?.state == "Maharashtra" ? totalGST / 2 : 0;
                   const igst =
                     Master_data?.state != "Maharashtra" ? totalGST : 0;
 
@@ -940,25 +949,10 @@ const PrintModal = (props) => {
                 }}
               >
                 <span style={{ fontWeight: "bold", fontSize: 13 }}>
-                  Total Payable Amount After Tax 
+                  Total Payable Amount After Tax
                 </span>
-                <span style={{ fontWeight: "bold", fontSize: 13 }}>₹{" "} 
-                  {parseFloat(
-                    Child_data.reduce((sum, item) => {
-                      const rate = getPrice(item);
-                      const qty = item.purchase_qty || 0;
-                      const taxableValue = rate * qty;
-                      const gstPercent = item.tax_percentage || 0;
-                      const gstValue = (taxableValue * gstPercent) / 100;
-                      return sum + taxableValue + gstValue;
-                    }, 0).toFixed(2),
-                  ) +
-                    (isNaN(Master_data.other_charge_amount)
-                      ? 0
-                      : parseFloat(Master_data.other_charge_amount)) +
-                    (isNaN(Master_data.transport_types_total_charge)
-                      ? 0
-                      : parseFloat(Master_data.transport_types_total_charge))}
+                <span style={{ fontWeight: "bold", fontSize: 13 }}>
+                  ₹ {Math.ceil(totalAmount)}
                 </span>
               </div>
             </div>
@@ -1048,15 +1042,19 @@ const PrintModal = (props) => {
             </div>
           </div>
         </div>
-        <div style={{
-          textAlign:"right",
-          fontSize:10,
-          fontStyle:"italic",
-          paddingRight:"10px"
-        }}>
-          
-          <i> {Master_data.full_name && `${props.status == 1 ? 'Purchase Order' : 'Quotation'} Created By ${Master_data.full_name}`}</i>
-
+        <div
+          style={{
+            textAlign: "right",
+            fontSize: 10,
+            fontStyle: "italic",
+            paddingRight: "10px",
+          }}
+        >
+          <i>
+            {" "}
+            {Master_data.full_name &&
+              `${props.status == 1 ? "Purchase Order" : "Quotation"} Created By ${Master_data.full_name}`}
+          </i>
         </div>
         <div className="hstack gap-2 justify-content-center my-2">
           <button
