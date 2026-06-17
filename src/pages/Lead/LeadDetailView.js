@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   Card,
@@ -9,6 +10,8 @@ import {
   Badge,
   Spinner,
   Table,
+  Modal,
+  Button,
 } from "reactstrap";
 import {
   Mail,
@@ -22,6 +25,7 @@ import {
   User,
 } from "lucide-react";
 import AuthUser from "../../helpers/Authuser";
+import EmailRequiredModal from "./EmailRequiredModal";
 
 const LeadDetailView = () => {
   const { id } = useParams();
@@ -32,6 +36,9 @@ const LeadDetailView = () => {
   const [allStages, setAllStages] = useState([]); // New state for dynamic stages
   const [loading, setLoading] = useState(true);
   const [followUpData, setFollowUpData] = useState([]);
+
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -76,6 +83,40 @@ const LeadDetailView = () => {
     );
   }
 
+  const handleUpdateEmail = async (email) => {
+    
+    try {
+      const response = await http.put("/admin/register/update", {
+        user_id: leadData.customer_id,
+        user_email: email,
+      });
+
+      if (response.status === 200) {
+         
+        setShowEmailModal(false);  
+        toast.success("Email updated successfully"); 
+              
+        leadData.customer_email = email;
+        navigate(`/purchase-create/${leadData.lead_id}`);
+      }
+    } catch (error) {
+      console.log(email);
+      console.log(error.response);
+      console.log(error.response?.data);
+      console.log(error.response?.status);
+      toast.error("Failed to update email");
+    }
+  };
+
+  const handleConvertToPO = () => {
+    if (!leadData?.customer_email) {
+      setShowEmailModal(true);
+      return;
+    }
+
+    navigate(`/purchase-create/${leadData.lead_id}`);
+  };
+
   if (!leadData)
     return (
       <div className="page-content text-center">
@@ -115,7 +156,7 @@ const LeadDetailView = () => {
                 </div>
               </div>
               <h5 className="mt-3 mb-1">
-                {leadData.master_type == 1
+                {leadData.master_type === 1
                   ? leadData.user_name
                   : leadData?.master_name}
               </h5>
@@ -242,7 +283,7 @@ const LeadDetailView = () => {
                     </div>
                   </div>
                 ))}
-              {(!followUpData || followUpData.length == 0) && (
+              {(!followUpData || followUpData.length === 0) && (
                 <p className="text-muted mb-0">
                   No follow-up details available.
                 </p>
@@ -458,13 +499,14 @@ const LeadDetailView = () => {
                   <div className="d-flex flex-column flex-sm-row gap-2 justify-content-center align-items-center">
                     {/* Primary Conversion Action */}
                     {!leadData.lead_purchase_id && (
-                      <Link
+                      <button
+                        type="button"
                         className="btn btn-soft-primary btn-sm px-3 shadow-none"
-                        to={`/purchase-create/${leadData.lead_id}`}
+                        onClick={handleConvertToPO}
                       >
                         <i className="ri-exchange-funds-line align-bottom me-1"></i>
                         Convert to PO
-                      </Link>
+                      </button>
                     )}
 
                     {/* Secondary Actions */}
@@ -739,6 +781,13 @@ const LeadDetailView = () => {
           </Card>
         </Col>
       </Row>
+      {showEmailModal && (
+        <EmailRequiredModal
+          isOpen={showEmailModal}
+          toggle={() => setShowEmailModal(false)}
+          onSave={handleUpdateEmail}
+        />
+      )}
     </div>
   );
 };

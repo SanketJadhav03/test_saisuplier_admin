@@ -23,7 +23,7 @@ import { toast } from "react-toastify";
 import Select from "react-select";
 import { Link, useNavigate } from "react-router-dom";
 const LeadProView = () => {
-  const { http } = AuthUser();
+  const { http, user } = AuthUser();
   const navigate = useNavigate();
   // 1. States for Data
   const [leads, setLeads] = useState([]);
@@ -302,8 +302,14 @@ const LeadProView = () => {
               {stages.map((stage) => {
                 // Determine the theme color from the stage object
                 const themeColor = stage.color || "primary";
+                const isSuperAdmin = user?.user?.role === 1;
+
                 const columnLeads = leads.filter(
-                  (l) => l.stage_id === stage.id,
+                  (lead) =>
+                    lead.stage_id === stage.id &&
+                    (isSuperAdmin ||
+                      Number(lead.assigned_employee_id) ===
+                        Number(user.user.user_id)),
                 );
 
                 return (
@@ -341,7 +347,6 @@ const LeadProView = () => {
                         </DropdownMenu>
                       </UncontrolledDropdown>
                     </div>
-
                     {/* Scrollable Card Container */}
                     <div
                       className="kanban-card-container px-3 pt-3"
@@ -361,6 +366,7 @@ const LeadProView = () => {
                             }`,
                           }}
                         >
+                          {console.log(columnLeads)}
                           <CardBody className="">
                             {/* Header: Priority & Stage */}
                             <div className="pb-3 ">

@@ -901,7 +901,7 @@ const LabelPrint = (props) => {
                   <div>
                     <div className="to">To,</div>
                     <div className="bank-name">
-                      {customer?.user_type == 1
+                      {customer?.user_type == 2
                         ? customer?.user_name
                         : customer?.master_name}
                       {customer?.master_branch_name
@@ -913,17 +913,45 @@ const LabelPrint = (props) => {
                     </div>
 
                     <div className="address-customer">
-                      {users?.address_line1 ||
-                        ("" && (
-                          <>
-                            {users?.address_line1 || ""}
-                            <br />
-                            {users.taluka && `Tq. ${users.taluka}`}
-                            {users.district && ` Dist. ${users.district}`}
-                            {users.city && `, ${users.city}`}
-                            {users.state && `, ${users.state}`}
-                          </>
-                        ))}
+                      {(users?.address_line1
+                         ) && (
+                        <>
+                          {users?.address_line1 && (
+                            <>
+                              {users.address_line1}
+                              <br />
+                            </>
+                          )}
+
+                          {users?.taluka && (
+                            <>
+                              <strong>Tal:</strong> {users.taluka}
+                            </>
+                          )}
+
+                          {users?.district && (
+                            <>
+                              {" "}
+                              <strong>Dist:</strong> {users.district}
+                              <br/>
+                            </>
+                          )}
+
+                          {users?.city && (
+                            <>
+                              {" "}
+                              <strong>City:</strong> {users.city}
+                            </>
+                          )}
+
+                          {users?.state && (
+                            <>
+                              {" "}
+                              <strong>State:</strong> {users.state}
+                            </>
+                          )}
+                        </>
+                      )}
                     </div>
 
                     <div className="meta-customer">

@@ -68,8 +68,8 @@ const Sale_List = () => {
   const year = currentDate.getFullYear();
   const [Filter_Data, SetFilter_data] = useState({
     customer_id: "",
-   start_date: `01/${String(new Date().getMonth() + 1).padStart(2, "0")}/${new Date().getFullYear()}`,
-end_date: `${new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()}/${String(new Date().getMonth() + 1).padStart(2, "0")}/${new Date().getFullYear()}`,
+    start_date: `01/${String(new Date().getMonth() + 1).padStart(2, "0")}/${new Date().getFullYear()}`,
+    end_date: `${new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()}/${String(new Date().getMonth() + 1).padStart(2, "0")}/${new Date().getFullYear()}`,
     payment_method: "",
   });
   const [activeFilter, setActiveFilter] = useState("this_month");
@@ -292,7 +292,7 @@ end_date: `${new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).ge
   const handleDeleteOrder = (data) => {
     if (data._reactName == "onClick") {
       http
-        .delete(`/purchase/deleted/${ID}`)
+        .post(`/purchase/deleted/${ID}`)
         .then(function (response) {
           toast.error("Product removed successfully!!");
           Setcounts(counts + 1);
@@ -337,6 +337,7 @@ end_date: `${new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).ge
     setmodal_large(!false);
   };
 
+  const tarsh_invoice = async (id) => {};
   const handleEditSale = (saleData) => {
     setSelectedSale(saleData);
     setEditModal(true);
@@ -556,175 +557,234 @@ end_date: `${new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).ge
           <Col lg={12}>
             <Card>
               <CardHeader className="border-0 bg-white pb-0">
+                {/* ── TOP BAR: Title + Filter Pills ── */}
+                <div className="d-flex align-items-center justify-content-between flex-wrap gap-3 px-4 pt-4 pb-3 border-bottom">
+                  <div>
+                    <p
+                      className="text-uppercase text-dark fw-semibold mb-1"
+                      style={{ letterSpacing: "0.08em", fontSize: "0.72rem" }}
+                    >
+                      Invoice Management
+                    </p>
+                    <h4 className="fw-bold mb-0 text-dark">
+                      {selectedstatus == 0
+                        ? "All"
+                        : statusOptions.find((o) => o.value == selectedstatus)
+                            ?.label}{" "}
+                      Invoices{" "}
+                      <span className="badge bg-dark rounded-pill fw-normal fs-6 ms-1">
+                        {
+                          [
+                            ...new Map(
+                              (Data || [])
+                                .filter((item) => {
+                                  const query =
+                                    searchQuery?.toLowerCase() || "";
+                                  return (
+                                    item.user_name
+                                      ?.toLowerCase()
+                                      .includes(query) ||
+                                    item.master_name
+                                      ?.toLowerCase()
+                                      .includes(query) ||
+                                    item.user_unique_id
+                                      ?.toLowerCase()
+                                      .includes(query) ||
+                                    item.master_ifsc
+                                      ?.toLowerCase()
+                                      .includes(query) ||
+                                    item.user_mobile
+                                      ?.toString()
+                                      .includes(query) ||
+                                    item.master_mobile
+                                      ?.toString()
+                                      .includes(query) ||
+                                    item.user_email
+                                      ?.toLowerCase()
+                                      .includes(query) ||
+                                    item.master_pincode
+                                      ?.toLowerCase()
+                                      .includes(query) ||
+                                    item.master_branch_name
+                                      ?.toLowerCase()
+                                      .includes(query)
+                                  );
+                                })
+                                .map((item) => [item.master_invoice_no, item]),
+                            ).values(),
+                          ].filter((temp) =>
+                            selectedstatus != 0
+                              ? temp.master_bill_status == selectedstatus
+                              : true,
+                          ).length
+                        }
+                      </span>
+                    </h4>
+                  </div>
 
-  {/* ── TOP BAR: Title + Filter Pills ── */}
-  <div className="d-flex align-items-center justify-content-between flex-wrap gap-3 px-4 pt-4 pb-3 border-bottom">
-    <div>
-      <p className="text-uppercase text-dark fw-semibold mb-1" style={{ letterSpacing: "0.08em", fontSize: "0.72rem" }}>
-        Invoice Management
-      </p>
-      <h4 className="fw-bold mb-0 text-dark">
-        {selectedstatus == 0
-          ? "All"
-          : statusOptions.find((o) => o.value == selectedstatus)?.label}{" "}
-        Invoices{" "}
-        <span className="badge bg-dark rounded-pill fw-normal fs-6 ms-1">
-          {
-            [
-              ...new Map(
-                (Data || [])
-                  .filter((item) => {
-                    const query = searchQuery?.toLowerCase() || "";
+                  <div className="d-flex flex-wrap gap-2">
+                    {filters.map((item) => (
+                      <button
+                        key={item.value}
+                        className={`btn btn-sm rounded-pill px-3 fw-semibold ${
+                          activeFilter === item.value
+                            ? "btn-dark text-white"
+                            : "btn-outline-dark"
+                        }`}
+                        onClick={() => handleDateFilter(item.value)}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* ── STATUS SUMMARY CARDS ── */}
+                <div className="d-flex flex-nowrap gap-2 px-4 py-3 overflow-auto border-bottom">
+                  {statusOptions.map((status) => {
+                    const count = [
+                      ...new Map(
+                        (Data || [])
+                          .filter(
+                            (item) =>
+                              String(item.master_bill_status) ==
+                              String(status.value),
+                          )
+                          .map((item) => [item.master_invoice_no, item]),
+                      ).values(),
+                    ].length;
+
                     return (
-                      item.user_name?.toLowerCase().includes(query) ||
-                      item.master_name?.toLowerCase().includes(query) ||
-                      item.user_unique_id?.toLowerCase().includes(query) ||
-                      item.master_ifsc?.toLowerCase().includes(query) ||
-                      item.user_mobile?.toString().includes(query) ||
-                      item.master_mobile?.toString().includes(query) ||
-                      item.user_email?.toLowerCase().includes(query) ||
-                      item.master_pincode?.toLowerCase().includes(query) ||
-                      item.master_branch_name?.toLowerCase().includes(query)
+                      <div
+                        key={status.value}
+                        className="flex-fill text-center bg-light rounded-3 px-3 py-2 border"
+                        style={{ minWidth: "110px", cursor: "pointer" }}
+                        onClick={() => setSelectedStatus(status.value)}
+                      >
+                        <div className="fw-bold fs-5 text-dark mb-0">
+                          {count}
+                        </div>
+                        <div
+                          className="text-dark"
+                          style={{ fontSize: "0.68rem", whiteSpace: "nowrap" }}
+                        >
+                          {status.label}
+                        </div>
+                      </div>
                     );
-                  })
-                  .map((item) => [item.master_invoice_no, item]),
-              ).values(),
-            ].filter((temp) =>
-              selectedstatus != 0 ? temp.master_bill_status == selectedstatus : true,
-            ).length
-          }
-        </span>
-      </h4>
-    </div>
+                  })}
+                </div>
 
-    <div className="d-flex flex-wrap gap-2">
-      {filters.map((item) => (
-        <button
-          key={item.value}
-          className={`btn btn-sm rounded-pill px-3 fw-semibold ${
-            activeFilter === item.value ? "btn-dark text-white" : "btn-outline-dark"
-          }`}
-          onClick={() => handleDateFilter(item.value)}
-        >
-          {item.label}
-        </button>
-      ))}
-    </div>
-  </div>
+                {/* ── FILTERS ROW ── */}
+                <div className="d-flex align-items-end flex-wrap gap-3 px-4 py-3">
+                  {/* Search */}
+                  <div className="flex-grow-1" style={{ minWidth: "260px" }}>
+                    <label
+                      className="form-label fw-semibold text-dark mb-1"
+                      style={{ fontSize: "0.75rem", letterSpacing: "0.05em" }}
+                    >
+                      SEARCH
+                    </label>
+                    <div className="input-group">
+                      <span className="input-group-text bg-white border-end-0">
+                        <i className="ri-search-line text-dark"></i>
+                      </span>
+                      <input
+                        type="search"
+                        placeholder="Name / ID / Mobile / Email / IFSC / Branch / Pincode"
+                        className="form-control border-start-0 fw-medium"
+                        onChange={(e) =>
+                          setSearchQuery(e.target.value?.trim().toLowerCase())
+                        }
+                      />
+                    </div>
+                  </div>
 
-  {/* ── STATUS SUMMARY CARDS ── */}
-  <div className="d-flex flex-nowrap gap-2 px-4 py-3 overflow-auto border-bottom">
-    {statusOptions.map((status) => {
-      const count = [
-        ...new Map(
-          (Data || [])
-            .filter((item) => String(item.master_bill_status) == String(status.value))
-            .map((item) => [item.master_invoice_no, item]),
-        ).values(),
-      ].length;
+                  {/* Status Select */}
+                  <div style={{ minWidth: "160px" }}>
+                    <label
+                      className="form-label fw-semibold text-dark mb-1"
+                      style={{ fontSize: "0.75rem", letterSpacing: "0.05em" }}
+                    >
+                      STATUS
+                    </label>
+                    <Select
+                      styles={{
+                        container: (base) => ({ ...base, width: "100%" }),
+                      }}
+                      options={[{ value: 0, label: "All" }, ...statusOptions]}
+                      onChange={(opt) => setSelectedStatus(opt.value)}
+                    />
+                  </div>
 
-      return (
-        <div
-          key={status.value}
-          className="flex-fill text-center bg-light rounded-3 px-3 py-2 border"
-          style={{ minWidth: "110px", cursor: "pointer" }}
-          onClick={() => setSelectedStatus(status.value)}
-        >
-          <div className="fw-bold fs-5 text-dark mb-0">{count}</div>
-          <div className="text-dark" style={{ fontSize: "0.68rem", whiteSpace: "nowrap" }}>
-            {status.label}
-          </div>
-        </div>
-      );
-    })}
-  </div>
+                  {/* Start Date */}
+                  <div>
+                    <label
+                      className="form-label fw-semibold text-dark mb-1"
+                      style={{ fontSize: "0.75rem", letterSpacing: "0.05em" }}
+                    >
+                      FROM
+                    </label>
+                    <Flatpickr
+                      className="form-control"
+                      style={{ width: "130px" }}
+                      options={{ dateFormat: "d/m/Y", defaultDate: "today" }}
+                      value={Filter_Data.start_date}
+                      onChange={(selectedDates) => {
+                        const d = selectedDates[0];
+                        const formatted = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+                        SetFilter_data({
+                          ...Filter_Data,
+                          start_date: formatted,
+                        });
+                      }}
+                    />
+                  </div>
 
-  {/* ── FILTERS ROW ── */}
-  <div className="d-flex align-items-end flex-wrap gap-3 px-4 py-3">
+                  {/* End Date */}
+                  <div>
+                    <label
+                      className="form-label fw-semibold text-dark mb-1"
+                      style={{ fontSize: "0.75rem", letterSpacing: "0.05em" }}
+                    >
+                      TO
+                    </label>
+                    <Flatpickr
+                      className="form-control"
+                      style={{ width: "130px" }}
+                      options={{ dateFormat: "d/m/Y", defaultDate: "today" }}
+                      value={Filter_Data.end_date}
+                      onChange={(selectedDates) => {
+                        const d = selectedDates[0];
+                        const formatted = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+                        SetFilter_data({ ...Filter_Data, end_date: formatted });
+                      }}
+                    />
+                  </div>
 
-    {/* Search */}
-    <div className="flex-grow-1" style={{ minWidth: "260px" }}>
-      <label className="form-label fw-semibold text-dark mb-1" style={{ fontSize: "0.75rem", letterSpacing: "0.05em" }}>
-        SEARCH
-      </label>
-      <div className="input-group">
-        <span className="input-group-text bg-white border-end-0">
-          <i className="ri-search-line text-dark"></i>
-        </span>
-        <input
-          type="search"
-          placeholder="Name / ID / Mobile / Email / IFSC / Branch / Pincode"
-          className="form-control border-start-0 fw-medium"
-          onChange={(e) => setSearchQuery(e.target.value?.trim().toLowerCase())}
-        />
-      </div>
-    </div>
-
-    {/* Status Select */}
-    <div style={{ minWidth: "160px" }}>
-      <label className="form-label fw-semibold text-dark mb-1" style={{ fontSize: "0.75rem", letterSpacing: "0.05em" }}>
-        STATUS
-      </label>
-      <Select
-        styles={{ container: (base) => ({ ...base, width: "100%" }) }}
-        options={[{ value: 0, label: "All" }, ...statusOptions]}
-        onChange={(opt) => setSelectedStatus(opt.value)}
-      />
-    </div>
-
-    {/* Start Date */}
-    <div>
-      <label className="form-label fw-semibold text-dark mb-1" style={{ fontSize: "0.75rem", letterSpacing: "0.05em" }}>
-        FROM
-      </label>
-      <Flatpickr
-        className="form-control"
-        style={{ width: "130px" }}
-        options={{ dateFormat: "d/m/Y", defaultDate: "today" }}
-        value={Filter_Data.start_date}
-        onChange={(selectedDates) => {
-          const d = selectedDates[0];
-          const formatted = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
-          SetFilter_data({ ...Filter_Data, start_date: formatted });
-        }}
-      />
-    </div>
-
-    {/* End Date */}
-    <div>
-      <label className="form-label fw-semibold text-dark mb-1" style={{ fontSize: "0.75rem", letterSpacing: "0.05em" }}>
-        TO
-      </label>
-      <Flatpickr
-        className="form-control"
-        style={{ width: "130px" }}
-        options={{ dateFormat: "d/m/Y", defaultDate: "today" }}
-        value={Filter_Data.end_date}
-        onChange={(selectedDates) => {
-          const d = selectedDates[0];
-          const formatted = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
-          SetFilter_data({ ...Filter_Data, end_date: formatted });
-        }}
-      />
-    </div>
-
-    {/* Add Invoice Button */}
-    {permission.find(
-      (p) => p.permission_category === "INVOICE" && p.permission_path === "2",
-    ) && (
-      <div className="ms-auto">
-        <label className="form-label mb-1" style={{ fontSize: "0.75rem", opacity: 0 }}>x</label>
-        <Link
-          to="/sale-create"
-          className="btn btn-success fw-semibold px-4 d-flex align-items-center gap-1"
-        >
-          <i className="ri-add-line fs-5"></i> Add Invoice
-        </Link>
-      </div>
-    )}
-  </div>
-
-</CardHeader>
+                  {/* Add Invoice Button */}
+                  {permission.find(
+                    (p) =>
+                      p.permission_category === "INVOICE" &&
+                      p.permission_path === "2",
+                  ) && (
+                    <div className="ms-auto">
+                      <label
+                        className="form-label mb-1"
+                        style={{ fontSize: "0.75rem", opacity: 0 }}
+                      >
+                        x
+                      </label>
+                      <Link
+                        to="/sale-create"
+                        className="btn btn-success fw-semibold px-4 d-flex align-items-center gap-1"
+                      >
+                        <i className="ri-add-line fs-5"></i> Add Invoice
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </CardHeader>
 
               <CardBody className="pt-0">
                 <div>
@@ -1006,8 +1066,21 @@ end_date: `${new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).ge
                                       <i className="ri-whatsapp-line  "></i>
                                     </div>
                                     <Link
-                                      to={`/sale-edit/${item.master_id}`}
-                                      className="btn btn-light btn-sm btn-icon text-primary"
+                                      to={
+                                        item.master_bill_status == 6
+                                          ? "#"
+                                          : `/sale-edit/${item.master_id}`
+                                      }
+                                      className={`btn btn-light btn-sm btn-icon ${
+                                        item.master_bill_status == 6
+                                          ? "text-muted disabled"
+                                          : "text-primary"
+                                      }`}
+                                      onClick={(e) => {
+                                        if (item.master_bill_status == 6) {
+                                          e.preventDefault();
+                                        }
+                                      }}
                                     >
                                       <i className="ri-edit-2-line"></i>
                                     </Link>
@@ -1036,7 +1109,11 @@ end_date: `${new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).ge
                                     <Button
                                       color="light"
                                       size="md"
-                                      onClick
+                                      onClick={() => {
+                                        SetID(item.master_id);
+                                        setDeleteModal(true);
+                                        console.log(item);
+                                      }}
                                       className="btn-icon text-primary"
                                     >
                                       <i className="ri-delete-bin-line"></i>
