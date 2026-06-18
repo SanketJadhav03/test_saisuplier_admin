@@ -1106,7 +1106,7 @@ const Sale_List = () => {
                                     >
                                       <i className="ri-printer-line"></i>
                                     </Button>
-                                    <Button
+                                    {/* <Button
                                       color="light"
                                       size="md"
                                       onClick={() => {
@@ -1117,7 +1117,7 @@ const Sale_List = () => {
                                       className="btn-icon text-primary"
                                     >
                                       <i className="ri-delete-bin-line"></i>
-                                    </Button>
+                                    </Button> */}
                                   </div>
                                 </td>
                               </tr>
