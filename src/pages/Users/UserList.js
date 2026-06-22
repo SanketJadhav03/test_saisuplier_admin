@@ -41,6 +41,7 @@ const UserList = () => {
         const fetched = response.data?.data || [];
 
         setUsers(fetched);
+        console.log(users);
       })
       .catch((err) => {
         console.error("Failed to fetch users", err);
@@ -207,7 +208,14 @@ const UserList = () => {
                               .map((item) => [item.user_id, item]), // ✅ dedupe by user_id
                           ).values(),
                         ].map((user, index) => (
-                          <tr key={user.user_id}>
+                          <tr
+                            key={user.user_id}
+                            style={{
+                              backgroundColor: user.createdBy_id
+                                ?"#ffe5e5"
+                                : "transparent",
+                            }}
+                          >
                             <td>{index + 1}</td>
                             <td>{user.user_unique_id}</td>
                             <td>{user.master_ifsc || ""}</td>

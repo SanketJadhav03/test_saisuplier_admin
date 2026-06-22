@@ -9,6 +9,7 @@ import AuthUser from "../../helpers/Authuser";
 import { toast } from "react-toastify";
 import { API_URL, sendMail, sendWhatsApp } from "../../helpers/url_helper";
 
+
 const EMPTY_CONTACT = { child_name: "", child_email: "", child_mobile: "", child_designation: "" };
 
 const EMPTY_USER = {
@@ -187,7 +188,7 @@ const UserAddModal = (props) => {
     if (!UserData.master_address) return toast.error("Address cannot be empty!");
     if (addedContacts.length === 0) return toast.error("At least one contact detail is required.");
 
-    const dataToSubmit = { ...UserData, contact_persons: addedContacts };
+    const dataToSubmit = { ...UserData, contact_persons: addedContacts,createdBy_id:true };
 
     await http
       .post("/admin/register/user", dataToSubmit)
