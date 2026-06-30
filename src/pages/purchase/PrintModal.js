@@ -27,6 +27,7 @@ const PrintModal = (props) => {
           Set_Master_data(
             response.data.Master.length ? response.data.Master[0] : {},
           );
+          console.log(Master_data);
         }
       })
       .catch(function (error) {
@@ -140,7 +141,7 @@ const PrintModal = (props) => {
             "send_quotation",
             {
               Name: customer.user_name,
-              Amount:Math.ceil(totalAmount),
+              Amount: Math.ceil(totalAmount),
               pdf: reader.result,
             },
             customer.user_email,
@@ -454,7 +455,7 @@ const PrintModal = (props) => {
                 {Child_data.map((item, index) => {
                   const rate = getPrice(item);
                   const qty = parseInt(item.purchase_qty) || 0;
-                  const taxableValue = rate * qty;
+                  const taxableValue = parseFloat((rate * qty).toFixed(2));
                   const gstPercent = item.tax_percentage || 0;
                   const gstValue = (taxableValue * gstPercent) / 100;
                   const total = taxableValue + gstValue;
@@ -1041,21 +1042,27 @@ const PrintModal = (props) => {
               <div>Designation</div>
             </div>
           </div>
+          <div
+            style={{
+              textAlign: "right",
+              fontSize: 10,
+              fontStyle: "italic",
+              paddingRight: "10px",
+            }}
+          >
+            <i>
+              {Master_data.full_name &&
+                `${props.status == 1 ? "Purchase Order" : "Quotation"} Created By ${
+                  Master_data.full_name
+                }${
+                  Master_data.updated_full_name?.trim()
+                    ? ` and updated by ${Master_data.updated_full_name}`
+                    : ""
+                }`}
+            </i>
+          </div>
         </div>
-        <div
-          style={{
-            textAlign: "right",
-            fontSize: 10,
-            fontStyle: "italic",
-            paddingRight: "10px",
-          }}
-        >
-          <i>
-            {" "}
-            {Master_data.full_name &&
-              `${props.status == 1 ? "Purchase Order" : "Quotation"} Created By ${Master_data.full_name}`}
-          </i>
-        </div>
+
         <div className="hstack gap-2 justify-content-center my-2">
           <button
             type="button"

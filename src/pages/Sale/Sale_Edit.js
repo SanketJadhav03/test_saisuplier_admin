@@ -579,6 +579,7 @@ const Sale_Edit = (props) => {
     Total_Net,
     purchase_payment_terms,
   ]);
+   const {user} = AuthUser(); 
 
   const prepareDataForAPI = () => {
     // Prepare master data
@@ -590,7 +591,7 @@ const Sale_Edit = (props) => {
       selectPriceOption: selectPriceOption.value,
       other_charge_id: selectOtherCharge.value,
       purchase_payment_term: purchase_payment_terms,
-      purchase_created_by_id: 1,
+      master_update_user_id:user.user.user_id || null,
     };
 
     // Prepare product data in the required format
