@@ -579,6 +579,7 @@ const Sale_Create = (props) => {
       other_charge_id: selectOtherCharge.value,
       purchase_payment_term: purchase_payment_terms,
       purchase_created_by_id: user ? user.user.user_id : null,
+
     };
 
     // Prepare product data in the required format

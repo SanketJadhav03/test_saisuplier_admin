@@ -634,6 +634,7 @@ const QuoatationUpdate = (props) => {
       selectPriceOption: selectPriceOption.value,
       purchase_payment_term: purchase_payment_terms,
       purchase_prchase_id: id,
+      purchase_updated_by_id:user.user.user_id || null,
     };
     return {
       master: masterData,

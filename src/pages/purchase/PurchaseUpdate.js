@@ -37,6 +37,7 @@ import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 const PurchaseUpdate = () => {
+  const {user} = AuthUser(); 
   const [preview, setPreview] = useState(null); // holds the file URL
 
   const [shippingModal, setShippingModal] = useState(false);
@@ -550,6 +551,7 @@ const PurchaseUpdate = () => {
       master_address_id: selectedAddress?.shipping_id,
       selectPriceOption: selectPriceOption.value,
       purchase_payment_term: purchase_payment_terms,
+      purchase_updated_by_id:user.user.user_id || null,
     };
 
     // Prepare product data in the required format
@@ -614,7 +616,7 @@ const PurchaseUpdate = () => {
       }
       SetDisabed(true);
       http
-        .post("/purchase/update", finalData)
+        .put( "/purchase/update", finalData)
         .then(function (response) {
           redireaction("/purchase-list");
           toast.success("Purchase Updated Successfully!");
