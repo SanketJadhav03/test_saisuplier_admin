@@ -19,6 +19,7 @@ const Sale_Print_Modal = (props) => {
           setCustomer(response.data.customer);
           setBusinessData(response.data.Business[0]);
           setMasterData(response.data.Master[0]);
+          console.log(masterData);
         }
       })
       .catch(function (error) {
@@ -1467,8 +1468,12 @@ const Sale_Print_Modal = (props) => {
           >
             <i>
               {masterData?.full_name
-                ? `Invoice Created By ${masterData.full_name}`
-                :  `Invoice Created By Customer ${customer.user_name}`}
+                ? `Invoice Created By ${masterData.full_name}${
+                    masterData?.updated_full_name?.trim()
+                      ? ` and updated by ${masterData.updated_full_name}`
+                      : ""
+                  }`
+                : `Invoice Created By Customer ${customer.user_name}`}
             </i>
           </div>
         </div>
