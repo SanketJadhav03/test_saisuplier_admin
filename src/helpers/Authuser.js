@@ -6,8 +6,9 @@ import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 
 export default function AuthUser() {
+  const [loggingOut, setLoggingOut] = useState(false);
   const permissionsList = useSelector(
-    (state) => state.permissionsSlice.permissionsList
+    (state) => state.permissionsSlice.permissionsList,
   );
   const navigate = useNavigate();
   const getToken = () => {
@@ -54,7 +55,7 @@ export default function AuthUser() {
       return true;
     }
     const resp = permissionsList.find(
-      (permission) => permission.permission_name == permissionName
+      (permission) => permission.permission_name == permissionName,
     );
     if (resp) {
       return true;
@@ -75,14 +76,25 @@ export default function AuthUser() {
     }
   };
 
-  const logout = async () => {
-    const userString = JSON.parse(sessionStorage.getItem("authUser"));
+  
 
-    await axios.get(API_URL + "/user/logout/" + userString.user.user_id);
-    sessionStorage.clear();
-    setToken(null);
-    setUser(null);
-    navigate("/login");
+  const logout = async () => {
+    if (loggingOut) return;
+
+    setLoggingOut(true);
+
+    try {
+      const authUser = JSON.parse(sessionStorage.getItem("authUser"));
+
+      if (authUser?.user?.user_id) {
+        await axios.get(`${API_URL}/user/logout/${authUser.user.user_id}`);
+      }
+    } finally {
+      sessionStorage.clear();
+      setToken(null);
+      setUser(null);
+      navigate("/login", { replace: true });
+    }
   };
   const [permission, setPermission] = useState([]);
 
@@ -110,7 +122,7 @@ export default function AuthUser() {
           setPermission(permissions);
           sessionStorage.setItem(
             `role_perm_${role}`,
-            JSON.stringify(permissions)
+            JSON.stringify(permissions),
           );
         }
       } catch (error) {
