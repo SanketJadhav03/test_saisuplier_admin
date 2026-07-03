@@ -389,6 +389,19 @@ const Navdata = () => {
       },
     },
     {
+      id: "CUSTOMER",
+      label: "Customer History",
+      icon: "bx bx-history",
+      link: "/user/history",
+      stateVariables: isDashboard,
+      click: function (e) {
+        e.preventDefault();
+        setIsDashboard(!isDashboard);
+        setIscurrentState("Dashboard");
+        updateIconSidebar(e);
+      },
+    },
+    {
       id: "CONTACTUS",
       label: "Contact Us",
       icon: "bx bx-user-circle",

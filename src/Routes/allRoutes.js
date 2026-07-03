@@ -121,6 +121,7 @@ import LeadAdd from "../pages/Lead/LeadAdd";
 import LeadDetailView from "../pages/Lead/LeadDetailView";
 import LeadUpdate from "../pages/Lead/LeadUpdate";
 import FollowUpList from "../pages/Lead/FollowUpList";
+import CustomerHistory from "../pages/Users/CustomerHistory";
 
 const authProtectedRoutes = [
   // Unauthorized
@@ -136,6 +137,7 @@ const authProtectedRoutes = [
   { path: "/pos/list", component: <POSLIIst /> },
   { path: "/seo/list", component: <SeoList /> },
   { path: "/user/list", component: <UserList /> },
+  { path: "/user/history", component: <CustomerHistory /> },
   { path: "/contact/list", component: <ContactList /> },
 
   //Whatsapp Template Routes
